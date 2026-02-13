@@ -4,6 +4,18 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'bg-gray-50',
+    'bg-nerdLime',
+    'bg-nerdBlue',
+    'bg-nerdWhite',
+    'bg-nerdGray',
+    'bg-nerdRed',
+    'bg-blue-50',
+    'bg-lime-50',
+    'bg-zinc-50',
+    'bg-white',
+  ],
   theme: {
     extend: {
       colors: {
