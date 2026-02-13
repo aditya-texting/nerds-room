@@ -27,21 +27,27 @@ const DataSeeder = () => {
                 image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=800&auto=format&fit=crop',
                 description: 'The ultimate tech showdown.',
                 location: 'Multiple Venues, NCR',
-                stats: [{ label: 'Registrations', value: '500' }, { label: 'Attendees', value: '400' }, { label: 'Speakers', value: '25' }]
+                stats: [{ label: 'Registrations', value: '500' }, { label: 'Attendees', value: '400' }, { label: 'Speakers', value: '25' }],
+                is_public: true,
+                is_featured: false
             },
             {
                 title: 'Major Hackathons',
                 image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop',
                 description: 'Pan India coding marathons.',
                 location: 'Pan India',
-                stats: [{ label: 'Registrations', value: '2000' }, { label: 'Attendees', value: '1500' }, { label: 'Speakers', value: '50' }]
+                stats: [{ label: 'Registrations', value: '2000' }, { label: 'Attendees', value: '1500' }, { label: 'Speakers', value: '50' }],
+                is_public: true,
+                is_featured: false
             },
             {
                 title: 'Tech Conclaves',
                 image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop',
                 description: 'Expert-led deep dives.',
                 location: 'Lucknow, Gurugram, Noida',
-                stats: [{ label: 'Registrations', value: '800' }, { label: 'Attendees', value: '600' }, { label: 'Speakers', value: '30' }]
+                stats: [{ label: 'Registrations', value: '800' }, { label: 'Attendees', value: '600' }, { label: 'Speakers', value: '30' }],
+                is_public: true,
+                is_featured: false
             }
         ];
         for (const e of events) await addFlagshipEvent(e);
