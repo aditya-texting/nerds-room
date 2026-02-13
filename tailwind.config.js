@@ -10,8 +10,9 @@ export default {
         nerdLime: '#9BE600',
         nerdBlue: '#00308F',
         nerdWhite: '#FFFFFF',
-        nerdDark: '#050505',
+        nerdDark: '#001a4d',
         nerdGray: '#F3F4F6',
+        nerdRed: '#FF4444',
       },
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
@@ -26,6 +27,7 @@ export default {
         'scroll': 'scroll 30s linear infinite',
         'gallery-scroll': 'scroll 40s linear infinite',
         'fade-in': 'fadeIn 0.3s ease-out forwards',
+        'blink': 'blink 1s step-end infinite',
       },
       keyframes: {
         float: {
@@ -39,6 +41,10 @@ export default {
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(-10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        blink: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0' },
         }
       }
     },

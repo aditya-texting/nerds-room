@@ -1,230 +1,215 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-
-interface CardData {
-  icon: string | React.ReactElement;
-  title: string;
-  description: string;
-  stat: string;
-  statLabel: string;
-  iconBg: string;
-  gradient: string;
-}
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { useAppData } from '../context/AppDataContext';
+import Skeleton from './Skeleton';
 
 const WhatWeDo = () => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const { whatWeDoCards, hackathons, pastEvents, loading } = useAppData();
+  const [isActive, setIsActive] = useState(false);
+  const [animatedStats, setAnimatedStats] = useState<{ [key: number]: number }>({});
   const sectionRef = useRef<HTMLElement>(null);
-  const headingRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<HTMLDivElement[]>([]);
 
-  const cards: CardData[] = [
-    {
-      icon: '</>',
-      title: 'HACKATHONS',
-      description: '24-48 hour building marathons. Code, coffee, chaos.',
-      stat: '12+',
-      statLabel: 'Hosted',
-      iconBg: 'bg-nerdLime',
-      gradient: 'from-nerdLime/20 via-nerdLime/10 to-transparent',
-    },
-    {
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-          />
-        </svg>
-      ),
-      title: 'IDEATHONS',
-      description: 'Brainstorming sessions to solve real-world problems.',
-      stat: '10+',
-      statLabel: 'Sessions',
-      iconBg: 'bg-nerdBlue',
-      gradient: 'from-nerdBlue/20 via-nerdBlue/10 to-transparent',
-    },
-    {
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-          />
-        </svg>
-      ),
-      title: 'WORKSHOPS',
-      description: 'Hands-on sessions on AI, Web3, Design & more.',
-      stat: '20+',
-      statLabel: 'Speakers',
-      iconBg: 'bg-yellow-400',
-      gradient: 'from-yellow-400/20 via-yellow-400/10 to-transparent',
-    },
-    {
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-      ),
-      title: 'COHORTS',
-      description: 'Long-term learning groups for deep diving into stacks.',
-      stat: 'upcoming',
-      statLabel: 'Active',
-      iconBg: 'bg-red-500',
-      gradient: 'from-red-500/20 via-red-500/10 to-transparent',
-    },
-  ];
+  // Process cards to include real data counts
+  const cards = useMemo(() => {
+    const publicHackathons = hackathons.filter(h => h.is_public !== false);
 
-  // GSAP scroll-triggered animations for heading + cards
-  useEffect(() => {
-    if (!sectionRef.current) return;
+    // Actual count for hackathons
+    const hackathonCount = publicHackathons.length + pastEvents.filter(e => e.event_type?.toLowerCase().includes('hackathon')).length;
 
-    let hasAnimated = false;
+    return whatWeDoCards.map(card => {
+      const title = (card.title || '').toLowerCase();
+      const label = (card.statLabel || '').toLowerCase();
 
-    const animateIn = () => {
-      if (hasAnimated) return;
-      hasAnimated = true;
-
-      // Heading animation
-      if (headingRef.current) {
-        gsap.fromTo(
-          headingRef.current,
-          { y: 40, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.9,
-            ease: 'power3.out',
-          }
-        );
+      if (title.includes('hackathon') || label.includes('hosted')) {
+        return { ...card, stat: `${hackathonCount}+` };
+      }
+      // Set others to 0 as they are coming soon
+      if (title.includes('workshop') || label.includes('sessions')) {
+        return { ...card, stat: `0+` };
+      }
+      if (title.includes('community') || label.includes('members')) {
+        return { ...card, stat: `0+` };
+      }
+      if (title.includes('project') || label.includes('shipped')) {
+        return { ...card, stat: `0+` };
       }
 
-      // Cards stagger animation
-      if (cardRefs.current.length) {
-        gsap.fromTo(
-          cardRefs.current,
-          { y: 40, opacity: 0, scale: 0.96 },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.9,
-            ease: 'power3.out',
-            stagger: 0.12,
-          }
-        );
+      return card;
+    });
+  }, [whatWeDoCards, hackathons, pastEvents]);
+
+  useEffect(() => {
+    if (loading || !sectionRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsActive(true);
+      },
+      { threshold: 0.05, rootMargin: '0px 0px -10% 0px' }
+    );
+
+    // Initial check
+    const rect = sectionRef.current.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom >= 0) {
+      setIsActive(true);
+    }
+
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [loading]);
+
+  // Handle Animation
+  useEffect(() => {
+    if (!isActive || cards.length === 0) return;
+
+    // Pre-initialize stats to avoid empty object access
+    setAnimatedStats(prev => {
+      if (Object.keys(prev).length === cards.length) return prev;
+      const initial: { [key: number]: number } = {};
+      cards.forEach((_, i) => { initial[i] = 0; });
+      return initial;
+    });
+
+    const duration = 2000;
+    const startTime = performance.now();
+    let frameId: number;
+
+    const parsedTargets = cards.map(card => {
+      const num = parseFloat((card.stat || '').replace(/[^0-9.]/g, ''));
+      return isNaN(num) ? 0 : num;
+    });
+
+    const animate = (time: number) => {
+      const progress = Math.min((time - startTime) / duration, 1);
+      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+      const next: { [key: number]: number } = {};
+      parsedTargets.forEach((target, i) => {
+        next[i] = target % 1 === 0 ? Math.floor(target * eased) : target * eased;
+      });
+      setAnimatedStats(next);
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(animate);
       }
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            animateIn();
-          }
-        });
-      },
-      { threshold: 0.2 }
-    );
+    frameId = requestAnimationFrame(animate);
+    return () => {
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, [isActive, cards]);
 
-    observer.observe(sectionRef.current);
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <section
-      ref={sectionRef}
-      id="what-we-do"
-      className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto"
-    >
-      <div className="relative">
-        {/* Header */}
-        <div ref={headingRef} className="text-center mb-10 sm:mb-14 md:mb-16 opacity-0">
-          <div className="inline-block mb-3">
-            <span className="inline-flex items-center rounded-full border border-nerdLime/30 bg-nerdLime/10 px-4 py-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-nerdBlue">
-              WHAT WE DO
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
-            Not just talks.{' '}
-            <span className="font-bold">We do stuff.</span>
-          </h2>
-        </div>
-
-        {/* Cards Grid - responsive and modern */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {cards.map((card, index) => (
-            <div
-              key={index}
-              ref={(el) => {
-                if (el) {
-                  cardRefs.current[index] = el;
-                }
-              }}
-              className="group relative bg-white/80 backdrop-blur-sm border-2 border-nerdBlue/20 rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col justify-between h-full cursor-pointer overflow-hidden opacity-0"
-              style={{
-                transitionDelay: `${index * 100}ms`,
-                transform: hoveredIndex === index ? 'translateY(-8px) scale(1.02)' : undefined,
-              }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              {/* Gradient overlay on hover */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`}
-              />
-
-              {/* Animated border glow */}
-              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-nerdLime/50 transition-all duration-500" />
-
-              {/* Content */}
-              <div className="relative z-10">
-                {/* Icon */}
-                <div
-                  className={`${card.iconBg} ${
-                    card.iconBg === 'bg-nerdLime' ? 'text-nerdBlue' : 'text-white'
-                  } w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center mb-5 sm:mb-6 font-black text-xl sm:text-2xl shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}
-                >
-                  {typeof card.icon === 'string' ? card.icon : card.icon}
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl sm:text-2xl font-black text-nerdBlue mb-2 sm:mb-3 group-hover:text-nerdBlue transition-colors">
-                  {card.title}
-                </h3>
-
-                {/* Description */}
-                <p className="font-medium text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
-                  {card.description}
-                </p>
-              </div>
-
-              {/* Stats */}
-              <div className="relative z-10 mt-auto pt-4 sm:pt-5 border-t border-gray-100 group-hover:border-nerdLime/30 transition-colors duration-500">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue group-hover:scale-110 transition-transform duration-500">
-                    {card.stat}
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    {card.statLabel}
-                  </span>
-                </div>
-              </div>
-
-              {/* Shine effect */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-2xl" />
+  if (loading) {
+    return (
+      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto bg-gray-50 rounded-3xl my-10 border border-gray-200">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-80">
+              <Skeleton />
             </div>
           ))}
         </div>
+      </section>
+    );
+  }
+
+  return (
+    <section ref={sectionRef} id="what-we-do" className="py-20 px-4 md:px-8 max-w-7xl mx-auto bg-gray-50 rounded-3xl my-10 border border-gray-200">
+      <div className="text-center mb-16">
+        <h2 className="text-5xl font-black text-[#00308F] mb-2">WHAT WE DO</h2>
+        <p className="font-bold text-[#00308F]/60 text-xl">Not just talks. We do stuff.</p>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {cards.map((card, index) => {
+          const getCardLink = (title: string) => {
+            const t = title.toLowerCase();
+            if (t.includes('hackathon')) return '/hackathons';
+            return null; // All others are coming soon
+          };
+
+          const isComingSoon = (title: string) => {
+            const t = title.toLowerCase();
+            // Explicitly mark workshops, community, and projects as coming soon
+            return (
+              t.includes('workshop') ||
+              t.includes('ideathon') ||
+              t.includes('cohort') ||
+              t.includes('community') ||
+              t.includes('project')
+            );
+          };
+
+          const getIconBgColor = (idx: number) => {
+            const colors = ['bg-[#9BE600]', 'bg-[#00308F]', 'bg-yellow-400', 'bg-red-500'];
+            return colors[idx % colors.length];
+          };
+
+          const getIconTextColor = (idx: number) => {
+            const colors = ['text-[#00308F]', 'text-white', 'text-[#00308F]', 'text-white'];
+            return colors[idx % colors.length];
+          };
+
+          const cardLink = getCardLink(card.title || '');
+          const comingSoon = isComingSoon(card.title || '');
+          const CardWrapper = cardLink ? 'a' : 'div';
+
+          return (
+            <CardWrapper
+              key={index}
+              {...(cardLink ? { href: cardLink } : {})}
+              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] ${cardLink ? 'hover:shadow-[6px_6px_0px_#00308F] cursor-pointer' : 'opacity-75'} transition-all group rounded-xl flex flex-col justify-between h-full`}
+            >
+              {comingSoon && (
+                <div className="absolute top-4 right-4 bg-[#9BE600] text-[#00308F] text-xs font-black px-3 py-1 rounded-full">
+                  COMING SOON
+                </div>
+              )}
+              <div>
+                <div className={`w-12 h-12 ${getIconBgColor(index)} rounded-lg flex items-center justify-center ${getIconTextColor(index)} mb-4 font-black text-xl`}>
+                  {(() => {
+                    const title = (card.title || '').toLowerCase();
+                    if (title.includes('hackathon')) {
+                      return <>&lt;/&gt;</>;
+                    }
+                    if (title.includes('ideathon') || title.includes('community')) {
+                      return (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      );
+                    }
+                    if (title.includes('workshop')) {
+                      return (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                        </svg>
+                      );
+                    }
+                    if (title.includes('cohort') || title.includes('project')) {
+                      return (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                      );
+                    }
+                    return <>&lt;/&gt;</>;
+                  })()}
+                </div>
+                <h3 className="text-2xl font-black text-[#00308F] mb-2 uppercase tracking-tighter">{card.title}</h3>
+                <p className="font-medium text-sm text-gray-500 mb-4 leading-relaxed">{card.description}</p>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-3xl font-black text-[#00308F]">
+                  {cards[index].stat.includes('.')
+                    ? (animatedStats[index] || 0).toFixed(1)
+                    : (animatedStats[index] || 0)}
+                  {(card.stat || '').replace(/[\d,.]/g, '')}
+                </span>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{card.statLabel || 'Hosted'}</span>
+              </div>
+            </CardWrapper>
+          );
+        })}
       </div>
     </section>
   );

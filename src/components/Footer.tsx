@@ -1,4 +1,8 @@
+import { useAppData } from '../context/AppDataContext';
+
 const Footer = () => {
+  const { socialLinks, footerDescription } = useAppData();
+
   return (
     <footer className="bg-[#202124] text-white relative rounded-t-[40px] md:rounded-t-[60px] mt-8 md:mt-12">
       <div className="mx-auto px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 pt-16 md:pt-20 lg:pt-24 pb-6 md:pb-8">
@@ -17,7 +21,7 @@ const Footer = () => {
                 </span>
               </div>
               <p className="text-gray-300 text-base leading-relaxed max-w-[250px]">
-                Empowering developers to build, learn, and grow together in the tech community.
+                {footerDescription}
               </p>
             </div>
 
@@ -26,19 +30,19 @@ const Footer = () => {
               <h3 className="text-white text-base font-semibold">About</h3>
               <div className="flex flex-col gap-3">
                 <a
-                  href="#home"
+                  href="/#home"
                   className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                 >
                   About Us
                 </a>
                 <a
-                  href="#socials"
+                  href="/#socials"
                   className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                 >
                   Contact Us
                 </a>
                 <a
-                  href="#events"
+                  href="/#events"
                   className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                 >
                   Events
@@ -51,19 +55,19 @@ const Footer = () => {
               <h3 className="text-white text-base font-semibold">Resources</h3>
               <div className="flex flex-col gap-3">
                 <a
-                  href="#past-events"
+                  href="/#past-events"
                   className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                 >
                   Past Events
                 </a>
                 <a
-                  href="#gallery"
+                  href="/#gallery"
                   className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                 >
                   Gallery
                 </a>
                 <a
-                  href="#testimonials"
+                  href="/#testimonials"
                   className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                 >
                   Testimonials
@@ -71,58 +75,65 @@ const Footer = () => {
               </div>
             </div>
 
+
+
             {/* Follow Us */}
             <div className="flex flex-col gap-5">
-              <h3 className="text-white text-base font-semibold">Follow Us</h3>
+              <h3 className="text-white text-base font-semibold">Join the Movement</h3>
               <div className="flex flex-col gap-3">
                 <a
-                  href="https://instagram.com/nerdsroom"
+                  href={socialLinks.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200 group"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
                     width="20"
                     height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-gray-400 group-hover:text-white transition-colors"
+                    fill="currentColor"
+                    className="text-gray-400 group-hover:text-green-500 transition-colors"
                   >
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.928 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-2.846-.823-.927-.38-1.529-.949-1.618-1.071-.087-.121-.654-.872-.654-1.658 0-.787.408-1.171.554-1.328.163-.17.356-.211.475-.211.119 0 .238.001.335.006.108.005.253-.042.404.321.163.393.555 1.357.604 1.456.048.1.08.216.012.353-.068.136-.102.221-.202.341-.1.121-.212.27-.3.364-.1.107-.205.223-.088.423.117.201.517.853 1.107 1.379.76.677 1.401.887 1.606.985.205.098.326.084.448-.055.122-.139.524-.61.664-.818.14-.208.28-.173.473-.102.194.071 1.229.58 1.44.685.211.105.352.157.404.248.052.091.052.529-.092.934zM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C9.813 20 7.828 19.263 6.307 18.064L3.84 18.783L4.621 16.326C3.308 14.771 2.502 12.684 2.502 10.422C2.502 5.176 6.703 0.941 12 0.941C17.297 0.941 21.498 5.176 21.498 10.422C21.498 15.668 17.297 20 12 20Z"></path>
                   </svg>
-                  <span>nerdsroom</span>
+                  <span>Join our WhatsApp Channel</span>
                 </a>
                 <a
-                  href="https://twitter.com/nerdsroom"
+                  href={socialLinks.discord}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200 group"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
                     width="20"
                     height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-gray-400 group-hover:text-white transition-colors"
+                    fill="currentColor"
+                    className="text-gray-400 group-hover:text-[#5865F2] transition-colors"
                   >
-                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.516.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041-.001-.09-.041-.106-.653-.248-1.275-.55-1.872-.892a.077.077 0 0 1-.008-.128 10.2 10.2 0 0 1 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path>
                   </svg>
-                  <span>nerdsroom</span>
+                  <span>Join us on Discord</span>
                 </a>
                 <a
-                  href="https://linkedin.com/company/nerdsroom"
+                  href={socialLinks.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200 group"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    className="text-gray-400 group-hover:text-pink-500 transition-colors"
+                  >
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path>
+                  </svg>
+                  <span>Instagram</span>
+                </a>
+                <a
+                  href={socialLinks.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200 group"
@@ -137,36 +148,30 @@ const Footer = () => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-gray-400 group-hover:text-white transition-colors"
+                    className="text-gray-400 group-hover:text-blue-500 transition-colors"
                   >
                     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                     <rect width="4" height="12" x="2" y="9"></rect>
                     <circle cx="4" cy="4" r="2"></circle>
                   </svg>
-                  <span>nerdsroom</span>
+                  <span>LinkedIn</span>
                 </a>
                 <a
-                  href="https://youtube.com/@nerdsroom"
+                  href={socialLinks.telegram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200 group"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
                     width="20"
                     height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-gray-400 group-hover:text-white transition-colors"
+                    fill="currentColor"
+                    className="text-gray-400 group-hover:text-blue-400 transition-colors"
                   >
-                    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
-                    <path d="m10 15 5-3-5-3z"></path>
+                    <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.008-1.252-.241-1.865-.44-.751-.244-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.024-1.627 4.475-1.559.101.015.322.037.466.155.121.1.155.234.166.326.012.066.012.135 0 .199z"></path>
                   </svg>
-                  <span>nerdsroom</span>
+                  <span>Join us on Telegram</span>
                 </a>
               </div>
             </div>
@@ -178,23 +183,13 @@ const Footer = () => {
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
               <div className="text-gray-400 text-base font-medium">© Nerds Room. All rights reserved.</div>
               <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6">
-                <a href="#privacy" className="text-gray-400 text-base hover:text-white transition-colors duration-200">
-                  Privacy Policy
-                </a>
-                <span className="text-gray-600">•</span>
-                <a href="#terms" className="text-gray-400 text-base hover:text-white transition-colors duration-200">
-                  Terms of Service
-                </a>
-                <span className="text-gray-600">•</span>
-                <a href="#cookies" className="text-gray-400 text-base hover:text-white transition-colors duration-200">
-                  Cookies Settings
-                </a>
+
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </div >
+    </footer >
   );
 };
 

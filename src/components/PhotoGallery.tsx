@@ -1,161 +1,244 @@
+import { useState, useEffect, useRef } from 'react';
+import { useAppData } from '../context/AppDataContext';
+
+// Helper component for smooth image transitions
+const MosaicImage = ({ src, alt, className, onClick }: { src: string, alt: string, className: string, onClick: () => void }) => {
+  const [currentSrc, setCurrentSrc] = useState(src);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    if (src !== currentSrc) {
+      setIsFading(true);
+      const timer = setTimeout(() => {
+        setCurrentSrc(src);
+        setIsFading(false);
+      }, 500); // Wait for fade out
+      return () => clearTimeout(timer);
+    }
+  }, [src]);
+
+  return (
+    <div className={`${className} bg-gray-200`}>
+      <img
+        src={currentSrc}
+        alt={alt}
+        onClick={onClick}
+        className={`w-full h-full object-cover transition-opacity duration-500 ease-in-out ${isFading ? 'opacity-0' : 'opacity-100'}`}
+      />
+    </div>
+  );
+};
+
 const PhotoGallery = () => {
-  // Column 1 images (tall)
-  const column1Images = [
-    'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=400&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=400&h=600&fit=crop',
-  ];
+  const { photoGallery } = useAppData();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Column 2 images (medium)
-  const column2Images = [
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=400&h=400&fit=crop',
-  ];
+  // Fixed slots for the layout: 2 + 3 + 4 + 3 + 2 = 14 slots
+  const [visibleImages, setVisibleImages] = useState<string[]>([]);
 
-  // Center column images (tall)
-  const centerImages = [
-    'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=400&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=400&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=400&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=400&h=600&fit=crop',
-  ];
+  // Keep track of all available images to rotate
+  const allImagesRef = useRef<string[]>([]);
 
-  // Column 3 images (medium)
-  const column3Images = [
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=400&h=400&fit=crop',
-    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=400&h=400&fit=crop',
-  ];
+  // Initialize and Update Pool (Handle Adds/Deletes)
+  useEffect(() => {
+    if (photoGallery) {
+      // Flatten all images regardless of category
+      const flatImages = photoGallery.map(p => p.image_url);
+      allImagesRef.current = flatImages;
 
-  // Column 4 images (tall)
-  const column4Images = [
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=400&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=400&h=600&fit=crop',
-  ];
+      setVisibleImages(prev => {
+        // 1. Initial Fill if empty
+        if (prev.length === 0 && flatImages.length > 0) {
+          const initial = [];
+          for (let i = 0; i < 14; i++) {
+            initial.push(flatImages[i % flatImages.length]);
+          }
+          return initial;
+        }
+
+        // 2. Live Sync: Remove deleted images immediately
+        // If a visible image is NO LONGER in the updated pool, it must be replaced.
+        let changed = false;
+        const updated = prev.map(img => {
+          if (flatImages.includes(img)) return img; // Image still exists, keep it
+
+          // Image was deleted! Swap with a random valid one
+          changed = true;
+          if (flatImages.length > 0) {
+            return flatImages[Math.floor(Math.random() * flatImages.length)];
+          }
+          return img; // Fallback (e.g. all deleted)
+        });
+
+        return changed ? updated : prev;
+      });
+    }
+  }, [photoGallery]);
+
+  // Rotation Logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const pool = allImagesRef.current;
+      if (pool.length === 0) return;
+
+      setVisibleImages(current => {
+        const next = [...current];
+
+        // Scenario 1: We have more images than slots (> 14)
+        // Swap a visible image with a new one from the pool
+        const available = pool.filter(img => !current.includes(img));
+
+        if (available.length > 0) {
+          const slotToSwap = Math.floor(Math.random() * 14);
+          const randomNew = available[Math.floor(Math.random() * available.length)];
+          next[slotToSwap] = randomNew;
+          return next;
+        }
+
+        // Scenario 2: We have few images (<= 14)
+        // To create movement, we simply swap two visible images positions
+        if (current.length >= 2) {
+          const slotA = Math.floor(Math.random() * current.length);
+          let slotB = Math.floor(Math.random() * current.length);
+          // Ensure distinct slots
+          while (slotA === slotB) {
+            slotB = Math.floor(Math.random() * current.length);
+          }
+
+          const temp = next[slotA];
+          next[slotA] = next[slotB];
+          next[slotB] = temp;
+          return next;
+        }
+
+        return current;
+      });
+    }, 4000); // Swap every 4 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+
+  if (visibleImages.length === 0) return null;
+
+  // Slices for layout
+  const col1 = visibleImages.slice(0, 2);
+  const col2 = visibleImages.slice(2, 5);
+  const center = visibleImages.slice(5, 9); // 4 images
+  const col3 = visibleImages.slice(9, 12);
+  const col4 = visibleImages.slice(12, 14);
 
   return (
     <section id="gallery" className="relative w-full overflow-hidden bg-gradient-to-b from-gray-50 to-white py-12 lg:py-0">
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"
+            onClick={() => setSelectedImage(null)}
+          >
+            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img
+            src={selectedImage}
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+            alt="Full view"
+          />
+        </div>
+      )}
+
       <div className="relative mx-auto max-w-[1920px]">
-        {/* Mobile View */}
+        {/* Mobile View - Simplified Subset */}
         <div className="lg:hidden px-2 sm:px-4">
           <div className="mb-6 sm:mb-8 text-center">
             <h2 className="text-3xl font-semibold sm:text-4xl md:text-5xl text-zinc-900">Photo Gallery</h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-zinc-600">A glimpse into our most memorable moments</p>
           </div>
           <div className="flex items-center justify-center gap-3 sm:gap-5 md:gap-8 max-w-full">
-            {/* Left Column */}
+            {/* Left Column (2 items) */}
             <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 flex-shrink-0">
-              {column1Images.map((img, index) => (
-                <div
-                  key={`mobile-col1-${index}`}
-                  className="group relative h-[120px] w-[85px] sm:h-[150px] sm:w-[105px] md:h-[182px] md:w-[134px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                >
-                  <div className="relative overflow-hidden h-full w-full">
-                    <img
-                      src={img}
-                      alt={`Gallery ${index + 1}`}
-                      className="object-cover w-full h-full transition-opacity duration-1000 ease-in-out"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+              {col1.map((img, index) => (
+                <div key={`mob-col1-${index}`} className="group relative h-[120px] w-[85px] sm:h-[150px] sm:w-[105px] md:h-[182px] md:w-[134px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-lg hover:scale-105 transition-all duration-300">
+                  <MosaicImage
+                    src={img}
+                    alt={`Gallery ${index}`}
+                    className="h-full w-full"
+                    onClick={() => setSelectedImage(img)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 pointer-events-none"></div>
                 </div>
               ))}
             </div>
-            {/* Center Column */}
+
+            {/* Center (1 main item) */}
             <div className="flex items-center justify-center flex-shrink-0">
-              <div className="group relative h-[200px] w-[140px] sm:h-[250px] sm:w-[175px] md:h-[300px] md:w-[220px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                <div className="relative overflow-hidden h-full w-full">
-                  <img
-                    src={centerImages[0]}
-                    alt="Center Gallery"
-                    className="object-cover w-full h-full transition-opacity duration-1000 ease-in-out"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+              <div className="group relative h-[200px] w-[140px] sm:h-[250px] sm:w-[175px] md:h-[300px] md:w-[220px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-xl hover:scale-105 transition-all duration-300">
+                <MosaicImage
+                  src={center[0]}
+                  alt="Center Gallery"
+                  className="h-full w-full"
+                  onClick={() => setSelectedImage(center[0])}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 pointer-events-none"></div>
               </div>
             </div>
-            {/* Right Column */}
+
+            {/* Right Column (2 items) */}
             <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 flex-shrink-0">
-              {column4Images.map((img, index) => (
-                <div
-                  key={`mobile-col4-${index}`}
-                  className="group relative h-[120px] w-[85px] sm:h-[150px] sm:w-[105px] md:h-[182px] md:w-[134px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                >
-                  <div className="relative overflow-hidden h-full w-full">
-                    <img
-                      src={img}
-                      alt={`Gallery ${index + 3}`}
-                      className="object-cover w-full h-full transition-opacity duration-1000 ease-in-out"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+              {col4.map((img, index) => (
+                <div key={`mob-col4-${index}`} className="group relative h-[120px] w-[85px] sm:h-[150px] sm:w-[105px] md:h-[182px] md:w-[134px] overflow-hidden rounded-xl sm:rounded-2xl md:rounded-3xl shadow-lg hover:scale-105 transition-all duration-300">
+                  <MosaicImage
+                    src={img}
+                    alt={`Gallery R ${index}`}
+                    className="h-full w-full"
+                    onClick={() => setSelectedImage(img)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10 pointer-events-none"></div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Desktop View */}
+        {/* Desktop View - Full 14 Layout */}
         <div className="hidden lg:block relative">
           <div className="relative flex items-start justify-center gap-[30px]">
             {/* Left Columns */}
             <div className="flex gap-[30px]">
-              {/* Column 1 */}
+              {/* Column 1 (2 items) */}
               <div className="flex flex-col items-center justify-start gap-[30px] pt-[70px]">
-                {column1Images.map((img, index) => (
-                  <div
-                    key={`desktop-col1-${index}`}
-                    className="group relative h-[182px] w-[134px] overflow-hidden rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                  >
-                    <div className="relative overflow-hidden h-full w-full">
-                      <img
-                        src={img}
-                        alt={`Gallery ${index + 1}`}
-                        className="h-full w-full object-cover transition-opacity duration-1000 ease-in-out"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+                {col1.map((img, index) => (
+                  <div key={`d-c1-${index}`} className="group relative h-[182px] w-[134px] overflow-hidden rounded-3xl shadow-lg hover:scale-105 transition-all duration-300 cursor-zoom-in">
+                    <MosaicImage src={img} alt="" className="h-full w-full" onClick={() => setSelectedImage(img)} />
                   </div>
                 ))}
               </div>
-              {/* Column 2 */}
+              {/* Column 2 (3 items) */}
               <div className="flex flex-col items-center justify-start gap-[19px]">
-                {column2Images.map((img, index) => (
-                  <div
-                    key={`desktop-col2-${index}`}
-                    className="group relative h-[146px] w-[134px] overflow-hidden rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                  >
-                    <div className="relative overflow-hidden h-full w-full">
-                      <img
-                        src={img}
-                        alt={`Gallery ${index + 3}`}
-                        className="h-full w-full object-cover transition-opacity duration-1000 ease-in-out"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+                {col2.map((img, index) => (
+                  <div key={`d-c2-${index}`} className="group relative h-[146px] w-[134px] overflow-hidden rounded-3xl shadow-lg hover:scale-105 transition-all duration-300 cursor-zoom-in">
+                    <MosaicImage src={img} alt="" className="h-full w-full" onClick={() => setSelectedImage(img)} />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Center Section with Title */}
+            {/* Center Section with Title (4 items) */}
             <div className="relative flex flex-col items-center justify-center">
               <div className="relative flex flex-col items-center justify-center">
                 <div className="relative flex items-start justify-center gap-[30px] mt-2 mb-[113px]">
-                  {centerImages.map((img, index) => (
+                  {center.map((img, index) => (
                     <div
-                      key={`desktop-center-${index}`}
-                      className="group relative h-[250px] w-[135px] overflow-hidden rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                      key={`d-center-${index}`}
+                      className="group relative h-[250px] w-[135px] overflow-hidden rounded-3xl shadow-lg hover:scale-105 transition-all duration-300 cursor-zoom-in"
                       style={{ marginTop: index === 0 ? '63px' : index === 1 ? '27px' : index === 2 ? '0px' : '63px' }}
                     >
-                      <div className="relative overflow-hidden h-full w-full">
-                        <img
-                          src={img}
-                          alt={`Center Gallery ${index + 1}`}
-                          className="h-full w-full object-cover transition-opacity duration-1000 ease-in-out"
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+                      <MosaicImage src={img} alt="" className="h-full w-full" onClick={() => setSelectedImage(img)} />
                     </div>
                   ))}
                 </div>
@@ -170,39 +253,19 @@ const PhotoGallery = () => {
 
             {/* Right Columns */}
             <div className="flex gap-[30px]">
-              {/* Column 3 */}
+              {/* Column 3 (3 items) */}
               <div className="flex flex-col items-center justify-start gap-[19px]">
-                {column3Images.map((img, index) => (
-                  <div
-                    key={`desktop-col3-${index}`}
-                    className="group relative h-[146px] w-[134px] overflow-hidden rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                  >
-                    <div className="relative overflow-hidden h-full w-full">
-                      <img
-                        src={img}
-                        alt={`Gallery ${index + 6}`}
-                        className="h-full w-full object-cover transition-opacity duration-1000 ease-in-out"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+                {col3.map((img, index) => (
+                  <div key={`d-c3-${index}`} className="group relative h-[146px] w-[134px] overflow-hidden rounded-3xl shadow-lg hover:scale-105 transition-all duration-300 cursor-zoom-in">
+                    <MosaicImage src={img} alt="" className="h-full w-full" onClick={() => setSelectedImage(img)} />
                   </div>
                 ))}
               </div>
-              {/* Column 4 */}
+              {/* Column 4 (2 items) */}
               <div className="flex flex-col items-center justify-start gap-[30px] pt-[70px]">
-                {column4Images.map((img, index) => (
-                  <div
-                    key={`desktop-col4-${index}`}
-                    className="group relative h-[182px] w-[134px] overflow-hidden rounded-3xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                  >
-                    <div className="relative overflow-hidden h-full w-full">
-                      <img
-                        src={img}
-                        alt={`Gallery ${index + 9}`}
-                        className="h-full w-full object-cover transition-opacity duration-1000 ease-in-out"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-10"></div>
+                {col4.map((img, index) => (
+                  <div key={`d-c4-${index}`} className="group relative h-[182px] w-[134px] overflow-hidden rounded-3xl shadow-lg hover:scale-105 transition-all duration-300 cursor-zoom-in">
+                    <MosaicImage src={img} alt="" className="h-full w-full" onClick={() => setSelectedImage(img)} />
                   </div>
                 ))}
               </div>

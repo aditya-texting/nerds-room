@@ -1,0 +1,206 @@
+
+export interface Registration {
+    id: number;
+    name: string;
+    role: string;
+    email: string;
+    status: 'pending' | 'approved' | 'rejected';
+    createdAt: string;
+    hackathon_id?: number;
+    form_responses?: Record<string, any>;
+    ticket_token?: string;
+}
+
+export interface WhatWeDoCard {
+    id: number;
+    icon: string;
+    title: string;
+    description: string;
+    stat: string;
+    statLabel: string;
+    iconBg: string;
+    gradient: string;
+}
+
+export interface FlagshipEvent {
+    id: number;
+    title: string;
+    description: string;
+    image: string;
+    location: string;
+    stats: {
+        label: string;
+        value: string;
+    }[];
+    is_public: boolean;
+    is_featured: boolean;
+    registration_link?: string;
+}
+
+export interface PhotoGalleryItem {
+    id: number;
+    image_url: string;
+    category: string;
+    description?: string;
+}
+
+export interface SuccessStory {
+    id: number;
+    name: string;
+    role: string;
+    image_url: string;
+    content: any; // jsonb structure
+    bg_color: string;
+    column_group: number;
+    display_order: number;
+}
+
+export interface Chapter {
+    id: number;
+    name: string;
+    location?: string;
+}
+
+export interface Organizer {
+    name: string;
+    role?: string;
+    logo_url?: string;
+    social_links?: {
+        platform: 'twitter' | 'linkedin' | 'github' | 'website' | 'instagram' | 'other';
+        url: string;
+    }[];
+}
+
+export interface FormField {
+    id: string;
+    type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'checkbox' | 'multiselect' | 'phone';
+    label: string;
+    placeholder?: string;
+    required: boolean;
+    options?: string[]; // For select
+}
+
+export interface RegistrationForm {
+    id: string;
+    title: string;
+    description?: string;
+    fields: FormField[];
+    created_at: string;
+}
+
+export interface Hackathon {
+    id: number;
+    title: string;
+    slug: string;
+    organizer: string; // Primary/legacy organizer name
+    organizers?: Organizer[];
+    time_left?: string;
+    mode: 'Online' | 'In-person';
+    prize: string;
+    participants?: string;
+    tags: string[];
+    dates?: string;
+    logo_url?: string;
+    banner_url?: string;
+    status: 'upcoming' | 'open' | 'ended';
+    description?: string;
+    about?: string;
+    prizes?: { title: string; amount: string; description: string }[];
+    rules?: string[];
+    resources?: { name: string; link: string }[];
+    registration_link?: string;
+    registration_type?: 'external' | 'managed';
+    managed_form_id?: string;
+    discord_link?: string;
+    managed_by_nerds: boolean;
+    is_public: boolean;
+    is_featured: boolean;
+    auto_approve?: boolean;
+    allow_comments?: boolean;
+    length_category?: 'short' | 'medium' | 'long';
+    badge_image_url?: string;
+    badge_enabled?: boolean;
+    challenges?: { title: string; description: string; icon?: string }[];
+    schedule?: { date: string; time: string; title: string; description?: string }[];
+    rewards?: { title: string; description: string; image?: string }[];
+    partners?: { name: string; logo: string; type: string }[];
+    mentors?: { name: string; role: string; bio?: string; image_url?: string; social_links?: any[] }[];
+    jury?: { name: string; role: string; bio?: string; image_url?: string; social_links?: any[] }[];
+    faq?: { question: string; answer: string }[];
+}
+
+export interface Workshop {
+    id: number;
+    title: string;
+    description: string;
+    image_url: string;
+    date: string;
+    location: string;
+    registration_link?: string;
+    is_public: boolean;
+    is_featured: boolean;
+    attendees_count: number;
+}
+
+export interface PastEvent {
+    id: number;
+    title: string;
+    dates: string;
+    location: string;
+    image_url: string;
+    description: string;
+    event_type: string;
+    attendees_count: number;
+    is_public: boolean;
+    tags?: string[];
+}
+
+export interface DashboardStats {
+    totalRegistrations: number;
+    pendingApprovals: number;
+}
+
+export interface HeroContent {
+    headingLine1: string;
+    headingLine2: string;
+    headingLine3: string;
+    description: string;
+    primaryCTA: string;
+    primaryCTALink?: string;
+    secondaryCTA: string;
+    secondaryCTALink?: string;
+}
+
+export interface SocialLinks {
+    telegram: string;
+    instagram: string;
+    linkedin: string;
+    discord: string;
+    twitter: string;
+    youtube: string;
+    whatsapp: string;
+}
+
+export interface MissionLetterData {
+    id: number;
+    title?: string;
+    subtitle?: string;
+    heading: string;
+    content: string;
+    signature_name: string;
+    signature_role: string;
+    profile_image_url: string;
+}
+
+export interface Tag {
+    id: number;
+    name: string;
+    color?: string;
+    created_at?: string;
+}
+
+export interface Toast {
+    id: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+}
