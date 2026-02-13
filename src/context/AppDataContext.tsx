@@ -189,14 +189,14 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [partners, setPartnersState] = useState<string[]>([]);
   const [supportedByText, setSupportedByTextState] = useState('');
   const [heroContent, setHeroContentState] = useState<HeroContent>({
-    headingLine1: '',
-    headingLine2: '',
-    headingLine3: '',
-    description: '',
-    primaryCTA: '',
-    primaryCTALink: '',
-    secondaryCTA: '',
-    secondaryCTALink: '',
+    headingLine1: 'THINK. CREATE.',
+    headingLine2: 'INNOVATE THE',
+    headingLine3: 'FUTURE.',
+    description: 'Join the premier student community building the future of technology.',
+    primaryCTA: 'JOIN US',
+    primaryCTALink: '#join',
+    secondaryCTA: 'EVENTS',
+    secondaryCTALink: '/events',
   });
 
   const [socialLinks, setSocialLinksState] = useState<SocialLinks>({
@@ -268,6 +268,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       );
 
       await Promise.all(fetchPromises);
+      console.log('[NerdsRoom] Data fetch complete.');
 
       // Ensure loading lasts at least 0.5 seconds ONLY for initial/forced loads
       if (showGlobalLoading) {
@@ -278,7 +279,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
         }
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('[NerdsRoom] Global Fetch Error:', error);
     } finally {
       if (showGlobalLoading) setLoading(false);
     }

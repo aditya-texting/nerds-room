@@ -313,7 +313,7 @@ const Hero = () => {
                   <span className="inline-block w-2 h-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                   Installing packages…
                 </div>
-                <div className="text-gray-400">Found {5000 + totalRegs}+ builders</div>
+                <div className="text-gray-400">Found {5000 + (totalRegs || 0)}+ builders</div>
                 <div className="flex flex-wrap gap-x-2">
                   <span className="text-blue-400">user@nerdsroom:~$</span>
                   <span className="text-white">init_innovation.sh</span>
