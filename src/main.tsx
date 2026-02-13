@@ -8,7 +8,7 @@ import EventsPage from './components/EventsPage';
 import EventDetailsPage from './components/EventDetailsPage';
 import { AppDataProvider, useAppData } from './context/AppDataContext';
 import './index.css';
-
+import GlobalLoadingScreen from './components/GlobalLoadingScreen';
 import OfflineOverlay from './components/OfflineOverlay';
 
 const MainContent = () => {
@@ -52,11 +52,8 @@ const MainContent = () => {
     <>
       <OfflineOverlay />
       {loading && !bootTimeout && (
-        <div className="fixed inset-0 z-[50] bg-white flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-nerdBlue border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-nerdBlue font-black animate-pulse">BOOTING NERDS ROOM...</p>
-          </div>
+        <div className="fixed inset-0 z-[50]">
+          <GlobalLoadingScreen />
         </div>
       )}
       <App />

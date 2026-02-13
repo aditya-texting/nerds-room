@@ -6,6 +6,15 @@ const CommunitySays = () => {
 
   const testimonials: any[][] = [[], [], []];
 
+  const fallbackColors = [
+    'bg-blue-50/50',
+    'bg-nerdLime/5',
+    'bg-orange-50/50',
+    'bg-purple-50/50',
+    'bg-emerald-50/50',
+    'bg-sky-50/50'
+  ];
+
   if (successStories && successStories.length > 0) {
     successStories.forEach((story, i) => {
       testimonials[i % 3].push({
@@ -13,7 +22,7 @@ const CommunitySays = () => {
         role: story.role,
         image: story.image_url,
         paragraphs: story.content,
-        bgColor: story.bg_color || 'bg-gray-50'
+        bgColor: story.bg_color || fallbackColors[i % fallbackColors.length]
       });
     });
   } else {
