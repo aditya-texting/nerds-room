@@ -15,9 +15,16 @@ const MainContent = () => {
   const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
   const { loading } = useAppData();
 
+  const [bootTimeout, setBootTimeout] = React.useState(false);
+
   React.useEffect(() => {
     console.log('[NerdsRoom] App Initialized. Path:', window.location.pathname);
     console.log('[NerdsRoom] Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'Configured' : 'MISSING');
+
+    // Safety timeout for the loader
+    const timer = setTimeout(() => {
+      setBootTimeout(true);
+    }, 10000);
 
     const handleLocationChange = () => {
       setCurrentPath(window.location.pathname);
@@ -28,6 +35,7 @@ const MainContent = () => {
     window.addEventListener('pushstate', handleLocationChange);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('popstate', handleLocationChange);
       window.removeEventListener('pushstate', handleLocationChange);
     };
@@ -43,7 +51,7 @@ const MainContent = () => {
   return (
     <>
       <OfflineOverlay />
-      {loading && (
+      {loading && !bootTimeout && (
         <div className="fixed inset-0 z-[50] bg-white flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-nerdBlue border-t-transparent rounded-full animate-spin"></div>

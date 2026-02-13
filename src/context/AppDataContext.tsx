@@ -363,21 +363,27 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   // --- Fetchers ---
 
   const fetchRegistrations = async () => {
-    // 1. Fetch counts only (Very fast even with millions of rows)
-    const { count: total } = await supabase.from('registrations').select('*', { count: 'exact', head: true });
-    const { count: approved } = await supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('status', 'approved');
+    try {
+      const { count: total, error: e1 } = await supabase.from('registrations').select('*', { count: 'exact', head: true });
+      if (e1) console.error('[NerdsRoom] fetchRegistrations Count Error:', e1);
 
-    if (total !== null) setTotalRegs(total);
-    if (approved !== null) setTotalApprovedRegs(approved);
+      const { count: approved, error: e2 } = await supabase.from('registrations').select('*', { count: 'exact', head: true }).eq('status', 'approved');
+      if (e2) console.error('[NerdsRoom] fetchRegistrations Approved Count Error:', e2);
 
-    // 2. Fetch only the latest 50 for the recent stream (Avoids hanging)
-    const { data } = await supabase
-      .from('registrations')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50);
+      if (total !== null) setTotalRegs(total);
+      if (approved !== null) setTotalApprovedRegs(approved);
 
-    if (data) setRegistrations(data.map(d => ({ ...d, createdAt: d.created_at })));
+      const { data, error: e3 } = await supabase
+        .from('registrations')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (e3) console.error('[NerdsRoom] fetchRegistrations Data Error:', e3);
+      if (data) setRegistrations(data.map(d => ({ ...d, createdAt: d.created_at })));
+    } catch (err) {
+      console.error('[NerdsRoom] fetchRegistrations Unexpected Error:', err);
+    }
   };
 
   const fetchWhatWeDo = async () => {
@@ -386,7 +392,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const fetchFlagshipEvents = async () => {
-    const { data } = await supabase.from('flagship_events').select('*').order('created_at', { ascending: true });
+    const { data, error } = await supabase.from('flagship_events').select('*').order('created_at', { ascending: true });
+    if (error) console.error('[NerdsRoom] fetchFlagshipEvents Error:', error);
     if (data) setFlagshipEvents(data.map(d => ({ ...d, image: d.image_url })));
   };
 
@@ -438,7 +445,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const fetchSettings = async () => {
-    const { data } = await supabase.from('site_settings').select('*');
+    const { data, error } = await supabase.from('site_settings').select('*');
+    if (error) console.error('[NerdsRoom] fetchSettings Error:', error);
     if (data) {
       data.forEach(setting => {
         const val = setting.value;
