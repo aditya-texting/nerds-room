@@ -119,7 +119,7 @@ const Hero = () => {
             <div className="absolute inset-0 z-[50] bg-white/95 backdrop-blur-md flex items-center justify-center p-6 text-center">
               <div className="max-w-md animate-fade-in">
                 <div className="text-6xl mb-6">🛠️</div>
-                <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tighter">UNDER MAINTENANCE</h1>
+                <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tight">UNDER MAINTENANCE</h1>
                 <p className="text-gray-600 font-bold mb-8">We're updating our systems to bring you more epic building opportunities. Join our community for live updates!</p>
                 <a href="#join" className="bg-nerdBlue text-white px-8 py-3 rounded-xl font-black shadow-hard hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all inline-block">GO TO COMMUNITY</a>
               </div>
@@ -184,7 +184,7 @@ const Hero = () => {
             </div>
 
             {/* Main Heading */}
-            <h1 className="font-black tracking-tighter leading-[0.85]">
+            <h1 className="font-black tracking-tight leading-[0.95]">
               <span
                 className={`block text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-nerdBlue transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}

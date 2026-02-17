@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
@@ -42,6 +43,8 @@ const Icons = {
 
 const HackathonsPage = () => {
   const { hackathons: dbHackathons, navigate } = useAppData();
+  const { isSignedIn } = useUser();
+  const { openSignIn } = useClerk();
 
   // Map database hackathons to component format
   const hackathons: Hackathon[] = useMemo(() => dbHackathons
@@ -297,7 +300,7 @@ const HackathonsPage = () => {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-nerdBlue/70 via-nerdBlue/40 to-white"></div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10 px-4">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tighter leading-[1] drop-shadow-2xl">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1] drop-shadow-2xl">
             BUILD. COMPETE. <br />
             <span className="text-nerdLime">WIN BIG.</span>
           </h1>
@@ -726,7 +729,7 @@ const HackathonsPage = () => {
                         )}
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{hack.organizer}</span>
                       </div>
-                      <h3 className="text-nerdDark text-lg sm:text-xl lg:text-xl font-black mb-2 tracking-tight group-hover:text-nerdBlue transition-all leading-tight">
+                      <h3 className="text-nerdDark text-lg sm:text-xl lg:text-xl font-black mb-2 tracking-normal group-hover:text-nerdBlue transition-all leading-snug">
                         {hack.title}
                       </h3>
 
@@ -841,6 +844,10 @@ const HackathonsPage = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (!isSignedIn) {
+                              openSignIn();
+                              return;
+                            }
                             if (hack.registration_type === 'managed') {
                               window.location.href = `/hackathons/${hack.slug}${userRegistrations[hack.slug]?.isRegistered ? '' : '?register=true'}`;
                             } else if (hack.registration_link) {

@@ -28,7 +28,7 @@ const OfflineOverlay = () => {
                 </div>
             </div>
 
-            <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tighter">
+            <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tight">
                 CONNECTION LOST
             </h1>
 

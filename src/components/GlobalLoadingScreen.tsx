@@ -18,7 +18,7 @@ const GlobalLoadingScreen = () => {
                     </div>
 
                     <div className="text-center">
-                        <h1 className="text-3xl font-black text-nerdBlue tracking-tighter">
+                        <h1 className="text-3xl font-black text-nerdBlue tracking-tight">
                             nerds room<span className="text-nerdLime">.</span>
                         </h1>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">

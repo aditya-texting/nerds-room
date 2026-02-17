@@ -132,14 +132,21 @@ export interface Hackathon {
 export interface Workshop {
     id: number;
     title: string;
+    slug: string;
     description: string;
+    about?: string;
     image_url: string;
+    banner_url?: string;
     date: string;
     location: string;
     registration_link?: string;
     is_public: boolean;
     is_featured: boolean;
     attendees_count: number;
+    mentors?: { name: string; role: string; image_url?: string; social_links?: any[] }[];
+    schedule?: { time: string; title: string; description?: string }[];
+    faq?: { question: string; answer: string }[];
+    topics?: string[];
 }
 
 export interface PastEvent {

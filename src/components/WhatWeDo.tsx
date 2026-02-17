@@ -3,7 +3,7 @@ import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 
 const WhatWeDo = () => {
-  const { whatWeDoCards, hackathons, pastEvents, loading } = useAppData();
+  const { whatWeDoCards, hackathons, workshops, pastEvents, loading } = useAppData();
   const [isActive, setIsActive] = useState(false);
   const [animatedStats, setAnimatedStats] = useState<{ [key: number]: number }>({});
   const sectionRef = useRef<HTMLElement>(null);
@@ -11,9 +11,12 @@ const WhatWeDo = () => {
   // Process cards to include real data counts
   const cards = useMemo(() => {
     const publicHackathons = hackathons.filter(h => h.is_public !== false);
+    const publicWorkshops = workshops.filter(w => w.is_public !== false);
 
     // Actual count for hackathons
     const hackathonCount = publicHackathons.length + pastEvents.filter(e => e.event_type?.toLowerCase().includes('hackathon')).length;
+    // Actual count for workshops
+    const workshopCount = publicWorkshops.length;
 
     return whatWeDoCards.map(card => {
       const title = (card.title || '').toLowerCase();
@@ -22,10 +25,11 @@ const WhatWeDo = () => {
       if (title.includes('hackathon') || label.includes('hosted')) {
         return { ...card, stat: `${hackathonCount}+` };
       }
-      // Set others to 0 as they are coming soon
+      // Set stats for workshops
       if (title.includes('workshop') || label.includes('sessions')) {
-        return { ...card, stat: `0+` };
+        return { ...card, stat: `${workshopCount}+` };
       }
+      // Others are still coming soon
       if (title.includes('community') || label.includes('members')) {
         return { ...card, stat: `0+` };
       }
@@ -124,14 +128,14 @@ const WhatWeDo = () => {
           const getCardLink = (title: string) => {
             const t = title.toLowerCase();
             if (t.includes('hackathon')) return '/hackathons';
+            if (t.includes('workshop')) return '/workshops';
             return null; // All others are coming soon
           };
 
           const isComingSoon = (title: string) => {
             const t = title.toLowerCase();
-            // Explicitly mark workshops, community, and projects as coming soon
+            // Explicitly mark community and projects as coming soon
             return (
-              t.includes('workshop') ||
               t.includes('ideathon') ||
               t.includes('cohort') ||
               t.includes('community') ||
@@ -195,7 +199,7 @@ const WhatWeDo = () => {
                     return <>&lt;/&gt;</>;
                   })()}
                 </div>
-                <h3 className="text-2xl font-black text-[#00308F] mb-2 uppercase tracking-tighter">{card.title}</h3>
+                <h3 className="text-2xl font-black text-[#00308F] mb-1 uppercase tracking-tight leading-tight">{card.title}</h3>
                 <p className="font-medium text-sm text-gray-500 mb-4 leading-relaxed">{card.description}</p>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const { navigate } = useAppData();
@@ -91,6 +92,17 @@ const Navbar = () => {
 
           {/* Action Button */}
           <div className="flex items-center gap-4">
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="hidden sm:flex items-center justify-center bg-nerdBlue text-white font-bold px-6 py-2.5 rounded-lg border border-transparent hover:bg-nerdLime hover:text-nerdBlue transition-all shadow-md hover:shadow-none text-sm tracking-wide">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSegbpqFbVYJKHiIXdK8tqGzbOntQGNHaW64qvkGpr9k85lE1Q/viewform?usp=publish-editor"
               target="_blank"

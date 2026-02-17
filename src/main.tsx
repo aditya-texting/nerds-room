@@ -4,8 +4,10 @@ import App from './App';
 import NotFound from './NotFound';
 import AdminPanel from './components/AdminPanel';
 import HackathonsPage from './components/HackathonsPage';
+import WorkshopsPage from './components/WorkshopsPage';
 import EventsPage from './components/EventsPage';
 import EventDetailsPage from './components/EventDetailsPage';
+import WorkshopDetailsPage from './components/WorkshopDetailsPage';
 import { AppDataProvider, useAppData } from './context/AppDataContext';
 import './index.css';
 import GlobalLoadingScreen from './components/GlobalLoadingScreen';
@@ -44,9 +46,11 @@ const MainContent = () => {
   if (currentPath === '/partner') return <NotFound />;
   if (currentPath === '/admin') return <AdminPanel />;
   if (currentPath === '/hackathons') return <HackathonsPage />;
+  if (currentPath === '/workshops') return <WorkshopsPage />;
   if (currentPath === '/events') return <EventsPage />;
 
   if (currentPath.startsWith('/hackathons/')) return <EventDetailsPage />;
+  if (currentPath.startsWith('/workshops/')) return <WorkshopDetailsPage />;
 
   return (
     <>
@@ -61,11 +65,21 @@ const MainContent = () => {
   );
 };
 
+import { ClerkProvider } from '@clerk/clerk-react';
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <AppDataProvider>
-      <MainContent />
-    </AppDataProvider>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <AppDataProvider>
+        <MainContent />
+      </AppDataProvider>
+    </ClerkProvider>
   </React.StrictMode>,
 );
 

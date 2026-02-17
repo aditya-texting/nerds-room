@@ -191,7 +191,7 @@ const FlagshipEvents = () => {
             <div className="absolute inset-0 z-[50] bg-white/95 backdrop-blur-md flex items-center justify-center p-6 text-center rounded-[40px]">
               <div className="max-w-md">
                 <div className="text-6xl mb-6">🛠️</div>
-                <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tighter">EVENTS UNAVAILABLE</h1>
+                <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tight">EVENTS UNAVAILABLE</h1>
                 <p className="text-gray-600 font-bold mb-8">Scheduling maintenance in progress. Check back soon for the next epic event lineup!</p>
               </div>
             </div>

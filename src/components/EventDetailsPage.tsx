@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
@@ -74,6 +75,8 @@ const BadgeViewWrapper = memo(({ hackathon, onClose }: { hackathon: any, onClose
 
 const EventDetailsPage = () => {
   const { hackathons: dbHackathons, registrationForms, registrations: dbRegistrations, loading, navigate } = useAppData();
+  const { isSignedIn, user } = useUser();
+  const { openSignIn } = useClerk();
   const [activeTab, setActiveTab] = useState('overview');
   const [hackathon, setHackathon] = useState<Hackathon | null>(null);
   const [showRegModal, setShowRegModal] = useState(false);
@@ -166,6 +169,11 @@ const EventDetailsPage = () => {
     e.preventDefault();
     if (!hackathon) return;
 
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+
     if (hackathon.registration_type === 'managed') {
       setShowRegModal(true);
     } else if (hackathon.registration_link) {
@@ -173,7 +181,7 @@ const EventDetailsPage = () => {
     } else {
       alert('Registration details not available yet.');
     }
-  }, [hackathon]);
+  }, [hackathon, isSignedIn, openSignIn]);
 
   useEffect(() => {
     if (hackathon?.title) {
@@ -240,7 +248,7 @@ const EventDetailsPage = () => {
             {/* Title & Info */}
             <div className="text-left space-y-3 max-w-[665px]">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{hackathon.title}</h1>
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-normal leading-tight">{hackathon.title}</h1>
                 <div className="flex flex-wrap gap-2">
                   {(hackathon.tags || []).map((tag, idx) => (
                     <span
@@ -391,7 +399,7 @@ const EventDetailsPage = () => {
                   <img src={hackathon.logo} alt={hackathon.title} className="w-full h-full object-contain" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 mb-2">{hackathon.title}</h2>
+                  <h2 className="text-2xl font-black text-slate-900 mb-2 tracking-normal">{hackathon.title}</h2>
                   <p className="text-slate-500 text-sm font-medium leading-relaxed">{hackathon.description}</p>
                 </div>
 
@@ -452,7 +460,7 @@ const EventDetailsPage = () => {
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-black text-slate-900 leading-tight truncate uppercase tracking-tight text-lg">{org.name}</div>
+                          <div className="font-black text-slate-900 leading-tight truncate uppercase tracking-normal text-lg">{org.name}</div>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">
                               {org.role || 'Partner'}
@@ -600,7 +608,7 @@ const EventDetailsPage = () => {
                 <div className="max-w-4xl mx-auto px-2 sm:px-0">
                   <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
                     <div>
-                      <h2 className="text-4xl font-black text-slate-900 tracking-tight">Event Schedule</h2>
+                      <h2 className="text-4xl font-black text-slate-900 tracking-normal">Event Schedule</h2>
                       <p className="text-slate-500 font-bold text-sm mt-2 uppercase tracking-[0.1em]">Complete roadmap for Innovation</p>
                     </div>
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full text-indigo-600 text-xs font-black uppercase tracking-widest border border-indigo-100">
@@ -940,6 +948,13 @@ const EventDetailsPage = () => {
                       ) : (
                         <input
                           name={field.id}
+                          defaultValue={
+                            (field.type === 'email' || field.label.toLowerCase().includes('email'))
+                              ? user?.primaryEmailAddress?.emailAddress
+                              : (field.label.toLowerCase().includes('name') && !field.label.toLowerCase().includes('team') && !field.label.toLowerCase().includes('project'))
+                                ? user?.fullName || ''
+                                : ''
+                          }
                           type={(field.type === 'phone' || field.label.toLowerCase().includes('phone') || field.label.toLowerCase().includes('mobile')) ? 'tel' : field.type}
                           placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
                           required={field.required}

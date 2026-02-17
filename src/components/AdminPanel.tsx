@@ -289,6 +289,10 @@ const AdminPanel = () => {
     setEditingHackathon((prev: any) => ({ ...prev, ...updates }));
   };
 
+  const updateWorkshopState = (updates: any) => {
+    setEditingWorkshop((prev: any) => ({ ...prev, ...updates }));
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setIsCheckingSession(false), 1000);
     return () => clearTimeout(timer);
@@ -452,7 +456,7 @@ const AdminPanel = () => {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-[#1a1c23] text-white flex flex-col shrink-0 z-40 transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-800">
-          <span className="font-black text-2xl tracking-tighter text-[#9BE600]">nerds.</span>
+          <span className="font-black text-2xl tracking-tight text-[#9BE600]">nerds.</span>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-gray-400 hover:text-white">
             <Icons.X />
           </button>
@@ -543,7 +547,7 @@ const AdminPanel = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</h3>
-                        <div className="text-3xl font-black text-slate-900 mt-2 tracking-tighter">
+                        <div className="text-3xl font-black text-slate-900 mt-2 tracking-tight">
                           {stat.value >= 1000 ? `${(stat.value / 1000).toFixed(1)}k` : stat.value}
                         </div>
                       </div>
@@ -3729,80 +3733,426 @@ const AdminPanel = () => {
       {/* Add/Edit Workshop Modal */}
       {
         (showAddWorkshop || editingWorkshop) && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-2xl font-bold text-gray-800">{editingWorkshop ? 'Edit Workshop' : 'Add New Workshop'}</h2>
-              </div>
-              <div className="p-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Title *</label>
-                    <input type="text" defaultValue={editingWorkshop?.title || ''} id="ws-title" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Date *</label>
-                    <input type="text" defaultValue={editingWorkshop?.date || ''} id="ws-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Location</label>
-                    <input type="text" defaultValue={editingWorkshop?.location || ''} id="ws-location" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Registration Link</label>
-                    <input type="text" defaultValue={editingWorkshop?.registration_link || ''} id="ws-reg-link" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" />
-                  </div>
-                </div>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Sticky Header */}
+              <div className="sticky top-0 z-20 p-8 border-b border-gray-100 flex justify-between items-center bg-white/90 backdrop-blur-xl">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Description</label>
-                  <textarea defaultValue={editingWorkshop?.description || ''} id="ws-desc" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm h-24" />
+                  <h2 className="text-3xl font-black text-gray-800 tracking-tight">{editingWorkshop?.id ? 'Edit Masterclass' : 'Launch Workshop'}</h2>
+                  <p className="text-sm font-bold text-indigo-500 uppercase tracking-widest mt-1">Advanced masterclass configuration</p>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Image URL</label>
-                  <div className="flex flex-col gap-2">
-                    <input type="text" defaultValue={editingWorkshop?.image_url || ''} id="ws-image" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" />
-                    <label className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'workshops', 'ws-image')} />
-                      {isUploading ? 'UPLOADING...' : 'UPLOAD FROM DEVICE'}
-                    </label>
+                <button onClick={() => { setShowAddWorkshop(false); setEditingWorkshop(null); }} className="p-3 hover:bg-gray-100 rounded-2xl transition-all"><Icons.X /></button>
+              </div>
+
+              <div className="p-8 space-y-12">
+                {/* 1. CORE CONFIGURATION */}
+                <div className="space-y-8">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-4 flex items-center gap-3">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                    Core Configuration
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">Workshop Title *</label>
+                        <input
+                          type="text"
+                          defaultValue={editingWorkshop?.title || ''}
+                          id="ws-title"
+                          onChange={(e) => {
+                            const slugInput = document.getElementById('ws-slug') as HTMLInputElement;
+                            if (slugInput && (!editingWorkshop || !editingWorkshop.slug)) {
+                              slugInput.value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+                            }
+                          }}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold focus:border-indigo-500 transition-all"
+                          placeholder="e.g. Master Modern React"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">URL Slug * (Unique)</label>
+                        <input
+                          type="text"
+                          defaultValue={editingWorkshop?.slug || ''}
+                          id="ws-slug"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-mono text-indigo-600 font-bold"
+                          placeholder="modern-react-mastery"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">Date/Time *</label>
+                          <input type="text" defaultValue={editingWorkshop?.date || ''} id="ws-date" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold" placeholder="25 Dec, 4PM" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">Location</label>
+                          <input type="text" defaultValue={editingWorkshop?.location || ''} id="ws-location" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold" placeholder="Online / Venue" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">Registration CTA Link</label>
+                        <input type="text" defaultValue={editingWorkshop?.registration_link || ''} id="ws-reg-link" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-blue-600" placeholder="https://..." />
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-6">
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked={editingWorkshop?.is_public !== false} id="ws-public" className="w-4 h-4" />
-                    <label htmlFor="ws-public" className="text-sm text-gray-600 font-bold uppercase">Public</label>
+
+                {/* 2. DEEP CONTENT */}
+                <div className="space-y-8">
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-4 flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                    Deep Content
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">Short Teaser (List View Cards)</label>
+                      <textarea defaultValue={editingWorkshop?.description || ''} id="ws-desc" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-medium h-32 leading-relaxed" placeholder="Brief summary of the workshop..." />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-wider">Full Story (Detail Page - Markdown)</label>
+                      <textarea defaultValue={editingWorkshop?.about || ''} id="ws-about" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-medium h-32 leading-relaxed" placeholder="Everything about the workshop..." />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" defaultChecked={editingWorkshop?.is_featured || false} id="ws-featured" className="w-4 h-4" />
-                    <label htmlFor="ws-featured" className="text-sm text-gray-600 font-bold uppercase">Featured</label>
+
+                  {/* Highlights / Topics Editor */}
+                  <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-200">
+                    <div className="flex justify-between items-center mb-6">
+                      <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">✨ Key Highlights</h4>
+                      <button
+                        onClick={() => {
+                          const topics = [...(editingWorkshop?.topics || [])];
+                          topics.push('');
+                          updateWorkshopState({ topics });
+                        }}
+                        className="bg-white border border-slate-200 text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black hover:bg-indigo-50 transition-colors uppercase"
+                      >
+                        + Add Highlight
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(editingWorkshop?.topics || []).map((topic: string, idx: number) => (
+                        <div key={idx} className="flex gap-2 group">
+                          <input
+                            type="text"
+                            value={topic}
+                            onChange={(e) => {
+                              const topics = [...(editingWorkshop?.topics || [])];
+                              topics[idx] = e.target.value;
+                              updateWorkshopState({ topics });
+                            }}
+                            className="flex-1 bg-white border border-slate-100 p-3 rounded-xl text-xs font-bold shadow-sm focus:border-indigo-400 outline-none"
+                            placeholder="e.g. Hands-on coding"
+                          />
+                          <button
+                            onClick={() => {
+                              const topics = [...(editingWorkshop?.topics || [])];
+                              topics.splice(idx, 1);
+                              updateWorkshopState({ topics });
+                            }}
+                            className="p-3 text-red-400 hover:bg-red-50 rounded-xl"
+                          >
+                            <Icons.Trash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. EXPERT LINEUP & CURRICULUM */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {/* Mentors Editor */}
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                        Expert Mentors
+                      </h3>
+                      <button
+                        onClick={() => {
+                          const mentors = [...(editingWorkshop?.mentors || [])];
+                          mentors.push({ name: '', role: '', image_url: '', social_links: [] });
+                          updateWorkshopState({ mentors });
+                        }}
+                        className="text-emerald-600 font-bold text-[10px] uppercase hover:underline"
+                      >
+                        + Add Mentor
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      {(editingWorkshop?.mentors || []).map((mentor: any, idx: number) => (
+                        <div key={idx} className="p-6 bg-slate-50 border border-slate-200 rounded-[2rem] space-y-4 relative group">
+                          <button onClick={() => {
+                            const m = [...(editingWorkshop?.mentors || [])];
+                            m.splice(idx, 1);
+                            updateWorkshopState({ mentors: m });
+                          }} className="absolute top-4 right-4 text-red-400 p-2"><Icons.Trash className="w-4 h-4" /></button>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <input
+                              type="text"
+                              value={mentor.name}
+                              placeholder="Name"
+                              onChange={(e) => {
+                                const m = [...(editingWorkshop?.mentors || [])];
+                                m[idx].name = e.target.value;
+                                updateWorkshopState({ mentors: m });
+                              }}
+                              className="w-full bg-white border border-slate-100 p-3 rounded-xl text-sm font-black"
+                            />
+                            <input
+                              type="text"
+                              value={mentor.role}
+                              placeholder="Role (e.g. Senior Dev)"
+                              onChange={(e) => {
+                                const m = [...(editingWorkshop?.mentors || [])];
+                                m[idx].role = e.target.value;
+                                updateWorkshopState({ mentors: m });
+                              }}
+                              className="w-full bg-white border border-slate-100 p-3 rounded-xl text-sm font-bold"
+                            />
+                          </div>
+                          <input
+                            type="text"
+                            value={mentor.image_url}
+                            placeholder="Profile Image URL"
+                            onChange={(e) => {
+                              const m = [...(editingWorkshop?.mentors || [])];
+                              m[idx].image_url = e.target.value;
+                              updateWorkshopState({ mentors: m });
+                            }}
+                            className="w-full bg-white border border-slate-100 p-3 rounded-xl text-[10px] font-mono"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Schedule/Roadmap Editor */}
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                        Mastery Roadmap
+                      </h3>
+                      <button
+                        onClick={() => {
+                          const schedule = [...(editingWorkshop?.schedule || [])];
+                          schedule.push({ time: '', title: '', description: '' });
+                          updateWorkshopState({ schedule });
+                        }}
+                        className="text-amber-600 font-bold text-[10px] uppercase hover:underline"
+                      >
+                        + Add Milestone
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      {(editingWorkshop?.schedule || []).map((item: any, idx: number) => (
+                        <div key={idx} className="p-6 bg-slate-50 border border-slate-200 rounded-[2rem] space-y-3 relative group">
+                          <button onClick={() => {
+                            const s = [...(editingWorkshop?.schedule || [])];
+                            s.splice(idx, 1);
+                            updateWorkshopState({ schedule: s });
+                          }} className="absolute top-4 right-4 text-red-400 p-2"><Icons.Trash className="w-4 h-4" /></button>
+
+                          <div className="grid grid-cols-3 gap-3">
+                            <input
+                              type="text"
+                              value={item.time}
+                              placeholder="Offset (e.g. 1hr 20m)"
+                              onChange={(e) => {
+                                const s = [...(editingWorkshop?.schedule || [])];
+                                s[idx].time = e.target.value;
+                                updateWorkshopState({ schedule: s });
+                              }}
+                              className="col-span-1 bg-white border border-slate-100 p-3 rounded-xl text-xs font-black text-amber-600"
+                            />
+                            <input
+                              type="text"
+                              value={item.title}
+                              placeholder="Session Title"
+                              onChange={(e) => {
+                                const s = [...(editingWorkshop?.schedule || [])];
+                                s[idx].title = e.target.value;
+                                updateWorkshopState({ schedule: s });
+                              }}
+                              className="col-span-2 bg-white border border-slate-100 p-3 rounded-xl text-sm font-black"
+                            />
+                          </div>
+                          <textarea
+                            value={item.description}
+                            placeholder="What will they learn?"
+                            onChange={(e) => {
+                              const s = [...(editingWorkshop?.schedule || [])];
+                              s[idx].description = e.target.value;
+                              updateWorkshopState({ schedule: s });
+                            }}
+                            className="w-full bg-white border border-slate-100 p-3 rounded-xl text-[11px] font-medium h-16"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. FAQ & MEDIA */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {/* FAQ Editor */}
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        Common Doubts (FAQ)
+                      </h3>
+                      <button
+                        onClick={() => {
+                          const faq = [...(editingWorkshop?.faq || [])];
+                          faq.push({ question: '', answer: '' });
+                          updateWorkshopState({ faq });
+                        }}
+                        className="text-blue-600 font-bold text-[10px] uppercase hover:underline"
+                      >
+                        + Add Question
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      {(editingWorkshop?.faq || []).map((item: any, idx: number) => (
+                        <div key={idx} className="p-6 bg-slate-50 border border-slate-200 rounded-[2rem] space-y-3 relative group">
+                          <button onClick={() => {
+                            const f = [...(editingWorkshop?.faq || [])];
+                            f.splice(idx, 1);
+                            updateWorkshopState({ faq: f });
+                          }} className="absolute top-4 right-4 text-red-400 p-2"><Icons.Trash className="w-4 h-4" /></button>
+
+                          <input
+                            type="text"
+                            value={item.question}
+                            placeholder="The Question?"
+                            onChange={(e) => {
+                              const f = [...(editingWorkshop?.faq || [])];
+                              f[idx].question = e.target.value;
+                              updateWorkshopState({ faq: f });
+                            }}
+                            className="w-full bg-white border border-slate-100 p-3 rounded-xl text-sm font-black"
+                          />
+                          <textarea
+                            value={item.answer}
+                            placeholder="The detailed answer..."
+                            onChange={(e) => {
+                              const f = [...(editingWorkshop?.faq || [])];
+                              f[idx].answer = e.target.value;
+                              updateWorkshopState({ faq: f });
+                            }}
+                            className="w-full bg-white border border-slate-100 p-3 rounded-xl text-xs font-medium h-24"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Media & Visibility */}
+                  <div className="space-y-8">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-3">
+                      <div className="w-2 h-2 bg-rose-500 rounded-full" />
+                      Visual Identity
+                    </h3>
+
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Poster URL</label>
+                          <input type="text" defaultValue={editingWorkshop?.image_url || ''} id="ws-image" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hero Banner URL</label>
+                          <input type="text" defaultValue={editingWorkshop?.banner_url || ''} id="ws-banner" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono" />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <label className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border-2 border-dashed border-slate-200 text-xs font-black uppercase tracking-widest cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'workshops', 'ws-image')} />
+                          <Icons.Image className="w-4 h-4" />
+                          {isUploading ? 'Uploading...' : 'Upload Image Assets'}
+                        </label>
+                      </div>
+
+                      <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl" />
+                        <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-6">Workshop Visibility</h4>
+                        <div className="flex flex-col gap-6">
+                          <label className="flex items-center gap-4 cursor-pointer group/label">
+                            <div className="relative">
+                              <input type="checkbox" defaultChecked={editingWorkshop?.is_public !== false} id="ws-public" className="sr-only peer" />
+                              <div className="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-indigo-600 transition-all duration-300" />
+                              <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5" />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-widest text-slate-400 peer-checked:text-white transition-colors">Visible to Public</span>
+                          </label>
+
+                          <label className="flex items-center gap-4 cursor-pointer group/label">
+                            <div className="relative">
+                              <input type="checkbox" defaultChecked={editingWorkshop?.is_featured || false} id="ws-featured" className="sr-only peer" />
+                              <div className="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-amber-500 transition-all duration-300" />
+                              <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5" />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-widest text-slate-400 peer-checked:text-white transition-colors">Featured Spotlight</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="p-6 border-t border-gray-200 flex gap-3">
-                <button onClick={() => { setShowAddWorkshop(false); setEditingWorkshop(null); }} className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-xs font-bold uppercase">Cancel</button>
+
+              {/* Action Footer */}
+              <div className="sticky bottom-0 z-20 p-8 border-t border-gray-100 flex gap-4 bg-white/90 backdrop-blur-xl">
+                <button onClick={() => { setShowAddWorkshop(false); setEditingWorkshop(null); }} className="flex-1 bg-slate-50 text-slate-500 py-5 rounded-3xl text-sm font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Discard</button>
                 <button onClick={async () => {
                   const title = (document.getElementById('ws-title') as HTMLInputElement).value;
+                  const slug = (document.getElementById('ws-slug') as HTMLInputElement).value;
                   const date = (document.getElementById('ws-date') as HTMLInputElement).value;
                   const location = (document.getElementById('ws-location') as HTMLInputElement).value;
                   const registration_link = (document.getElementById('ws-reg-link') as HTMLInputElement).value;
                   const description = (document.getElementById('ws-desc') as HTMLTextAreaElement).value;
+                  const about = (document.getElementById('ws-about') as HTMLTextAreaElement).value;
                   const image_url = (document.getElementById('ws-image') as HTMLInputElement).value;
+                  const banner_url = (document.getElementById('ws-banner') as HTMLInputElement).value;
                   const is_public = (document.getElementById('ws-public') as HTMLInputElement).checked;
                   const is_featured = (document.getElementById('ws-featured') as HTMLInputElement).checked;
 
-                  if (!title || !date) { showToast('Please fill required fields', 'error'); return; }
+                  if (!title || !date || !slug) { showToast('Missing required fields', 'error'); return; }
 
-                  const workshopData = { title, date, location, registration_link, description, image_url, is_public, is_featured, attendees_count: 0 };
+                  const workshopData = {
+                    ...editingWorkshop,
+                    title,
+                    slug,
+                    date,
+                    location,
+                    registration_link,
+                    description,
+                    about,
+                    image_url,
+                    banner_url,
+                    is_public,
+                    is_featured,
+                    attendees_count: editingWorkshop?.attendees_count || 0
+                  };
 
-                  if (editingWorkshop) {
-                    await handleAction(() => updateWorkshop(editingWorkshop.id, workshopData), 'Workshop updated');
+                  // Remove ID if new
+                  if (editingWorkshop?.id === 'new') delete (workshopData as any).id;
+
+                  if (!editingWorkshop || editingWorkshop.id === 'new') {
+                    await handleAction(() => addWorkshop(workshopData as any), 'Workshop launched');
                   } else {
-                    await handleAction(() => addWorkshop(workshopData), 'Workshop added');
+                    await handleAction(() => updateWorkshop(editingWorkshop.id, workshopData), 'Workshop synchronized');
                   }
                   setShowAddWorkshop(false); setEditingWorkshop(null);
-                }} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-xs font-bold uppercase shadow-lg shadow-indigo-200">{editingWorkshop ? 'Update' : 'Add'} Workshop</button>
+                }} className="flex-[2] bg-indigo-600 text-white py-5 rounded-3xl text-sm font-black uppercase tracking-[0.2em] shadow-2xl shadow-indigo-200 hover:bg-indigo-700 hover:scale-[1.02] transition-all active:scale-95">{editingWorkshop?.id ? 'Synchronize Data' : 'Launch Masterclass'}</button>
               </div>
             </div>
           </div>
