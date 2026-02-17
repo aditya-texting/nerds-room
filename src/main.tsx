@@ -30,7 +30,18 @@ const MainContent = () => {
 
     const handleLocationChange = () => {
       setCurrentPath(window.location.pathname);
-      window.scrollTo(0, 0);
+
+      if (window.location.hash) {
+        setTimeout(() => {
+          const id = window.location.hash.substring(1);
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+      } else {
+        window.scrollTo(0, 0);
+      }
     };
 
     window.addEventListener('popstate', handleLocationChange);

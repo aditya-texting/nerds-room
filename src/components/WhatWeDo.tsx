@@ -105,7 +105,7 @@ const WhatWeDo = () => {
 
   if (loading) {
     return (
-      <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto bg-gray-50 rounded-3xl my-10 border border-gray-200">
+      <section id="what-we-do" className="py-20 px-4 md:px-8 max-w-7xl mx-auto bg-gray-50 rounded-3xl my-10 border border-gray-200">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-80">

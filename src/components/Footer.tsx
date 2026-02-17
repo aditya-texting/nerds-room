@@ -3,8 +3,25 @@ import { useAppData } from '../context/AppDataContext';
 import { X } from 'lucide-react';
 
 const Footer = () => {
-  const { socialLinks, footerDescription } = useAppData();
+  const { socialLinks, footerDescription, navigate } = useAppData();
   const [showTerms, setShowTerms] = useState(false);
+
+  const handleNav = (e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+      if (path.includes('#')) {
+        const id = path.split('#')[1];
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else if (path === '/') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate(path);
+      }
+    } else {
+      navigate(path);
+    }
+  };
 
   return (
     <>
@@ -35,12 +52,14 @@ const Footer = () => {
                 <div className="flex flex-col gap-3">
                   <a
                     href="/#home"
+                    onClick={(e) => handleNav(e, '/#home')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     About Us
                   </a>
                   <a
                     href="/events"
+                    onClick={(e) => handleNav(e, '/events')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     Events
@@ -54,18 +73,21 @@ const Footer = () => {
                 <div className="flex flex-col gap-3">
                   <a
                     href="/#past-events"
+                    onClick={(e) => handleNav(e, '/#past-events')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     Past Events
                   </a>
                   <a
                     href="/#gallery"
+                    onClick={(e) => handleNav(e, '/#gallery')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     Gallery
                   </a>
                   <a
                     href="/#testimonials"
+                    onClick={(e) => handleNav(e, '/#testimonials')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     Testimonials

@@ -23,7 +23,7 @@ const PastEvents = () => {
 
   if (loading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+      <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
           <Skeleton className="h-[450px] w-full rounded-lg" />
           <div className="space-y-6">
