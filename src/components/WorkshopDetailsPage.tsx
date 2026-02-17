@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
@@ -6,6 +7,8 @@ import { Clock, Users, Calendar, MapPin, ArrowRight, MessageCircle } from 'lucid
 
 const WorkshopDetailsPage = () => {
     const { workshops: dbWorkshops, loading, navigate } = useAppData();
+    const { isSignedIn } = useUser();
+    const { openSignIn } = useClerk();
     const [activeTab, setActiveTab] = useState('overview');
 
     const slug = useMemo(() => window.location.pathname.split('/').pop() || '', []);
@@ -35,6 +38,17 @@ const WorkshopDetailsPage = () => {
             </div>
         );
     }
+
+    const handleRegisterClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (!isSignedIn) {
+            openSignIn();
+            return;
+        }
+        if (workshop.registration_link) {
+            window.open(workshop.registration_link, '_blank');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-white selection:bg-indigo-100 selection:text-indigo-900" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
@@ -103,15 +117,13 @@ const WorkshopDetailsPage = () => {
                             </div>
 
                             {workshop.registration_link && (
-                                <a
-                                    href={workshop.registration_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                <button
+                                    onClick={handleRegisterClick}
                                     className="inline-flex items-center gap-3 bg-indigo-600 text-white px-10 py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-700 shadow-2xl shadow-indigo-200 transition-all active:scale-95 group"
                                 >
                                     Secure Your Seat
                                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                </a>
+                                </button>
                             )}
                         </div>
                     </div>
@@ -288,7 +300,7 @@ const WorkshopDetailsPage = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => workshop.registration_link && window.open(workshop.registration_link, '_blank')}
+                                    onClick={handleRegisterClick}
                                     className="w-full bg-white text-nerdBlue py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-nerdLime transition-all transform active:scale-95"
                                 >
                                     Claim Your Spot
