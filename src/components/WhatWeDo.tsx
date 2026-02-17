@@ -3,7 +3,7 @@ import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 
 const WhatWeDo = () => {
-  const { whatWeDoCards, hackathons, workshops, pastEvents, loading } = useAppData();
+  const { whatWeDoCards, hackathons, workshops, pastEvents, loading, navigate } = useAppData();
   const [isActive, setIsActive] = useState(false);
   const [animatedStats, setAnimatedStats] = useState<{ [key: number]: number }>({});
   const sectionRef = useRef<HTMLElement>(null);
@@ -117,6 +117,34 @@ const WhatWeDo = () => {
     );
   }
 
+  // Helper functions used in render
+  const getCardLink = (title: string) => {
+    const t = (title || '').toLowerCase();
+    if (t.includes('hackathon')) return '/hackathons';
+    if (t.includes('workshop')) return '/events'; // Redirect to /events as requested
+    return null;
+  };
+
+  const isComingSoon = (title: string) => {
+    const t = (title || '').toLowerCase();
+    return (
+      t.includes('ideathon') ||
+      t.includes('cohort') ||
+      t.includes('community') ||
+      t.includes('project')
+    );
+  };
+
+  const getIconBgColor = (idx: number) => {
+    const colors = ['bg-[#9BE600]', 'bg-[#00308F]', 'bg-yellow-400', 'bg-red-500'];
+    return colors[idx % colors.length];
+  };
+
+  const getIconTextColor = (idx: number) => {
+    const colors = ['text-[#00308F]', 'text-white', 'text-[#00308F]', 'text-white'];
+    return colors[idx % colors.length];
+  };
+
   return (
     <section ref={sectionRef} id="what-we-do" className="py-20 px-4 md:px-8 max-w-7xl mx-auto bg-gray-50 rounded-3xl my-10 border border-gray-200">
       <div className="text-center mb-16">
@@ -125,43 +153,20 @@ const WhatWeDo = () => {
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card, index) => {
-          const getCardLink = (title: string) => {
-            const t = title.toLowerCase();
-            if (t.includes('hackathon')) return '/hackathons';
-            if (t.includes('workshop')) return '/workshops';
-            return null; // All others are coming soon
-          };
-
-          const isComingSoon = (title: string) => {
-            const t = title.toLowerCase();
-            // Explicitly mark community and projects as coming soon
-            return (
-              t.includes('ideathon') ||
-              t.includes('cohort') ||
-              t.includes('community') ||
-              t.includes('project')
-            );
-          };
-
-          const getIconBgColor = (idx: number) => {
-            const colors = ['bg-[#9BE600]', 'bg-[#00308F]', 'bg-yellow-400', 'bg-red-500'];
-            return colors[idx % colors.length];
-          };
-
-          const getIconTextColor = (idx: number) => {
-            const colors = ['text-[#00308F]', 'text-white', 'text-[#00308F]', 'text-white'];
-            return colors[idx % colors.length];
-          };
-
           const cardLink = getCardLink(card.title || '');
           const comingSoon = isComingSoon(card.title || '');
-          const CardWrapper = cardLink ? 'a' : 'div';
+          const isClickable = !!cardLink;
 
           return (
-            <CardWrapper
+            <div
               key={index}
-              {...(cardLink ? { href: cardLink } : {})}
-              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] ${cardLink ? 'hover:shadow-[6px_6px_0px_#00308F] cursor-pointer' : 'opacity-75'} transition-all group rounded-xl flex flex-col justify-between h-full`}
+              onClick={() => {
+                if (cardLink) {
+                  navigate(cardLink);
+                  window.scrollTo(0, 0);
+                }
+              }}
+              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] ${isClickable ? 'hover:shadow-[6px_6px_0px_#00308F] cursor-pointer' : 'opacity-75'} transition-all group rounded-xl flex flex-col justify-between h-full`}
             >
               {comingSoon && (
                 <div className="absolute top-4 right-4 bg-[#9BE600] text-[#00308F] text-xs font-black px-3 py-1 rounded-full">
@@ -211,7 +216,7 @@ const WhatWeDo = () => {
                 </span>
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{card.statLabel || 'Hosted'}</span>
               </div>
-            </CardWrapper>
+            </div>
           );
         })}
       </div>
