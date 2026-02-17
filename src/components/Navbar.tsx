@@ -81,13 +81,7 @@ const Navbar = () => {
             >
               What We Do
             </a>
-            <a
-              href="#socials"
-              className="hover:text-nerdBlue transition-colors"
-              onClick={(e) => handleSmoothScroll(e, '#socials')}
-            >
-              Contact
-            </a>
+
           </div>
 
           {/* Action Button */}
@@ -157,13 +151,7 @@ const Navbar = () => {
           >
             WHAT WE DO <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
           </a>
-          <a
-            href="#socials"
-            className="mobile-link p-3 rounded-lg hover:bg-gray-50 flex items-center justify-between group"
-            onClick={(e) => handleSmoothScroll(e, '#socials')}
-          >
-            CONTACT <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
-          </a>
+
           <a
             href="https://docs.google.com/forms/d/e/1FAIpQLSegbpqFbVYJKHiIXdK8tqGzbOntQGNHaW64qvkGpr9k85lE1Q/viewform?usp=publish-editor"
             target="_blank"
