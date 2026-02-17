@@ -871,16 +871,6 @@ const EventDetailsPage = () => {
 
                       const status = data.status as any;
 
-                      const registeredEvents = JSON.parse(localStorage.getItem('registered_events') || '[]');
-                      if (hackathon?.slug) {
-                        const slug = hackathon.slug;
-                        if (!registeredEvents.includes(slug)) {
-                          registeredEvents.push(slug);
-                          localStorage.setItem('registered_events', JSON.stringify(registeredEvents));
-                        }
-                        localStorage.setItem(`reg_email_${slug}`, email);
-                        localStorage.setItem(`reg_status_${slug}`, status);
-                      }
 
                       alert(status === 'approved' ? 'Registration successful! You are approved.' : 'Registration successful! We will contact you soon.');
                       setShowRegModal(false);
