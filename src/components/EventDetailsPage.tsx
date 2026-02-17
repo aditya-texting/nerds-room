@@ -86,22 +86,25 @@ const EventDetailsPage = () => {
   // Derive registration state from AppData (real-time) with useMemo for performance
   const slug = useMemo(() => window.location.pathname.split('/').pop() || '', []);
 
-  const savedEmail = useMemo(() => localStorage.getItem(`reg_email_${slug}`), [slug]);
+  const savedEmail = useMemo(() => {
+    if (isSignedIn && user?.primaryEmailAddress?.emailAddress) {
+      return user.primaryEmailAddress.emailAddress;
+    }
+    return null;
+  }, [isSignedIn, user]);
 
   const userRegistration = useMemo(() => {
-    if (!hackathon?.id) return null;
+    if (!hackathon?.id || !savedEmail) return null;
     return dbRegistrations.find(r => r.hackathon_id === hackathon.id && r.email === savedEmail) || null;
   }, [hackathon?.id, dbRegistrations, savedEmail]);
 
   const isRegistered = useMemo(() => {
-    if (userRegistration) return true;
-    const registeredEvents = JSON.parse(localStorage.getItem('registered_events') || '[]');
-    return registeredEvents.includes(slug);
-  }, [userRegistration, slug]);
+    return !!userRegistration;
+  }, [userRegistration]);
 
   const regStatus = useMemo(() => {
-    return userRegistration?.status || (localStorage.getItem(`reg_status_${slug}`) as any) || (isRegistered ? 'pending' : null);
-  }, [userRegistration?.status, isRegistered, slug]);
+    return userRegistration?.status || (isRegistered ? 'pending' : null);
+  }, [userRegistration?.status, isRegistered]);
 
   // Sync Hackathon data from context
   useEffect(() => {
@@ -153,17 +156,6 @@ const EventDetailsPage = () => {
   }, [dbHackathons, loading, slug]);
 
   // Keep localStorage in sync with real-time status
-  useEffect(() => {
-    if (userRegistration && hackathon?.slug) {
-      localStorage.setItem(`reg_status_${hackathon.slug}`, userRegistration.status);
-
-      const registeredEvents = JSON.parse(localStorage.getItem('registered_events') || '[]');
-      if (!registeredEvents.includes(hackathon.slug)) {
-        registeredEvents.push(hackathon.slug);
-        localStorage.setItem('registered_events', JSON.stringify(registeredEvents));
-      }
-    }
-  }, [userRegistration?.status, hackathon?.slug]);
 
   const handleRegisterClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

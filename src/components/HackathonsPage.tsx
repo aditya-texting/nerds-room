@@ -43,7 +43,7 @@ const Icons = {
 
 const HackathonsPage = () => {
   const { hackathons: dbHackathons, navigate } = useAppData();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const { openSignIn } = useClerk();
 
   // Map database hackathons to component format
@@ -76,94 +76,44 @@ const HackathonsPage = () => {
       is_public: h.is_public
     })), [dbHackathons]);
 
-  const [userRegistrations, setUserRegistrations] = useState<Record<string, any>>(() => {
-    const registeredSlugs = JSON.parse(localStorage.getItem('registered_events') || '[]');
-    const regs: Record<string, { status: string; isRegistered: boolean }> = {};
-    registeredSlugs.forEach((slug: string) => {
-      const savedStatus = localStorage.getItem(`reg_status_${slug}`) || 'pending';
-      regs[slug] = { isRegistered: true, status: savedStatus };
-    });
-    return regs;
-  });
+  const [userRegistrations, setUserRegistrations] = useState<Record<string, any>>({});
   const [showTicket, setShowTicket] = useState(false);
   const [viewingTicket, setViewingTicket] = useState<any>(null);
 
   useEffect(() => {
-    const checkRegistrations = async () => {
-      const registeredSlugs = JSON.parse(localStorage.getItem('registered_events') || '[]');
-      // Step 1: Prepare batch lookup data
-      if (dbHackathons.length > 0 && registeredSlugs.length > 0) {
-        try {
-          // Group lookups: Collect all emails and IDs
-          const emailMap: Record<number, string> = {};
-          const hackathonIds: number[] = [];
+    const fetchRegistrations = async () => {
+      if (!isSignedIn || !user?.primaryEmailAddress?.emailAddress) {
+        setUserRegistrations({});
+        return;
+      }
 
-          registeredSlugs.forEach((slug: string) => {
-            const email = localStorage.getItem(`reg_email_${slug}`);
-            const hack = dbHackathons.find(h => h.slug === slug);
-            if (email && hack) {
-              emailMap[hack.id] = email;
-              hackathonIds.push(hack.id);
-            }
-          });
+      const email = user.primaryEmailAddress.emailAddress;
 
-          if (hackathonIds.length === 0) return;
+      try {
+        const { data, error } = await supabase
+          .from('registrations')
+          .select('*')
+          .eq('email', email);
 
-          // Single query for all registrations
-          const { data, error } = await supabase
-            .from('registrations')
-            .select('*')
-            .in('hackathon_id', hackathonIds)
-            .in('email', Object.values(emailMap));
+        if (error) throw error;
 
-          if (error) throw error;
-
-          const updates: Record<string, any> = {};
-          registeredSlugs.forEach((slug: string) => {
-            updates[slug] = { isRegistered: true, status: localStorage.getItem(`reg_status_${slug}`) || 'pending' };
-          });
-          const foundIds = new Set();
-
-          data?.forEach(reg => {
+        const updates: Record<string, any> = {};
+        if (data) {
+          data.forEach(reg => {
             const hack = dbHackathons.find(h => h.id === reg.hackathon_id);
-            if (hack && reg.email === emailMap[reg.hackathon_id]) {
+            if (hack) {
               updates[hack.slug] = { isRegistered: true, status: reg.status, ...reg };
-              foundIds.add(reg.hackathon_id);
-              // Update localStorage if status has changed
-              localStorage.setItem(`reg_status_${hack.slug}`, reg.status);
             }
           });
-
-          // Cleanup: If something was in registeredSlugs but not in DB anymore
-          let cleanupRequired = false;
-          const currentSlugs = [...registeredSlugs];
-          const survivingSlugs: string[] = [];
-
-          currentSlugs.forEach(slug => {
-            const hack = dbHackathons.find(h => h.slug === slug);
-            if (hack && !foundIds.has(hack.id)) {
-              delete updates[slug];
-              localStorage.removeItem(`reg_email_${slug}`);
-              localStorage.removeItem(`reg_status_${slug}`);
-              cleanupRequired = true;
-            } else {
-              survivingSlugs.push(slug);
-            }
-          });
-
-          if (cleanupRequired) {
-            localStorage.setItem('registered_events', JSON.stringify(survivingSlugs));
-          }
-
-          setUserRegistrations(updates);
-        } catch (err) {
-          console.error('Batch status fetch error:', err);
         }
+        setUserRegistrations(updates);
+      } catch (err) {
+        console.error('Error fetching registrations:', err);
       }
     };
 
-    checkRegistrations();
-  }, [dbHackathons]);
+    fetchRegistrations();
+  }, [isSignedIn, user, dbHackathons]);
 
   const [search, setSearch] = useState('');
   const [matchEligibility, setMatchEligibility] = useState(false);
