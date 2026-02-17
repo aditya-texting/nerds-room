@@ -344,7 +344,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
             'photo_gallery': 'photoGallery',
             'hackathons': 'hackathons',
             'registration_forms': 'registrationForms',
-            'tags': 'tags'
+            'tags': 'tags',
+            'workshops': 'workshops'
           };
 
           if (tableToKeyMap[payload.table]) {
