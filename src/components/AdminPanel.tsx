@@ -276,6 +276,7 @@ const AdminPanel = () => {
   const [modalOrganizers, setModalOrganizers] = useState<any[]>([]);
   const [modalFields, setModalFields] = useState<any[]>([]);
   const [adminAnnouncements, setAdminAnnouncements] = useState<any[]>([]);
+  const [modalEventStats, setModalEventStats] = useState<{ label: string; value: string }[]>([]);
 
 
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; type: 'event' | 'card' | 'photo' | 'story' | 'chapter' | 'hackathon' | 'past_event' | 'workshop' } | null>(null);
@@ -849,7 +850,7 @@ const AdminPanel = () => {
                             <p className="text-xs text-gray-500 mt-1">{event.location}</p>
                           </div>
                           <div className="flex flex-col gap-2">
-                            <button onClick={() => setEditingEvent(event)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800"><Icons.Edit /></button>
+                            <button onClick={() => { setEditingEvent(event); setModalEventStats(Array.isArray(event.stats) ? event.stats : []); }} className="text-xs font-bold text-indigo-600 hover:text-indigo-800"><Icons.Edit /></button>
                             <button onClick={() => setDeleteConfirm({ id: String(event.id), type: 'event' })} className="text-xs font-bold text-red-400 hover:text-red-600"><Icons.Trash /></button>
                           </div>
                         </div>
@@ -3309,6 +3310,55 @@ const AdminPanel = () => {
                     <label htmlFor="new-event-featured" className="text-xs font-bold text-gray-500 uppercase">Featured</label>
                   </div>
                 </div>
+                {/* Stats Editor */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase">Stats (e.g. Registrations, Attendees)</label>
+                    <button
+                      type="button"
+                      onClick={() => setModalEventStats([...modalEventStats, { label: '', value: '' }])}
+                      className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest"
+                    >+ ADD STAT</button>
+                  </div>
+                  <div className="space-y-2">
+                    {modalEventStats.map((stat, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={stat.value}
+                          onChange={(e) => {
+                            const next = [...modalEventStats];
+                            next[idx].value = e.target.value;
+                            setModalEventStats(next);
+                          }}
+                          className="w-24 bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm font-black"
+                          placeholder="e.g. 50"
+                        />
+                        <input
+                          type="text"
+                          value={stat.label}
+                          onChange={(e) => {
+                            const next = [...modalEventStats];
+                            next[idx].label = e.target.value;
+                            setModalEventStats(next);
+                          }}
+                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm font-medium"
+                          placeholder="e.g. Registrations"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setModalEventStats(modalEventStats.filter((_, i) => i !== idx))}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                    {modalEventStats.length === 0 && (
+                      <p className="text-xs text-gray-400 italic">No stats yet. Click + ADD STAT to add one.</p>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button onClick={() => setShowAddEvent(false)} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
@@ -3326,12 +3376,13 @@ const AdminPanel = () => {
                       location: loc,
                       image: img || 'https://via.placeholder.com/150',
                       description: '',
-                      stats: [],
+                      stats: modalEventStats,
                       is_public,
                       is_featured,
                       registration_link: registration_link || undefined
                     }), 'Event created');
                     setShowAddEvent(false);
+                    setModalEventStats([]);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
               </div>
@@ -3380,6 +3431,55 @@ const AdminPanel = () => {
                     <label htmlFor="edit-event-featured" className="text-xs font-bold text-gray-500 uppercase">Featured</label>
                   </div>
                 </div>
+                {/* Stats Editor */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-[10px] font-bold text-gray-400 uppercase">Stats (e.g. Registrations, Attendees)</label>
+                    <button
+                      type="button"
+                      onClick={() => setModalEventStats([...modalEventStats, { label: '', value: '' }])}
+                      className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest"
+                    >+ ADD STAT</button>
+                  </div>
+                  <div className="space-y-2">
+                    {modalEventStats.map((stat, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={stat.value}
+                          onChange={(e) => {
+                            const next = [...modalEventStats];
+                            next[idx].value = e.target.value;
+                            setModalEventStats(next);
+                          }}
+                          className="w-24 bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm font-black"
+                          placeholder="e.g. 50"
+                        />
+                        <input
+                          type="text"
+                          value={stat.label}
+                          onChange={(e) => {
+                            const next = [...modalEventStats];
+                            next[idx].label = e.target.value;
+                            setModalEventStats(next);
+                          }}
+                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm font-medium"
+                          placeholder="e.g. Registrations"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setModalEventStats(modalEventStats.filter((_, i) => i !== idx))}
+                          className="text-gray-400 hover:text-red-500 p-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                    {modalEventStats.length === 0 && (
+                      <p className="text-xs text-gray-400 italic">No stats yet. Click + ADD STAT to add one.</p>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button onClick={() => setEditingEvent(null)} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
@@ -3398,9 +3498,11 @@ const AdminPanel = () => {
                       image: img,
                       is_public,
                       is_featured,
+                      stats: modalEventStats,
                       registration_link: registration_link || undefined
                     }), 'Event updated');
                     setEditingEvent(null);
+                    setModalEventStats([]);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE CHANGES</button>
               </div>

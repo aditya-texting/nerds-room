@@ -38,7 +38,7 @@ const MainContent = () => {
           if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
           }
-        }, 100);
+        }, 400);
       } else {
         window.scrollTo(0, 0);
       }

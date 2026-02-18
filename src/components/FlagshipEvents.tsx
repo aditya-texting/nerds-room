@@ -45,21 +45,18 @@ const FlagshipEvents = () => {
       .map((ce: any, i: number) => {
         const dynamicStats = (ce.stats || []).map((s: any) => {
           const label = (s.label || '').toLowerCase();
+          const rawVal = String(s.value || '').trim();
+          const numVal = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
+          const isEmpty = !rawVal || rawVal === '0' || isNaN(numVal);
 
-          // Override 0 or static values with dynamic counts
-          if (label.includes('registration')) {
-            return { ...s, value: `${totalRegs}+` };
+          // Only use dynamic fallback when DB value is 0 or empty
+          if (isEmpty) {
+            if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
+            if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || Math.floor(totalRegs * 0.8)}+` };
+            if (label.includes('hackathon')) return { ...s, value: `${totalHackathons}+` };
           }
-          if (label.includes('attendee')) {
-            return { ...s, value: `${totalApprovedRegs || Math.floor(totalRegs * 0.8)}+` };
-          }
-          if (label.includes('hackathon')) {
-            return { ...s, value: `${totalHackathons}+` };
-          }
-          if (label.includes('speaker') && (s.value === '0' || !s.value)) {
-            // Default speakers for flagship events if not set
-            return { ...s, value: '25+' };
-          }
+
+          // Use real DB value as-is
           return s;
         });
 

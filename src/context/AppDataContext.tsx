@@ -562,17 +562,23 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       description: event.description,
       image_url: event.image,
       location: event.location,
-      stats: event.stats
+      stats: event.stats,
+      is_public: event.is_public ?? true,
+      is_featured: event.is_featured ?? false,
+      registration_link: event.registration_link ?? null,
     }]);
     if (!error) fetchFlagshipEvents();
   };
 
   const updateFlagshipEvent = async (id: number, updates: Partial<FlagshipEvent>) => {
     const payload: any = {};
-    if (updates.title) payload.title = updates.title;
-    if (updates.location) payload.location = updates.location;
-    if (updates.stats) payload.stats = updates.stats;
-    if (updates.image) payload.image_url = updates.image;
+    if (updates.title !== undefined) payload.title = updates.title;
+    if (updates.location !== undefined) payload.location = updates.location;
+    if (updates.stats !== undefined) payload.stats = updates.stats;
+    if (updates.image !== undefined) payload.image_url = updates.image;
+    if (updates.is_public !== undefined) payload.is_public = updates.is_public;
+    if (updates.is_featured !== undefined) payload.is_featured = updates.is_featured;
+    if (updates.registration_link !== undefined) payload.registration_link = updates.registration_link || null;
 
     const { error } = await supabase.from('flagship_events').update(payload).eq('id', id);
     if (!error) fetchFlagshipEvents();
