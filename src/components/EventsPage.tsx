@@ -191,6 +191,93 @@ const EventsPage = () => {
                     </section>
                 )}
 
+                {/* ── OTHER EVENTS SECTION ── */}
+                {(activeTab === 'all' || activeTab === 'other') && publicOtherEvents.length > 0 && (
+                    <section>
+                        {activeTab === 'all' && (
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-black text-nerdBlue">Other Events</h2>
+                                <p className="text-slate-500 text-sm mt-1">Ideathons, meetups, design competitions & more</p>
+                            </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {(activeTab === 'all' ? publicOtherEvents.slice(0, 3) : publicOtherEvents).map((ev, idx) => {
+                                const hasLink = !!ev.registration_link && ev.registration_link.startsWith('http');
+                                const handleClick = () => {
+                                    if (!hasLink) return;
+                                    window.open(ev.registration_link, '_blank', 'noopener,noreferrer');
+                                };
+                                const typeColors: Record<string, string> = {
+                                    'ideathon': 'bg-violet-500',
+                                    'meetup': 'bg-sky-500',
+                                    'design-competition': 'bg-pink-500',
+                                    'pitch-competition': 'bg-amber-500',
+                                    'bootcamp': 'bg-emerald-500',
+                                    'seminar': 'bg-cyan-500',
+                                    'networking': 'bg-indigo-500',
+                                    'other': 'bg-slate-500',
+                                };
+                                const typeColor = typeColors[ev.event_type] || 'bg-slate-500';
+                                return (
+                                    <div
+                                        key={`other-${ev.id ?? idx}`}
+                                        onClick={handleClick}
+                                        className={`bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col${hasLink ? ' cursor-pointer' : ''}`}
+                                    >
+                                        <div className="aspect-video relative overflow-hidden bg-slate-100">
+                                            {ev.image_url ? (
+                                                <img src={ev.image_url} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                            ) : (
+                                                <div className={`w-full h-full ${typeColor} flex items-center justify-center opacity-80`}>
+                                                    <svg className="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                                            <span className={`absolute top-3 left-3 ${typeColor} text-white text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full flex items-center gap-1`}>
+                                                <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />
+                                                {ev.status}
+                                            </span>
+                                            <span className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full border border-white/30">
+                                                {ev.event_type?.replace(/-/g, ' ')}
+                                            </span>
+                                        </div>
+                                        <div className="p-5 flex flex-col flex-1">
+                                            <h3 className="text-base font-black text-slate-900 group-hover:text-nerdBlue transition-colors leading-snug mb-2">{ev.title}</h3>
+                                            {ev.description && <p className="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-3">{ev.description}</p>}
+                                            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                                                <div className="flex items-center gap-1.5">
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="font-bold">{ev.date || 'TBA'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                    <span className="font-bold">{ev.location || 'TBA'}</span>
+                                                </div>
+                                            </div>
+                                            {ev.prize && <p className="text-xs font-black text-nerdBlue mt-2">🏆 {ev.prize}</p>}
+                                            {hasLink && (
+                                                <div className="mt-3 text-nerdBlue text-xs font-black uppercase tracking-widest hover:text-nerdLime transition-colors flex items-center gap-1">
+                                                    Register Now
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
+
                 {/* ── FLAGSHIP SECTION ── */}
                 {(activeTab === 'all' || activeTab === 'flagship') && publicFlagship.length > 0 && (
                     <section>
@@ -325,94 +412,7 @@ const EventsPage = () => {
                     </section>
                 )}
 
-                {/* ── OTHER EVENTS SECTION ── */}
-                {(activeTab === 'all' || activeTab === 'other') && publicOtherEvents.length > 0 && (
-                    <section>
-                        {activeTab === 'all' && (
-                            <div className="mb-8">
-                                <h2 className="text-2xl font-black text-nerdBlue">Other Events</h2>
-                                <p className="text-slate-500 text-sm mt-1">Ideathons, meetups, design competitions & more</p>
-                            </div>
-                        )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {(activeTab === 'all' ? publicOtherEvents.slice(0, 3) : publicOtherEvents).map((ev, idx) => {
-                                const hasLink = !!ev.registration_link;
-                                const isExternal = hasLink && ev.registration_link!.startsWith('http');
-                                const handleClick = () => {
-                                    if (!hasLink) return;
-                                    if (isExternal) window.open(ev.registration_link, '_blank', 'noopener,noreferrer');
-                                    else navigate(ev.registration_link!);
-                                };
-                                const typeColors: Record<string, string> = {
-                                    'ideathon': 'bg-violet-500',
-                                    'meetup': 'bg-sky-500',
-                                    'design-competition': 'bg-pink-500',
-                                    'pitch-competition': 'bg-amber-500',
-                                    'bootcamp': 'bg-emerald-500',
-                                    'seminar': 'bg-cyan-500',
-                                    'networking': 'bg-indigo-500',
-                                    'other': 'bg-slate-500',
-                                };
-                                const typeColor = typeColors[ev.event_type] || 'bg-slate-500';
-                                return (
-                                    <div
-                                        key={`other-${ev.id ?? idx}`}
-                                        onClick={handleClick}
-                                        className={`bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col${hasLink ? ' cursor-pointer' : ''}`}
-                                    >
-                                        <div className="aspect-video relative overflow-hidden bg-slate-100">
-                                            {ev.image_url ? (
-                                                <img src={ev.image_url} alt={ev.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                                            ) : (
-                                                <div className={`w-full h-full ${typeColor} flex items-center justify-center opacity-80`}>
-                                                    <svg className="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                                            <span className={`absolute top-3 left-3 ${typeColor} text-white text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full flex items-center gap-1`}>
-                                                <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />
-                                                {ev.status}
-                                            </span>
-                                            <span className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm text-white text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full border border-white/30">
-                                                {ev.event_type?.replace(/-/g, ' ')}
-                                            </span>
-                                        </div>
-                                        <div className="p-5 flex flex-col flex-1">
-                                            <h3 className="text-base font-black text-slate-900 group-hover:text-nerdBlue transition-colors leading-snug mb-2">{ev.title}</h3>
-                                            {ev.description && <p className="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-3">{ev.description}</p>}
-                                            <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                                                <div className="flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    <span className="font-bold">{ev.date || 'TBA'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    <span className="font-bold">{ev.location || 'TBA'}</span>
-                                                </div>
-                                            </div>
-                                            {ev.prize && <p className="text-xs font-black text-nerdBlue mt-2">🏆 {ev.prize}</p>}
-                                            {hasLink && (
-                                                <div className="mt-3 text-nerdBlue text-xs font-black uppercase tracking-widest hover:text-nerdLime transition-colors flex items-center gap-1">
-                                                    Register Now
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-                )}
+
 
                 {/* ── PAST EVENTS SECTION ── */}
                 {(activeTab === 'all' || activeTab === 'past') && pastEvents.length > 0 && (
