@@ -17,7 +17,25 @@ const OtherEventDetailPage = () => {
             const found = otherEvents.find((e: any) =>
                 e.slug === slug || e.slug?.toLowerCase() === slug.toLowerCase()
             );
-            setEvent(found || null);
+
+            if (found) {
+                // Filter invalid organizers
+                if (found.organizers) {
+                    found.organizers = found.organizers.filter((o: any) => o.name && o.name.trim() !== '');
+                }
+
+                setEvent(found);
+
+                // Determine initial active tab
+                if (found.about && found.about.trim() !== '') setActiveTab('overview');
+                else if ((found.format_process?.length || 0) > 0) setActiveTab('process');
+                else if ((found.rules?.length || 0) > 0) setActiveTab('rules');
+                else if ((found.eligibilities?.length || 0) > 0) setActiveTab('eligibility');
+                else if ((found.perks?.length || 0) > 0) setActiveTab('perks');
+                else if ((found.organizers?.length || 0) > 0) setActiveTab('organizers');
+            } else {
+                setEvent(null);
+            }
             setLoading(false);
         }
     }, [otherEvents, slug, contextLoading]);
@@ -68,7 +86,7 @@ const OtherEventDetailPage = () => {
 
     // Define Tabs based on available content
     const tabs = [
-        { id: 'overview', label: 'About' },
+        ...(event.about && event.about.trim() !== '' ? [{ id: 'overview', label: 'About' }] : []),
         ...(event.format_process?.length > 0 ? [{ id: 'process', label: 'Process' }] : []),
         ...(event.rules?.length > 0 ? [{ id: 'rules', label: 'Rules' }] : []),
         ...(event.eligibilities?.length > 0 ? [{ id: 'eligibility', label: 'Eligibility' }] : []),
