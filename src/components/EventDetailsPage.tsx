@@ -162,7 +162,7 @@ const EventDetailsPage = () => {
     if (!hackathon) return;
 
     if (!isSignedIn) {
-      openSignIn();
+      openSignIn({ redirectUrl: window.location.href });
       return;
     }
 

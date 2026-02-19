@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
@@ -6,11 +7,21 @@ import { Clock, Trophy, MapPin, Globe, Users, Zap, Twitter, Linkedin, Github, In
 
 const OtherEventDetailPage = () => {
     const { otherEvents, navigate, loading: contextLoading } = useAppData();
+    const { isSignedIn } = useUser();
+    const { openSignIn } = useClerk();
     const [event, setEvent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
 
     const slug = decodeURIComponent(window.location.pathname.split('/').pop() || '');
+
+    const handleRegister = (link: string) => {
+        if (!isSignedIn) {
+            openSignIn({ redirectUrl: window.location.href });
+            return;
+        }
+        window.open(link, '_blank');
+    };
 
     useEffect(() => {
         if (!contextLoading) {
@@ -191,14 +202,12 @@ const OtherEventDetailPage = () => {
                         )}
 
                         {hasRegLink ? (
-                            <a
-                                href={event.registration_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <button
+                                onClick={() => handleRegister(event.registration_link)}
                                 className="w-full bg-nerdBlue hover:bg-nerdDark text-white px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-nerdBlue/30 text-center transform hover:-translate-y-1"
                             >
                                 Register Now
-                            </a>
+                            </button>
                         ) : (
                             <button disabled className="w-full bg-slate-100 text-slate-400 px-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest cursor-not-allowed">
                                 Registration Closed
@@ -262,14 +271,12 @@ const OtherEventDetailPage = () => {
 
                                 <div className="pt-6 border-t border-slate-100">
                                     {hasRegLink ? (
-                                        <a
-                                            href={event.registration_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            onClick={() => handleRegister(event.registration_link)}
                                             className="w-full flex items-center justify-center bg-nerdBlue hover:bg-nerdDark text-white px-6 py-4 rounded-xl font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
                                         >
                                             Register Now
-                                        </a>
+                                        </button>
                                     ) : (
                                         <div className="w-full bg-slate-100 text-slate-400 px-6 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-center">
                                             Closed

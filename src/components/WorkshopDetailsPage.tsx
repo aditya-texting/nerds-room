@@ -42,7 +42,7 @@ const WorkshopDetailsPage = () => {
     const handleRegisterClick = (e: React.MouseEvent) => {
         e.preventDefault();
         if (!isSignedIn) {
-            openSignIn();
+            openSignIn({ redirectUrl: window.location.href });
             return;
         }
         if (workshop.registration_link) {
