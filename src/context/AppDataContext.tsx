@@ -144,6 +144,7 @@ interface AppDataContextType {
   // Utility
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   uploadFile: (file: File, bucket: string) => Promise<string | null>;
+  convertGoogleDriveUrl: (url: string) => string;
   getGrowthData: () => { labels: string[], data: number[] };
   refreshData: () => Promise<void>;
   navigate: (to: string) => void;
@@ -883,44 +884,44 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     }, 4000);
   };
 
-  const uploadFile = async (file: File, bucket: string): Promise<string | null> => {
+  // Convert any Google Drive share/view link to a direct image URL
+  const convertGoogleDriveUrl = (url: string): string => {
+    if (!url) return url;
+    // Handle: https://drive.google.com/file/d/FILE_ID/view?...
+    const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/\?]+)/);
+    if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+    // Handle: https://drive.google.com/open?id=FILE_ID
+    const openMatch = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+    if (openMatch) return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+    // Already a direct uc link, or not a drive URL — return as-is
+    return url;
+  };
+
+  const uploadFile = async (file: File, _bucket: string): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      // Use ImgBB free image hosting — no Supabase bucket required
+      const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY;
 
-      // 1. Try to upload
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
-
-      // 2. If bucket not found, try to create it
-      if (uploadError && (uploadError.message.includes('bucket not found') || (uploadError as any).error === 'Bucket not found')) {
-        const { error: createError } = await supabase.storage.createBucket(bucket, {
-          public: true,
+      if (IMGBB_KEY) {
+        const formData = new FormData();
+        formData.append('image', file);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+          method: 'POST',
+          body: formData,
         });
-
-        if (createError) {
-          // If creation fails (e.g. permissions), throw original error or creation error
-          console.error('Failed to create bucket:', createError);
-          throw uploadError;
-        }
-
-        // Retry upload after creation
-        const { error: retryError } = await supabase.storage
-          .from(bucket)
-          .upload(filePath, file);
-
-        if (retryError) throw retryError;
-      } else if (uploadError) {
-        throw uploadError;
+        const json = await res.json();
+        if (json.success) return json.data.url as string;
+        throw new Error(json.error?.message || 'ImgBB upload failed');
       }
 
-      const { data } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
+      // Fallback: base64 data URL (works locally, not ideal for prod)
+      return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
 
-      return data.publicUrl;
     } catch (error: any) {
       console.error('Upload failed:', error);
       showToast(error.message || 'Error uploading file', 'error');
@@ -1083,6 +1084,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setMaintenanceMode,
     showToast,
     uploadFile,
+    convertGoogleDriveUrl,
     getGrowthData,
     updateRegistration,
     refreshData,

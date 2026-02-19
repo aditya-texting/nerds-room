@@ -109,6 +109,7 @@ const AdminPanel = () => {
     setMaintenanceMode,
     showToast,
     uploadFile,
+    convertGoogleDriveUrl,
     workshops,
     addWorkshop,
     updateWorkshop,
@@ -1480,13 +1481,25 @@ const AdminPanel = () => {
                                     onChange={(e) => updateHackathonState({ logo_url: e.target.value })}
                                     id="hack-logo"
                                     className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm font-bold"
-                                    placeholder="https://..."
+                                    placeholder="https:// or paste Google Drive link"
                                   />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const converted = convertGoogleDriveUrl(editingHackathon?.logo_url || '');
+                                      updateHackathonState({ logo_url: converted });
+                                      showToast('Google Drive URL converted!', 'success');
+                                    }}
+                                    className="px-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors text-[10px] font-black uppercase whitespace-nowrap"
+                                    title="Convert Google Drive link to direct URL"
+                                  >
+                                    Drive→URL
+                                  </button>
                                   <button
                                     type="button"
                                     onClick={() => document.getElementById('logo-upload-input')?.click()}
                                     className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
-                                    title="Upload Logo"
+                                    title="Upload from device"
                                   >
                                     <Icons.Image className="w-5 h-5" />
                                   </button>
@@ -1518,13 +1531,25 @@ const AdminPanel = () => {
                                 onChange={(e) => updateHackathonState({ banner_url: e.target.value })}
                                 id="hack-banner"
                                 className="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm font-bold"
-                                placeholder="https://..."
+                                placeholder="https:// or paste Google Drive link"
                               />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const converted = convertGoogleDriveUrl(editingHackathon?.banner_url || '');
+                                  updateHackathonState({ banner_url: converted });
+                                  showToast('Google Drive URL converted!', 'success');
+                                }}
+                                className="px-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors text-[10px] font-black uppercase whitespace-nowrap"
+                                title="Convert Google Drive link to direct URL"
+                              >
+                                Drive→URL
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => document.getElementById('banner-upload-input')?.click()}
                                 className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
-                                title="Upload Banner"
+                                title="Upload from device"
                               >
                                 <Icons.Image className="w-5 h-5" />
                               </button>
@@ -2378,17 +2403,6 @@ const AdminPanel = () => {
                             const is_public = (document.getElementById('hack-public') as HTMLInputElement).checked;
                             const is_featured = (document.getElementById('hack-featured') as HTMLInputElement).checked;
 
-                            const hasValidOrganizer = modalOrganizers.some(org => org.name && org.name.trim() !== '');
-
-                            if (!title || !slug || !hasValidOrganizer || !prize) {
-                              alert('Please fill all required fields (Title, Slug, at least one Organizer name, and Prize)');
-                              return;
-                            }
-
-                            if (!regValue || regValue.trim() === '') {
-                              alert(regType === 'external' ? 'Please provide a registration link' : 'Please select a registration form');
-                              return;
-                            }
 
                             const description = (document.getElementById('hack-description') as HTMLTextAreaElement).value;
                             const about = (document.getElementById('hack-about') as HTMLTextAreaElement).value;
@@ -3910,7 +3924,7 @@ const AdminPanel = () => {
                   const image_url = (document.getElementById('past-image') as HTMLInputElement).value;
                   const description = (document.getElementById('past-desc') as HTMLTextAreaElement).value;
 
-                  if (!title || !dates || !location) { showToast('Please fill required fields', 'error'); return; }
+                  if (!title) { showToast('Title is required', 'error'); return; }
 
                   const eventData = { title, dates, location, event_type, attendees_count, image_url, description, is_public: true };
 
@@ -3997,13 +4011,19 @@ const AdminPanel = () => {
                   <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Event Image</label>
                   <div className="flex gap-3 items-start">
                     <input type="text" defaultValue={editingOtherEvent?.image_url || ''} id="oe-image" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="Image URL or upload below" />
-                    <label className="cursor-pointer bg-indigo-50 text-indigo-600 border border-indigo-200 px-4 py-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors whitespace-nowrap">
-                      Upload
+                    <label className={`cursor-pointer bg-indigo-50 text-indigo-600 border border-indigo-200 px-4 py-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors whitespace-nowrap ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                      {isUploading ? 'Uploading...' : 'Upload'}
                       <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
+                        setIsUploading(true);
                         const url = await uploadFile(file, 'event-images');
-                        if (url) (document.getElementById('oe-image') as HTMLInputElement).value = url;
+                        setIsUploading(false);
+                        if (url) {
+                          const input = document.getElementById('oe-image') as HTMLInputElement;
+                          if (input) { input.value = url; }
+                          showToast('Image uploaded!', 'success');
+                        }
                       }} />
                     </label>
                   </div>
@@ -4047,7 +4067,7 @@ const AdminPanel = () => {
                   const prize = (document.getElementById('oe-prize') as HTMLInputElement).value.trim() || undefined;
                   const is_public = (document.getElementById('oe-public') as HTMLInputElement).checked;
                   const is_featured = (document.getElementById('oe-featured') as HTMLInputElement).checked;
-                  if (!title) return;
+                  if (!title) { showToast('Title is required', 'error'); return; }
                   const payload = { title, slug, event_type, status, date, end_date, location, description, registration_link, image_url, attendees_count, prize, is_public, is_featured };
                   if (editingOtherEvent?.id) {
                     await handleAction(() => updateOtherEvent(editingOtherEvent.id, payload), 'Event updated');
@@ -4398,11 +4418,23 @@ const AdminPanel = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Poster URL</label>
-                          <input type="text" defaultValue={editingWorkshop?.image_url || ''} id="ws-image" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono" />
+                          <div className="flex gap-2">
+                            <input type="text" defaultValue={editingWorkshop?.image_url || ''} id="ws-image" className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono" placeholder="https:// or paste Google Drive link" />
+                            <button type="button" onClick={() => {
+                              const input = document.getElementById('ws-image') as HTMLInputElement;
+                              if (input) { input.value = convertGoogleDriveUrl(input.value); showToast('Converted!', 'success'); }
+                            }} className="px-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 text-[9px] font-black uppercase whitespace-nowrap">Drive→URL</button>
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hero Banner URL</label>
-                          <input type="text" defaultValue={editingWorkshop?.banner_url || ''} id="ws-banner" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono" />
+                          <div className="flex gap-2">
+                            <input type="text" defaultValue={editingWorkshop?.banner_url || ''} id="ws-banner" className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-[10px] font-mono" placeholder="https:// or paste Google Drive link" />
+                            <button type="button" onClick={() => {
+                              const input = document.getElementById('ws-banner') as HTMLInputElement;
+                              if (input) { input.value = convertGoogleDriveUrl(input.value); showToast('Converted!', 'success'); }
+                            }} className="px-2 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 text-[9px] font-black uppercase whitespace-nowrap">Drive→URL</button>
+                          </div>
                         </div>
                       </div>
 
@@ -4458,7 +4490,7 @@ const AdminPanel = () => {
                   const is_public = (document.getElementById('ws-public') as HTMLInputElement).checked;
                   const is_featured = (document.getElementById('ws-featured') as HTMLInputElement).checked;
 
-                  if (!title || !date || !slug) { showToast('Missing required fields', 'error'); return; }
+                  if (!title) { showToast('Title is required', 'error'); return; }
 
                   const workshopData = {
                     ...editingWorkshop,
