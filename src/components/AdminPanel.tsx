@@ -4054,7 +4054,8 @@ const AdminPanel = () => {
                 <button onClick={() => { setShowAddOtherEvent(false); setEditingOtherEvent(null); }} className="flex-1 bg-gray-100 text-gray-600 py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-gray-200">Cancel</button>
                 <button onClick={async () => {
                   const title = (document.getElementById('oe-title') as HTMLInputElement).value.trim();
-                  const slug = (document.getElementById('oe-slug') as HTMLInputElement).value.trim() || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                  const rawSlug = (document.getElementById('oe-slug') as HTMLInputElement).value.trim();
+                  const slug = (rawSlug || title).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                   const event_type = (document.getElementById('oe-type') as HTMLSelectElement).value as any;
                   const status = (document.getElementById('oe-status') as HTMLSelectElement).value as any;
                   const date = (document.getElementById('oe-date') as HTMLInputElement).value.trim();

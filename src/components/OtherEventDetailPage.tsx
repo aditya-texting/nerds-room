@@ -8,7 +8,7 @@ const OtherEventDetailPage = () => {
     const [event, setEvent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    const slug = window.location.pathname.split('/').pop() || '';
+    const slug = decodeURIComponent(window.location.pathname.split('/').pop() || '');
 
     useEffect(() => {
         if (otherEvents.length > 0) {
@@ -107,7 +107,7 @@ const OtherEventDetailPage = () => {
                     <div className="flex-1 space-y-4">
                         <div className="flex items-center gap-3 flex-wrap">
                             <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white ${event.status === 'upcoming' ? 'bg-emerald-500' :
-                                    event.status === 'ongoing' ? 'bg-blue-500' : 'bg-slate-400'
+                                event.status === 'ongoing' ? 'bg-blue-500' : 'bg-slate-400'
                                 }`}>
                                 {event.status}
                             </span>

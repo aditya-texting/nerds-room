@@ -899,18 +899,25 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
 
   const uploadFile = async (file: File, _bucket: string): Promise<string | null> => {
     const BUCKET = 'images'; // Create this in Supabase Dashboard > Storage > New Bucket (public)
+
+    // 1. Try Supabase Storage
     try {
-      // PRIMARY: Supabase Storage
       const ext = file.name.split('.').pop() || 'jpg';
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const { data, error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true });
-      if (!error && data) {
+
+      if (error) throw error;
+
+      if (data) {
         const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(data.path);
         return publicUrl;
       }
-      console.warn('Supabase storage error:', error?.message, '— falling back to ImgBB');
+    } catch (err: any) {
+      console.warn('Supabase upload failed (likely bucket missing), trying fallbacks...', err.message);
+    }
 
-      // FALLBACK: ImgBB
+    // 2. Fallback: ImgBB
+    try {
       const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY;
       if (IMGBB_KEY) {
         const formData = new FormData();
@@ -919,18 +926,21 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
         const json = await res.json();
         if (json.success) return json.data.url as string;
       }
+    } catch (err) {
+      console.warn('ImgBB upload failed', err);
+    }
 
-      // LAST RESORT: base64
+    // 3. Last Resort: Base64
+    try {
       return await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = () => resolve(null);
         reader.readAsDataURL(file);
       });
-
     } catch (error: any) {
-      console.error('Upload failed:', error);
-      showToast(error.message || 'Error uploading file', 'error');
+      console.error('All upload methods failed:', error);
+      showToast('Error uploading file: ' + error.message, 'error');
       return null;
     }
   };
