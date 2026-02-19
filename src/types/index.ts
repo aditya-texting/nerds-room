@@ -167,10 +167,11 @@ export interface PastEvent {
 export type OtherEventType = 'ideathon' | 'meetup' | 'design-competition' | 'pitch-competition' | 'bootcamp' | 'seminar' | 'networking' | 'other';
 
 export interface OtherEvent {
-    id: number;
+    id: number | 'new';
     title: string;
     slug: string;
     event_type: OtherEventType;
+    mode: 'Online' | 'In-person' | 'Hybrid';
     description?: string;
     about?: string;
     date: string;
@@ -178,6 +179,7 @@ export interface OtherEvent {
     location: string;
     image_url?: string;
     banner_url?: string;
+    logo_url?: string;
     registration_link?: string;
     status: 'upcoming' | 'open' | 'ended';
     is_public: boolean;
@@ -185,6 +187,11 @@ export interface OtherEvent {
     attendees_count: number;
     prize?: string;
     tags?: string[];
+    organizers?: Organizer[];
+    eligibilities?: { title: string; description: string }[];
+    perks?: { title: string; description: string }[];
+    rules?: string[];
+    format_process?: { title: string; description: string; step?: number }[];
     created_at?: string;
 }
 

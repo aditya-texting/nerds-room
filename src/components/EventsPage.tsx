@@ -256,6 +256,9 @@ const EventsPage = () => {
                                                     </svg>
                                                     <span className="font-bold">{ev.location || 'TBA'}</span>
                                                 </div>
+                                                <div className="flex items-center gap-1.5 text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md">
+                                                    <span className="font-black text-[9px] uppercase tracking-wider">{ev.mode || 'Online'}</span>
+                                                </div>
                                             </div>
                                             {ev.prize && <p className="text-xs font-black text-nerdBlue mt-2">🏆 {ev.prize}</p>}
                                             <div className="mt-3 text-nerdBlue text-xs font-black uppercase tracking-widest flex items-center gap-1">

@@ -32,6 +32,7 @@ export default {
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
+        roboto: ['Roboto', 'sans-serif', 'system-ui'],
       },
       boxShadow: {
         'hard': '6px 6px 0px 0px #00308F',

@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS other_events (
   date TEXT, -- Display date string e.g. "Jan 20, 2026"
   end_date DATE, -- Actual end date for logic
   location TEXT,
+  mode TEXT DEFAULT 'Online',
+  tags TEXT[] DEFAULT '{}',
   description TEXT, -- Short description for cards
   about TEXT, -- Full details/markdown content
   registration_link TEXT,
@@ -16,6 +18,7 @@ CREATE TABLE IF NOT EXISTS other_events (
   banner_url TEXT, -- Hero banner
   attendees_count INTEGER DEFAULT 0,
   prize TEXT,
+  logo_url TEXT,
   is_public BOOLEAN DEFAULT TRUE,
   is_featured BOOLEAN DEFAULT FALSE,
   
@@ -25,7 +28,11 @@ CREATE TABLE IF NOT EXISTS other_events (
   schedule JSONB DEFAULT '[]'::jsonb,
   faq JSONB DEFAULT '[]'::jsonb,
   partners JSONB DEFAULT '[]'::jsonb,
-  resources JSONB DEFAULT '[]'::jsonb
+  resources JSONB DEFAULT '[]'::jsonb,
+  rules JSONB DEFAULT '[]'::jsonb,
+  format_process JSONB DEFAULT '[]'::jsonb,
+  eligibilities JSONB DEFAULT '[]'::jsonb,
+  perks JSONB DEFAULT '[]'::jsonb
 );
 
 -- Add explicit indexes for performance
@@ -67,7 +74,32 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'partners') THEN 
         ALTER TABLE other_events ADD COLUMN partners JSONB DEFAULT '[]'::jsonb; 
     END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'logo_url') THEN 
+        ALTER TABLE other_events ADD COLUMN logo_url TEXT; 
+    END IF;
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'resources') THEN 
         ALTER TABLE other_events ADD COLUMN resources JSONB DEFAULT '[]'::jsonb; 
+    END IF;
+
+    -- Additional JSONB columns for Other Events Details Page content
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'rules') THEN 
+        ALTER TABLE other_events ADD COLUMN rules JSONB DEFAULT '[]'::jsonb; 
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'format_process') THEN 
+        ALTER TABLE other_events ADD COLUMN format_process JSONB DEFAULT '[]'::jsonb; 
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'eligibilities') THEN 
+        ALTER TABLE other_events ADD COLUMN eligibilities JSONB DEFAULT '[]'::jsonb; 
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'perks') THEN 
+        ALTER TABLE other_events ADD COLUMN perks JSONB DEFAULT '[]'::jsonb; 
+    END IF;
+
+    -- Missing columns causing update failures
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'mode') THEN 
+        ALTER TABLE other_events ADD COLUMN mode TEXT DEFAULT 'Online';
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'other_events' AND column_name = 'tags') THEN 
+        ALTER TABLE other_events ADD COLUMN tags TEXT[] DEFAULT '{}';
     END IF;
 END $$;

@@ -803,12 +803,22 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   // Other Events
   const addOtherEvent = async (event: Omit<OtherEvent, 'id'>) => {
     const { error } = await supabase.from('other_events').insert([event]);
-    if (!error) fetchOtherEvents();
+    if (error) {
+      console.error('Error adding other event:', error);
+      showToast('Error adding event: ' + error.message, 'error');
+    } else {
+      fetchOtherEvents();
+    }
   };
 
   const updateOtherEvent = async (id: number, updates: Partial<OtherEvent>) => {
     const { error } = await supabase.from('other_events').update(updates).eq('id', id);
-    if (!error) fetchOtherEvents();
+    if (error) {
+      console.error('Error updating other event:', error);
+      showToast('Error updating event: ' + error.message, 'error');
+    } else {
+      fetchOtherEvents();
+    }
   };
 
   const deleteOtherEvent = async (id: number) => {

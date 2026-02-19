@@ -262,7 +262,6 @@ const AdminPanel = () => {
   const [showAddStory, setShowAddStory] = useState(false);
   const [showAddChapter, setShowAddChapter] = useState(false);
   const [showAddPastEvent, setShowAddPastEvent] = useState(false);
-  const [showAddOtherEvent, setShowAddOtherEvent] = useState(false);
   const [showAddWorkshop, setShowAddWorkshop] = useState(false);
 
 
@@ -2589,7 +2588,26 @@ const AdminPanel = () => {
                         </div>
                         <button
                           onClick={() => {
-                            setEditingOtherEvent({ id: 'new', title: '', slug: '', event_type: 'other', status: 'upcoming', date: '', location: 'Online', attendees_count: 0, is_public: true, is_featured: false, description: '', about: '' });
+                            setEditingOtherEvent({
+                              id: 'new',
+                              title: '',
+                              slug: '',
+                              event_type: 'other',
+                              mode: 'Online',
+                              status: 'upcoming',
+                              date: '',
+                              location: 'Online',
+                              attendees_count: 0,
+                              is_public: true,
+                              is_featured: false,
+                              description: '',
+                              about: '',
+                              organizers: [],
+                              eligibilities: [],
+                              perks: [],
+                              rules: [],
+                              format_process: []
+                            });
                             setOtherEventEditorView(true);
                           }}
                           className="bg-indigo-600 text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
@@ -2738,38 +2756,49 @@ const AdminPanel = () => {
                             </div>
 
                             <div className="space-y-6">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Type</label>
-                                  <select
-                                    id="oe-type"
-                                    value={editingOtherEvent?.event_type || 'other'}
-                                    onChange={(e) => updateOtherEventState({ event_type: e.target.value })}
-                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
-                                  >
-                                    <option value="ideathon">Ideathon</option>
-                                    <option value="meetup">Meetup</option>
-                                    <option value="design-competition">Design Comp</option>
-                                    <option value="pitch-competition">Pitch Comp</option>
-                                    <option value="bootcamp">Bootcamp</option>
-                                    <option value="seminar">Seminar</option>
-                                    <option value="networking">Networking</option>
-                                    <option value="other">Other</option>
-                                  </select>
-                                </div>
-                                <div>
-                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Status</label>
-                                  <select
-                                    id="oe-status"
-                                    value={editingOtherEvent?.status || 'upcoming'}
-                                    onChange={(e) => updateOtherEventState({ status: e.target.value })}
-                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
-                                  >
-                                    <option value="upcoming">Upcoming</option>
-                                    <option value="open">Open</option>
-                                    <option value="ended">Ended</option>
-                                  </select>
-                                </div>
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Type</label>
+                                <select
+                                  id="oe-type"
+                                  value={editingOtherEvent?.event_type || 'other'}
+                                  onChange={(e) => updateOtherEventState({ event_type: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
+                                >
+                                  <option value="ideathon">Ideathon</option>
+                                  <option value="meetup">Meetup</option>
+                                  <option value="design-competition">Design Comp</option>
+                                  <option value="pitch-competition">Pitch Comp</option>
+                                  <option value="bootcamp">Bootcamp</option>
+                                  <option value="seminar">Seminar</option>
+                                  <option value="networking">Networking</option>
+                                  <option value="other">Other</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Mode</label>
+                                <select
+                                  id="oe-mode"
+                                  value={editingOtherEvent?.mode || 'Online'}
+                                  onChange={(e) => updateOtherEventState({ mode: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
+                                >
+                                  <option value="Online">Online</option>
+                                  <option value="In-person">In-person</option>
+                                  <option value="Hybrid">Hybrid</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Status</label>
+                                <select
+                                  id="oe-status"
+                                  value={editingOtherEvent?.status || 'upcoming'}
+                                  onChange={(e) => updateOtherEventState({ status: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
+                                >
+                                  <option value="upcoming">Upcoming</option>
+                                  <option value="open">Open</option>
+                                  <option value="ended">Ended</option>
+                                </select>
                               </div>
 
                               <div className="grid grid-cols-2 gap-4">
@@ -2801,7 +2830,7 @@ const AdminPanel = () => {
                                   <input
                                     type="number"
                                     id="oe-attendees"
-                                    value={editingOtherEvent?.attendees_count || 0}
+                                    value={editingOtherEvent?.attendees_count ?? 0}
                                     onChange={(e) => updateOtherEventState({ attendees_count: parseInt(e.target.value) || 0 })}
                                     className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
                                     min="0"
@@ -2819,6 +2848,18 @@ const AdminPanel = () => {
                                   />
                                 </div>
                               </div>
+
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Location</label>
+                                <input
+                                  type="text"
+                                  id="oe-location"
+                                  value={editingOtherEvent?.location || ''}
+                                  onChange={(e) => updateOtherEventState({ location: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                  placeholder="e.g. Online, Venue Name, City"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2826,48 +2867,94 @@ const AdminPanel = () => {
                         {/* 2. Media & Visuals */}
                         <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-sm">
                           <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-6 border-b border-slate-200 pb-4">🖼️ Media & Visuals</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                              <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Thumbnail Image</label>
-                              <div className="space-y-4">
-                                <div className="flex gap-2">
-                                  <input
-                                    type="text"
-                                    value={editingOtherEvent?.image_url || ''}
-                                    onChange={(e) => updateOtherEventState({ image_url: e.target.value })}
-                                    id="oe-image"
-                                    className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
-                                    placeholder="https://..."
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => document.getElementById('oe-image-upload')?.click()}
-                                    className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
-                                    title="Upload"
-                                  >
-                                    <Icons.Image className="w-5 h-5" />
-                                  </button>
-                                  <input
-                                    id="oe-image-upload"
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (!file) return;
-                                      const url = await uploadFile(file, 'event-images');
-                                      if (url) {
-                                        updateOtherEventState({ image_url: url });
-                                        showToast('Image uploaded', 'success');
-                                      }
-                                    }}
-                                  />
-                                </div>
-                                {editingOtherEvent?.image_url && (
-                                  <div className="w-24 h-24 rounded-xl border border-gray-200 bg-white p-1 overflow-hidden shrink-0 shadow-sm">
-                                    <img src={editingOtherEvent.image_url} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                          <div className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Thumbnail Image</label>
+                                <div className="space-y-4">
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      value={editingOtherEvent?.image_url || ''}
+                                      onChange={(e) => updateOtherEventState({ image_url: e.target.value })}
+                                      id="oe-image"
+                                      className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                      placeholder="https://..."
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => document.getElementById('oe-image-upload')?.click()}
+                                      className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+                                      title="Upload"
+                                    >
+                                      <Icons.Image className="w-5 h-5" />
+                                    </button>
+                                    <input
+                                      id="oe-image-upload"
+                                      type="file"
+                                      className="hidden"
+                                      accept="image/*"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        const url = await uploadFile(file, 'event-images');
+                                        if (url) {
+                                          updateOtherEventState({ image_url: url });
+                                          showToast('Image uploaded', 'success');
+                                        }
+                                      }}
+                                    />
                                   </div>
-                                )}
+                                  {editingOtherEvent?.image_url && (
+                                    <div className="w-24 h-24 rounded-xl border border-gray-200 bg-white p-1 overflow-hidden shrink-0 shadow-sm">
+                                      <img src={editingOtherEvent.image_url} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Logo URL</label>
+                                <div className="space-y-4">
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      value={editingOtherEvent?.logo_url || ''}
+                                      onChange={(e) => updateOtherEventState({ logo_url: e.target.value })}
+                                      id="oe-logo"
+                                      className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                      placeholder="https://..."
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => document.getElementById('oe-logo-upload')?.click()}
+                                      className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+                                      title="Upload"
+                                    >
+                                      <Icons.Image className="w-5 h-5" />
+                                    </button>
+                                    <input
+                                      id="oe-logo-upload"
+                                      type="file"
+                                      className="hidden"
+                                      accept="image/*"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        const url = await uploadFile(file, 'event-logos');
+                                        if (url) {
+                                          updateOtherEventState({ logo_url: url });
+                                          showToast('Logo uploaded', 'success');
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                  {editingOtherEvent?.logo_url && (
+                                    <div className="w-24 h-24 rounded-xl border border-gray-200 bg-white p-1 overflow-hidden shrink-0 shadow-sm">
+                                      <img src={editingOtherEvent.logo_url} alt="Preview" className="w-full h-full object-contain rounded-lg" />
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -2917,7 +3004,125 @@ const AdminPanel = () => {
                           </div>
                         </div>
 
-                        {/* 3. Content */}
+                        {/* 3. Organizers */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-sm">
+                          <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
+                            <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest">👥 Organizers</h4>
+                            <button
+                              onClick={() => {
+                                const current = [...(editingOtherEvent?.organizers || [])];
+                                current.push({ name: '', role: '', logo_url: '' });
+                                updateOtherEventState({ organizers: current });
+                              }}
+                              className="bg-white border border-slate-200 text-indigo-600 px-6 py-2 rounded-xl text-xs font-black hover:bg-indigo-50 transition-colors shadow-sm"
+                            >
+                              + ADD ORGANIZER
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {(editingOtherEvent?.organizers || []).map((org: any, idx: number) => (
+                              <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-100 relative group">
+                                <button
+                                  onClick={() => {
+                                    const current = [...(editingOtherEvent?.organizers || [])];
+                                    current.splice(idx, 1);
+                                    updateOtherEventState({ organizers: current });
+                                  }}
+                                  className="absolute -top-2 -right-2 bg-red-100 text-red-500 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Icons.X className="w-4 h-4" />
+                                </button>
+                                <div className="space-y-3">
+                                  <input
+                                    placeholder="Name"
+                                    value={org.name}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.organizers || [])];
+                                      current[idx].name = e.target.value;
+                                      updateOtherEventState({ organizers: current });
+                                    }}
+                                    className="w-full bg-slate-50 border-none p-3 rounded-xl text-sm font-bold"
+                                  />
+                                  <input
+                                    placeholder="Role (e.g. Lead Organizer)"
+                                    value={org.role}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.organizers || [])];
+                                      current[idx].role = e.target.value;
+                                      updateOtherEventState({ organizers: current });
+                                    }}
+                                    className="w-full bg-slate-50 border-none p-3 rounded-xl text-sm"
+                                  />
+                                  <input
+                                    placeholder="Logo URL"
+                                    value={org.logo_url}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.organizers || [])];
+                                      current[idx].logo_url = e.target.value;
+                                      updateOtherEventState({ organizers: current });
+                                    }}
+                                    className="w-full bg-slate-50 border-none p-3 rounded-xl text-[10px]"
+                                  />
+                                  {/* Social Links */}
+                                  <div className="flex gap-2 pt-2">
+                                    <div className="flex-1 flex items-center gap-2 bg-slate-50 rounded-xl px-3 border border-slate-100">
+                                      <Icons.Linkedin className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                      <input
+                                        placeholder="LinkedIn URL"
+                                        value={org.social_links?.find((l: any) => l.platform === 'linkedin')?.url || ''}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          const current = [...(editingOtherEvent?.organizers || [])];
+                                          const org = { ...current[idx] };
+                                          const links = [...(org.social_links || [])];
+                                          const linkIdx = links.findIndex((l: any) => l.platform === 'linkedin');
+
+                                          if (val) {
+                                            if (linkIdx >= 0) links[linkIdx] = { ...links[linkIdx], url: val };
+                                            else links.push({ platform: 'linkedin', url: val });
+                                          } else {
+                                            if (linkIdx >= 0) links.splice(linkIdx, 1);
+                                          }
+                                          org.social_links = links;
+                                          current[idx] = org;
+                                          updateOtherEventState({ organizers: current });
+                                        }}
+                                        className="w-full bg-transparent border-none p-2 text-[10px] focus:ring-0"
+                                      />
+                                    </div>
+                                    <div className="flex-1 flex items-center gap-2 bg-slate-50 rounded-xl px-3 border border-slate-100">
+                                      <Icons.Twitter className="w-4 h-4 text-sky-500 flex-shrink-0" />
+                                      <input
+                                        placeholder="Twitter URL"
+                                        value={org.social_links?.find((l: any) => l.platform === 'twitter')?.url || ''}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          const current = [...(editingOtherEvent?.organizers || [])];
+                                          const org = { ...current[idx] };
+                                          const links = [...(org.social_links || [])];
+                                          const linkIdx = links.findIndex((l: any) => l.platform === 'twitter');
+
+                                          if (val) {
+                                            if (linkIdx >= 0) links[linkIdx] = { ...links[linkIdx], url: val };
+                                            else links.push({ platform: 'twitter', url: val });
+                                          } else {
+                                            if (linkIdx >= 0) links.splice(linkIdx, 1);
+                                          }
+                                          org.social_links = links;
+                                          current[idx] = org;
+                                          updateOtherEventState({ organizers: current });
+                                        }}
+                                        className="w-full bg-transparent border-none p-2 text-[10px] focus:ring-0"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 4. Details & Content */}
                         <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-sm">
                           <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-6 border-b border-slate-200 pb-4">📝 Content</h4>
                           <div className="space-y-6">
@@ -2940,6 +3145,205 @@ const AdminPanel = () => {
                                 className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-medium h-64 resize-y font-mono"
                                 placeholder="# Event Details\n\nWrite your full event description here using Markdown..."
                               />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 5. Rules & Format */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8">
+                            <div className="flex justify-between items-center mb-6">
+                              <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest">📜 Rules</h4>
+                              <button
+                                onClick={() => {
+                                  const current = [...(editingOtherEvent?.rules || [])];
+                                  current.push('');
+                                  updateOtherEventState({ rules: current });
+                                }}
+                                className="text-indigo-600 text-xs font-black uppercase"
+                              >
+                                + ADD
+                              </button>
+                            </div>
+                            <div className="space-y-3">
+                              {(editingOtherEvent?.rules || []).map((rule: string, idx: number) => (
+                                <div key={idx} className="flex gap-2">
+                                  <input
+                                    value={rule}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.rules || [])];
+                                      current[idx] = e.target.value;
+                                      updateOtherEventState({ rules: current });
+                                    }}
+                                    className="flex-1 bg-white border border-slate-100 p-3 rounded-xl text-base"
+                                    placeholder={`Rule #${idx + 1}`}
+                                  />
+                                  <button onClick={() => {
+                                    const current = [...(editingOtherEvent?.rules || [])];
+                                    current.splice(idx, 1);
+                                    updateOtherEventState({ rules: current });
+                                  }} className="text-red-400"><Icons.X /></button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8">
+                            <div className="flex justify-between items-center mb-6">
+                              <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest">⚙️ Process</h4>
+                              <button
+                                onClick={() => {
+                                  const current = [...(editingOtherEvent?.format_process || [])];
+                                  current.push({ title: '', description: '' });
+                                  updateOtherEventState({ format_process: current });
+                                }}
+                                className="text-indigo-600 text-xs font-black uppercase"
+                              >
+                                + ADD STEP
+                              </button>
+                            </div>
+                            <div className="space-y-4">
+                              {(editingOtherEvent?.format_process || []).map((step: any, idx: number) => (
+                                <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 relative group">
+                                  <button
+                                    onClick={() => {
+                                      const current = [...(editingOtherEvent?.format_process || [])];
+                                      current.splice(idx, 1);
+                                      updateOtherEventState({ format_process: current });
+                                    }}
+                                    className="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100"
+                                  >
+                                    <Icons.X />
+                                  </button>
+                                  <input
+                                    placeholder="Step Title"
+                                    value={step.title}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.format_process || [])];
+                                      current[idx].title = e.target.value;
+                                      updateOtherEventState({ format_process: current });
+                                    }}
+                                    className="w-full font-bold text-base mb-2"
+                                  />
+                                  <textarea
+                                    placeholder="Step Description"
+                                    value={step.description}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.format_process || [])];
+                                      current[idx].description = e.target.value;
+                                      updateOtherEventState({ format_process: current });
+                                    }}
+                                    className="w-full text-sm h-16 resize-none"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 6. Eligibilities & Perks */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8">
+                            <div className="flex justify-between items-center mb-6">
+                              <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest">✅ Eligibility</h4>
+                              <button
+                                onClick={() => {
+                                  const current = [...(editingOtherEvent?.eligibilities || [])];
+                                  current.push({ title: '', description: '' });
+                                  updateOtherEventState({ eligibilities: current });
+                                }}
+                                className="text-indigo-600 text-xs font-black uppercase"
+                              >
+                                + ADD
+                              </button>
+                            </div>
+                            <div className="space-y-4">
+                              {(editingOtherEvent?.eligibilities || []).map((item: any, idx: number) => (
+                                <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 relative group">
+                                  <button
+                                    onClick={() => {
+                                      const current = [...(editingOtherEvent?.eligibilities || [])];
+                                      current.splice(idx, 1);
+                                      updateOtherEventState({ eligibilities: current });
+                                    }}
+                                    className="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded"
+                                  >
+                                    <Icons.X className="w-4 h-4" />
+                                  </button>
+                                  <input
+                                    placeholder="e.g. Students"
+                                    value={item.title}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.eligibilities || [])];
+                                      current[idx].title = e.target.value;
+                                      updateOtherEventState({ eligibilities: current });
+                                    }}
+                                    className="w-full font-bold text-base mb-1"
+                                  />
+                                  <input
+                                    placeholder="Brief criteria"
+                                    value={item.description}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.eligibilities || [])];
+                                      current[idx].description = e.target.value;
+                                      updateOtherEventState({ eligibilities: current });
+                                    }}
+                                    className="w-full text-sm"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8">
+                            <div className="flex justify-between items-center mb-6">
+                              <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest">🎁 Perks</h4>
+                              <button
+                                onClick={() => {
+                                  const current = [...(editingOtherEvent?.perks || [])];
+                                  current.push({ title: '', description: '' });
+                                  updateOtherEventState({ perks: current });
+                                }}
+                                className="text-indigo-600 text-xs font-black uppercase"
+                              >
+                                + ADD
+                              </button>
+                            </div>
+                            <div className="space-y-4">
+                              {(editingOtherEvent?.perks || []).map((item: any, idx: number) => (
+                                <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 relative group">
+                                  <button
+                                    onClick={() => {
+                                      const current = [...(editingOtherEvent?.perks || [])];
+                                      current.splice(idx, 1);
+                                      updateOtherEventState({ perks: current });
+                                    }}
+                                    className="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded"
+                                  >
+                                    <Icons.X className="w-4 h-4" />
+                                  </button>
+                                  <input
+                                    placeholder="e.g. Swags"
+                                    value={item.title}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.perks || [])];
+                                      current[idx].title = e.target.value;
+                                      updateOtherEventState({ perks: current });
+                                    }}
+                                    className="w-full font-bold text-base mb-1"
+                                  />
+                                  <input
+                                    placeholder="Details"
+                                    value={item.description}
+                                    onChange={(e) => {
+                                      const current = [...(editingOtherEvent?.perks || [])];
+                                      current[idx].description = e.target.value;
+                                      updateOtherEventState({ perks: current });
+                                    }}
+                                    className="w-full text-sm"
+                                  />
+                                </div>
+                              ))}
                             </div>
                           </div>
                         </div>
@@ -2993,19 +3397,30 @@ const AdminPanel = () => {
 
                               if (!title) { showToast('Title is required', 'error'); return; }
 
-                              // Gather all data from state (updated via onChange) or fallback to DOM for safe measure on some inputs
+                              // Gather all data from state (updated via onChange)
                               const payload = {
                                 ...editingOtherEvent,
                                 title,
                                 slug,
                                 event_type: editingOtherEvent?.event_type || 'other',
+                                mode: editingOtherEvent?.mode || 'Online',
                                 status: editingOtherEvent?.status || 'upcoming',
-                                // Clean up optional fields
-                                image_url: editingOtherEvent?.image_url || undefined,
-                                banner_url: editingOtherEvent?.banner_url || undefined,
-                                registration_link: editingOtherEvent?.registration_link || undefined,
-                                prize: editingOtherEvent?.prize || undefined,
-                                end_date: editingOtherEvent?.end_date || undefined
+                                location: editingOtherEvent?.location || '',
+                                description: editingOtherEvent?.description || '',
+                                about: editingOtherEvent?.about || '',
+                                date: editingOtherEvent?.date || '',
+                                attendees_count: editingOtherEvent?.attendees_count || 0,
+                                organizers: editingOtherEvent?.organizers || [],
+                                eligibilities: editingOtherEvent?.eligibilities || [],
+                                perks: editingOtherEvent?.perks || [],
+                                rules: editingOtherEvent?.rules || [],
+                                format_process: editingOtherEvent?.format_process || [],
+                                logo_url: editingOtherEvent?.logo_url || null,
+                                image_url: editingOtherEvent?.image_url || null,
+                                banner_url: editingOtherEvent?.banner_url || null,
+                                registration_link: editingOtherEvent?.registration_link || null,
+                                prize: editingOtherEvent?.prize || null,
+                                end_date: editingOtherEvent?.end_date || null
                               };
 
                               if (editingOtherEvent?.id === 'new') {
@@ -3022,7 +3437,6 @@ const AdminPanel = () => {
                             {editingOtherEvent?.id === 'new' ? 'Create' : 'Save'} Event
                           </button>
                         </div>
-
                       </div>
                     </div>
                   )}
@@ -4334,148 +4748,6 @@ const AdminPanel = () => {
         )
       }
 
-      {/* Add/Edit Other Event Modal */}
-      {/* Add/Edit Other Event Modal (Legacy - replaced by Full Screen Editor) */}
-      {
-        false && (showAddOtherEvent || editingOtherEvent) && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">{editingOtherEvent ? 'Edit Event' : 'Add Other Event'}</h2>
-                <button onClick={() => { setShowAddOtherEvent(false); setEditingOtherEvent(null); }} className="p-2 hover:bg-gray-100 rounded-xl"><Icons.X /></button>
-              </div>
-              <div className="p-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Title *</label>
-                    <input type="text" defaultValue={editingOtherEvent?.title || ''} id="oe-title" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Design Jam 2025" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Slug *</label>
-                    <input type="text" defaultValue={editingOtherEvent?.slug || ''} id="oe-slug" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm font-mono" placeholder="design-jam-2025" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Event Type *</label>
-                    <select id="oe-type" defaultValue={editingOtherEvent?.event_type || 'meetup'} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm">
-                      <option value="ideathon">Ideathon</option>
-                      <option value="meetup">Meetup</option>
-                      <option value="design-competition">Design Competition</option>
-                      <option value="pitch-competition">Pitch Competition</option>
-                      <option value="bootcamp">Bootcamp</option>
-                      <option value="seminar">Seminar</option>
-                      <option value="networking">Networking</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Status</label>
-                    <select id="oe-status" defaultValue={editingOtherEvent?.status || 'upcoming'} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm">
-                      <option value="upcoming">Upcoming</option>
-                      <option value="open">Open</option>
-                      <option value="ended">Ended</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Date</label>
-                    <input type="text" defaultValue={editingOtherEvent?.date || ''} id="oe-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Jan 20, 2026" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">End Date</label>
-                    <input type="date" defaultValue={editingOtherEvent?.end_date || ''} id="oe-end-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Location</label>
-                  <input type="text" defaultValue={editingOtherEvent?.location || ''} id="oe-location" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Online / Delhi" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Description</label>
-                  <textarea defaultValue={editingOtherEvent?.description || ''} id="oe-desc" rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm resize-none" placeholder="Short description shown on event cards..." />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Registration Link</label>
-                  <input type="text" defaultValue={editingOtherEvent?.registration_link || ''} id="oe-reg-link" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="https://..." />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Event Image</label>
-                  <div className="flex gap-3 items-start">
-                    <input type="text" defaultValue={editingOtherEvent?.image_url || ''} id="oe-image" className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="Image URL or upload below" />
-                    <label className={`cursor-pointer bg-indigo-50 text-indigo-600 border border-indigo-200 px-4 py-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors whitespace-nowrap ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                      {isUploading ? 'Uploading...' : 'Upload'}
-                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setIsUploading(true);
-                        const url = await uploadFile(file, 'event-images');
-                        setIsUploading(false);
-                        if (url) {
-                          const input = document.getElementById('oe-image') as HTMLInputElement;
-                          if (input) { input.value = url; }
-                          showToast('Image uploaded!', 'success');
-                        }
-                      }} />
-                    </label>
-                  </div>
-                  {(editingOtherEvent?.image_url) && <img src={editingOtherEvent.image_url} alt="" className="mt-2 h-20 rounded-lg object-cover" />}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Attendees Count</label>
-                    <input type="number" defaultValue={editingOtherEvent?.attendees_count || 0} id="oe-attendees" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" min="0" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Prize (optional)</label>
-                    <input type="text" defaultValue={editingOtherEvent?.prize || ''} id="oe-prize" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., ₹10,000" />
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="oe-public" defaultChecked={editingOtherEvent?.is_public !== false} className="w-4 h-4 accent-indigo-600" />
-                    <span className="text-sm font-bold text-gray-700">Public</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="oe-featured" defaultChecked={editingOtherEvent?.is_featured === true} className="w-4 h-4 accent-indigo-600" />
-                    <span className="text-sm font-bold text-gray-700">Featured</span>
-                  </label>
-                </div>
-              </div>
-              <div className="p-6 border-t border-gray-100 flex gap-3">
-                <button onClick={() => { setShowAddOtherEvent(false); setEditingOtherEvent(null); }} className="flex-1 bg-gray-100 text-gray-600 py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-gray-200">Cancel</button>
-                <button onClick={async () => {
-                  const title = (document.getElementById('oe-title') as HTMLInputElement).value.trim();
-                  const rawSlug = (document.getElementById('oe-slug') as HTMLInputElement).value.trim();
-                  const slug = (rawSlug || title).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                  const event_type = (document.getElementById('oe-type') as HTMLSelectElement).value as any;
-                  const status = (document.getElementById('oe-status') as HTMLSelectElement).value as any;
-                  const date = (document.getElementById('oe-date') as HTMLInputElement).value.trim();
-                  const end_date = (document.getElementById('oe-end-date') as HTMLInputElement).value || undefined;
-                  const location = (document.getElementById('oe-location') as HTMLInputElement).value.trim();
-                  const description = (document.getElementById('oe-desc') as HTMLTextAreaElement).value.trim();
-                  const registration_link = (document.getElementById('oe-reg-link') as HTMLInputElement).value.trim() || undefined;
-                  const image_url = (document.getElementById('oe-image') as HTMLInputElement).value.trim() || undefined;
-                  const attendees_count = Number((document.getElementById('oe-attendees') as HTMLInputElement).value) || 0;
-                  const prize = (document.getElementById('oe-prize') as HTMLInputElement).value.trim() || undefined;
-                  const is_public = (document.getElementById('oe-public') as HTMLInputElement).checked;
-                  const is_featured = (document.getElementById('oe-featured') as HTMLInputElement).checked;
-                  if (!title) { showToast('Title is required', 'error'); return; }
-                  const payload = { title, slug, event_type, status, date, end_date, location, description, registration_link, image_url, attendees_count, prize, is_public, is_featured };
-                  if (editingOtherEvent?.id) {
-                    await handleAction(() => updateOtherEvent(editingOtherEvent.id, payload), 'Event updated');
-                  } else {
-                    await handleAction(() => addOtherEvent(payload), 'Event created');
-                  }
-                  setShowAddOtherEvent(false);
-                  setEditingOtherEvent(null);
-                }} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700 shadow-lg shadow-indigo-200">{editingOtherEvent ? 'Update' : 'Create'} Event</button>
-              </div>
-            </div>
-          </div>
-        )
-      }
 
       {/* Add/Edit Workshop Modal */}
       {
