@@ -91,7 +91,7 @@ const WorkshopsPage = () => {
                 <div className="absolute inset-0 z-0 bg-gradient-to-b from-nerdBlue/80 via-nerdBlue/50 to-white"></div>
 
                 <div className="max-w-4xl mx-auto text-center relative z-10 px-4">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1] drop-shadow-2xl">
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1] drop-shadow-2xl">
                         LEARN. BUILD. <br />
                         <span className="text-nerdLime">MASTER.</span>
                     </h1>

@@ -164,7 +164,8 @@ const EventsPage = () => {
 
                                     <div className="p-5 flex flex-col flex-1">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{hack.organizer}</p>
-                                        <h3 className="text-base font-black text-slate-900 group-hover:text-nerdBlue transition-colors leading-snug mb-3">{hack.title}</h3>
+                                        <h3 className="text-base font-black text-slate-900 group-hover:text-nerdBlue transition-colors leading-snug mb-2">{hack.title}</h3>
+                                        {hack.description && <p className="text-slate-500 text-xs leading-relaxed line-clamp-2 mb-4">{hack.description}</p>}
 
                                         <div className="flex flex-wrap gap-1.5 mb-4">
                                             {(hack.tags || []).slice(0, 3).map(tag => (

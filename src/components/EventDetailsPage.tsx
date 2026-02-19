@@ -537,12 +537,14 @@ const EventDetailsPage = () => {
             <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-8 duration-500">
               {activeTab === 'overview' && (
                 <div className="space-y-12">
-                  <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 border border-slate-100 shadow-sm">
-                    <h2 className="text-3xl font-black text-slate-900 mb-8">About</h2>
-                    <div
-                      className="prose prose-lg prose-slate text-slate-600 max-w-none whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{ __html: hackathon.about || '' }}
-                    />
+                  <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-12 border border-slate-100 shadow-sm">
+                    <div className="max-w-3xl mx-auto">
+                      <h2 className="text-3xl font-black text-slate-900 mb-8 pb-4 border-b border-slate-50 text-center">About</h2>
+                      <div
+                        className="prose prose-lg prose-slate prose-headings:text-slate-900 prose-headings:font-black prose-p:text-slate-600 prose-p:leading-relaxed whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{ __html: hackathon.about || '' }}
+                      />
+                    </div>
                   </div>
 
                   {/* Stats Grid */}

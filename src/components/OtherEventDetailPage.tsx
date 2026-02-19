@@ -82,10 +82,10 @@ const OtherEventDetailPage = () => {
             <Navbar />
 
             {/* Banner */}
-            <div className="max-w-[1140px] mx-auto px-4 md:px-0 pt-20 md:pt-24">
-                <div className="relative h-[180px] sm:h-[280px] md:h-[340px] w-full rounded-none md:rounded-[3rem] overflow-hidden shadow-lg border border-slate-100">
+            <div className="max-w-[1140px] mx-auto px-0 md:px-4 pt-16 md:pt-24">
+                <div className="relative aspect-video md:aspect-[21/9] w-full md:rounded-[3rem] overflow-hidden shadow-lg md:border border-slate-100">
                     {event.image_url ? (
-                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
                     ) : (
                         <div className={`w-full h-full ${typeColor} flex items-center justify-center`}>
                             <svg className="w-24 h-24 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,99 +93,127 @@ const OtherEventDetailPage = () => {
                             </svg>
                         </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                    <span className={`absolute top-4 left-4 ${typeColor} text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full`}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <span className={`absolute top-4 left-4 ${typeColor} text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg`}>
                         {event.event_type?.replace(/-/g, ' ')}
                     </span>
                 </div>
             </div>
 
             {/* Header Info */}
-            <div className="max-w-[1140px] mx-auto px-4 md:px-0 py-8 md:py-10">
-                <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
+            <div className="max-w-[1140px] mx-auto px-4 md:px-0 py-8 md:py-12">
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-start justify-between gap-8 lg:gap-12">
                     {/* Left: Title + meta */}
-                    <div className="flex-1 space-y-4">
+                    <div className="flex-1 space-y-6">
                         <div className="flex items-center gap-3 flex-wrap">
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white ${event.status === 'upcoming' ? 'bg-emerald-500' :
+                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full text-white shadow-sm ${event.status === 'upcoming' ? 'bg-emerald-500' :
                                 event.status === 'ongoing' ? 'bg-blue-500' : 'bg-slate-400'
                                 }`}>
-                                {event.status}
+                                ● {event.status}
                             </span>
                             {event.is_featured && (
-                                <span className="bg-nerdLime text-nerdBlue text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Featured</span>
+                                <span className="bg-nerdLime text-nerdBlue text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Featured</span>
                             )}
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-black text-slate-900 leading-tight">{event.title}</h1>
-                        {event.description && (
-                            <p className="text-slate-500 text-base leading-relaxed max-w-2xl">{event.description}</p>
-                        )}
-                        <div className="flex flex-wrap gap-5 text-sm text-slate-600 font-bold pt-2">
+
+                        <div className="space-y-4">
+                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight">{event.title}</h1>
+                            {event.description && (
+                                <p className="text-slate-500 text-base md:text-lg leading-relaxed max-w-2xl font-medium">
+                                    {event.description}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                             {event.date && (
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    {event.date}
+                                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</p>
+                                        <p className="text-sm font-bold text-slate-900">{event.date}</p>
+                                    </div>
                                 </div>
                             )}
                             {event.location && (
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    {event.location}
+                                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p>
+                                        <p className="text-sm font-bold text-slate-900">{event.location}</p>
+                                    </div>
                                 </div>
                             )}
                             {event.attendees_count && (
-                                <div className="flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    {event.attendees_count}+ Attendees
+                                <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Attendees</p>
+                                        <p className="text-sm font-bold text-slate-900">{event.attendees_count}+ Builders</p>
+                                    </div>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Right: CTA */}
-                    <div className="flex flex-col gap-3 w-full lg:w-[220px] shrink-0">
+                    <div className="flex flex-col gap-4 w-full lg:w-[280px] shrink-0">
                         {event.prize && (
-                            <div className="text-center bg-nerdBlue/5 border border-nerdBlue/10 rounded-2xl p-4">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Prize</p>
-                                <p className="text-2xl font-black text-nerdBlue">🏆 {event.prize}</p>
+                            <div className="text-center bg-nerdLime/10 border border-nerdLime/20 rounded-3xl p-6 shadow-sm">
+                                <p className="text-[11px] font-black text-nerdBlue/60 uppercase tracking-widest mb-1">Prize Pool</p>
+                                <p className="text-3xl font-black text-nerdBlue">{event.prize}</p>
                             </div>
                         )}
-                        {hasRegLink ? (
-                            <a
-                                href={event.registration_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full bg-nerdBlue hover:bg-nerdDark text-white px-6 py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-nerdBlue/30 text-center"
+                        <div className="bg-white p-2 rounded-2xl shadow-xl border border-slate-100 space-y-2">
+                            {hasRegLink ? (
+                                <a
+                                    href={event.registration_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full bg-nerdBlue hover:bg-nerdDark text-white px-6 py-5 rounded-xl font-black text-sm uppercase tracking-widest transition-all inline-block text-center shadow-lg shadow-nerdBlue/20"
+                                >
+                                    Register Now
+                                </a>
+                            ) : (
+                                <div className="w-full bg-slate-100 text-slate-400 px-6 py-5 rounded-xl font-black text-sm uppercase tracking-widest text-center">
+                                    Closed
+                                </div>
+                            )}
+                            <button
+                                onClick={() => navigate('/events')}
+                                className="w-full text-slate-400 hover:text-slate-600 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all text-center"
                             >
-                                Register Now →
-                            </a>
-                        ) : (
-                            <div className="w-full bg-slate-100 text-slate-400 px-6 py-4 rounded-xl font-black text-sm uppercase tracking-widest text-center">
-                                Registration Coming Soon
-                            </div>
-                        )}
-                        <button
-                            onClick={() => navigate('/events')}
-                            className="w-full border border-slate-200 text-slate-500 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all"
-                        >
-                            ← All Events
-                        </button>
+                                ← Browse more events
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* About Section */}
             {event.about && (
-                <div className="max-w-[1140px] mx-auto px-4 md:px-0 pb-16">
-                    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8 md:p-12">
-                        <h2 className="text-2xl font-black text-slate-900 mb-6">About</h2>
-                        <div className="prose prose-slate text-slate-600 max-w-none whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: event.about }} />
+                <div className="max-w-[1140px] mx-auto px-4 sm:px-6 md:px-0 pb-20">
+                    <div className="bg-white rounded-[2rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-6 sm:p-10 md:p-16 overflow-hidden">
+                        <div className="max-w-3xl mx-auto">
+                            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 mb-10 pb-6 border-b border-slate-100 text-center tracking-tight">About the Event</h2>
+                            <div
+                                className="prose prose-slate prose-lg md:prose-xl prose-headings:text-slate-900 prose-headings:font-black prose-p:text-slate-600 prose-p:leading-relaxed whitespace-pre-wrap max-w-none"
+                                dangerouslySetInnerHTML={{ __html: event.about.replace(/\n\n/g, '<br/><br/>') }}
+                            />
+                        </div>
                     </div>
                 </div>
             )}

@@ -55,13 +55,13 @@ const WorkshopDetailsPage = () => {
             <Navbar />
 
             {/* Premium Hero Header */}
-            <header className="relative pt-32 pb-20 overflow-hidden">
+            <header className="relative pt-24 md:pt-32 pb-16 md:pb-20 overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img src={workshop.banner_url || workshop.image_url} alt="" className="w-full h-full object-cover opacity-10 blur-xl scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-white" />
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
                     <div className="flex flex-col lg:flex-row gap-12 items-center">
                         {/* Poster Card */}
                         <div className="w-full lg:w-1/3 shrink-0">
@@ -80,7 +80,7 @@ const WorkshopDetailsPage = () => {
                                 <span className="bg-indigo-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-indigo-100 uppercase tracking-widest">Masterclass</span>
                             </div>
 
-                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
+                            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-[1.1]">
                                 {workshop.title}
                             </h1>
 
@@ -161,12 +161,14 @@ const WorkshopDetailsPage = () => {
                                     <div className="w-1.5 h-8 bg-indigo-600 rounded-full" />
                                     Workshop Overview
                                 </h2>
-                                <div className="prose prose-slate prose-lg max-w-none font-medium text-slate-600 leading-relaxed">
-                                    {workshop.about ? (
-                                        <div dangerouslySetInnerHTML={{ __html: workshop.about.replace(/\n/g, '<br/>') }} />
-                                    ) : (
-                                        <p>{workshop.description}</p>
-                                    )}
+                                <div className="max-w-3xl">
+                                    <div className="prose prose-slate prose-lg font-medium text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                        {workshop.about ? (
+                                            <div dangerouslySetInnerHTML={{ __html: workshop.about.replace(/\n/g, '<br/>') }} />
+                                        ) : (
+                                            <p>{workshop.description}</p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {workshop.topics && workshop.topics.length > 0 && (

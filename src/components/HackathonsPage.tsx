@@ -250,7 +250,7 @@ const HackathonsPage = () => {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-nerdBlue/70 via-nerdBlue/40 to-white"></div>
 
         <div className="max-w-4xl mx-auto text-center relative z-10 px-4">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1] drop-shadow-2xl">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1] drop-shadow-2xl">
             BUILD. COMPETE. <br />
             <span className="text-nerdLime">WIN BIG.</span>
           </h1>

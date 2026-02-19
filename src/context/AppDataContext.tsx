@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Session } from '@supabase/supabase-js';
+import { compressImage } from '../utils/imageCompression';
 
 // Types moved to src/types/index.ts
 import type {
@@ -897,8 +898,15 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     return url;
   };
 
-  const uploadFile = async (file: File, _bucket: string): Promise<string | null> => {
-    const BUCKET = 'images'; // Create this in Supabase Dashboard > Storage > New Bucket (public)
+  const uploadFile = async (originalFile: File, _bucket: string): Promise<string | null> => {
+    const BUCKET = 'images'; // Create this in Supabase Dashboard -> Storage -> New Bucket (public)
+
+    let file = originalFile;
+    try {
+      file = await compressImage(originalFile);
+    } catch (err) {
+      console.warn('Image compression failed, using original.', err);
+    }
 
     // 1. Try Supabase Storage
     try {

@@ -49,6 +49,7 @@ const Icons = {
   Github: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>,
   Instagram: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>,
   Globe: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
+  ArrowLeft: ({ className }: { className?: string }) => <svg className={className || "w-5 h-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>,
 };
 
 const AdminPanel = () => {
@@ -278,7 +279,12 @@ const AdminPanel = () => {
   const [viewingTicket, setViewingTicket] = useState<Registration | null>(null);
   const [formEditorView, setFormEditorView] = useState(false); // Track if we're in form editor screen
   const [hackathonEditorView, setHackathonEditorView] = useState(false); // Track if we're in hackathon editor screen
+  const [otherEventEditorView, setOtherEventEditorView] = useState(false); // Track if we're in other event editor screen
   const [hackathonRegType, setHackathonRegType] = useState<'external' | 'managed'>('external'); // Track registration type
+
+  const updateOtherEventState = (updates: any) => {
+    setEditingOtherEvent((prev: any) => ({ ...prev, ...updates }));
+  };
   // const [returnToHackathon, setReturnToHackathon] = useState<any | null>(null); // Track hackathon to return to after form editing - TODO: Re-enable when registration forms tab is added
   const [modalOrganizers, setModalOrganizers] = useState<any[]>([]);
   const [modalFields, setModalFields] = useState<any[]>([]);
@@ -2572,66 +2578,452 @@ const AdminPanel = () => {
 
               {/* OTHER EVENTS */}
               {activeTab === 'other_events' && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-lg">Other Events ({otherEvents.length})</h3>
-                      <p className="text-xs text-gray-400 mt-1">Ideathons, meetups, design competitions, pitch competitions, etc.</p>
-                    </div>
-                    <button onClick={() => setShowAddOtherEvent(true)} className="bg-indigo-600 text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">+ ADD EVENT</button>
-                  </div>
+                <div className="space-y-6">
+                  {!otherEventEditorView ? (
+                    /* LIST VIEW */
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <div>
+                          <h3 className="font-bold text-gray-800 text-lg">Other Events ({otherEvents.length})</h3>
+                          <p className="text-xs text-gray-400 mt-1">Ideathons, meetups, competitions, etc.</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setEditingOtherEvent({ id: 'new', title: '', slug: '', event_type: 'other', status: 'upcoming', date: '', location: 'Online', attendees_count: 0, is_public: true, is_featured: false, description: '', about: '' });
+                            setOtherEventEditorView(true);
+                          }}
+                          className="bg-indigo-600 text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+                        >
+                          + ADD EVENT
+                        </button>
+                      </div>
 
-                  {otherEvents.length === 0 ? (
-                    <div className="text-center py-16 text-gray-400">
-                      <Icons.Calendar className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                      <p className="text-lg font-semibold mb-2">No Other Events</p>
-                      <p className="text-sm">Add ideathons, meetups, design competitions, etc.</p>
+                      {otherEvents.length === 0 ? (
+                        <div className="text-center py-16 text-gray-400">
+                          <Icons.Calendar className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                          <p className="text-lg font-semibold mb-2">No Other Events</p>
+                          <p className="text-sm">Add ideathons, meetups, design competitions, etc.</p>
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b border-gray-200">
+                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Event</th>
+                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Type</th>
+                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Date</th>
+                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Location</th>
+                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Status</th>
+                                <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {otherEvents.map(ev => (
+                                <tr key={ev.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                  <td className="py-4 px-4">
+                                    <div className="flex items-center gap-3">
+                                      {ev.image_url && <img src={ev.image_url} alt="" className="w-10 h-10 rounded object-cover" loading="lazy" decoding="async" />}
+                                      <div>
+                                        <div className="font-bold text-gray-800">{ev.title}</div>
+                                        <div className="text-xs text-gray-500">{ev.slug}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-4 px-4">
+                                    <span className="inline-block px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider">{ev.event_type}</span>
+                                  </td>
+                                  <td className="py-4 px-4 text-sm text-gray-600">{ev.date}</td>
+                                  <td className="py-4 px-4 text-sm text-gray-600">{ev.location}</td>
+                                  <td className="py-4 px-4">
+                                    <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${ev.status === 'open' ? 'bg-green-100 text-green-700' : ev.status === 'upcoming' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'}`}>
+                                      {ev.status?.toUpperCase()}
+                                    </span>
+                                  </td>
+                                  <td className="py-4 px-4">
+                                    <div className="flex gap-2">
+                                      <button
+                                        onClick={() => {
+                                          setEditingOtherEvent(ev);
+                                          setOtherEventEditorView(true);
+                                        }}
+                                        className="text-indigo-600 font-bold text-xs p-2 hover:bg-indigo-50 rounded"
+                                      >
+                                        <Icons.Edit />
+                                      </button>
+                                      <button onClick={() => setDeleteConfirm({ id: String(ev.id), type: 'other_event' })} className="text-red-500 font-bold text-xs p-2 hover:bg-red-50 rounded"><Icons.Trash /></button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-gray-200">
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Event</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Type</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Date</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Location</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Status</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {otherEvents.map(ev => (
-                            <tr key={ev.id} className="border-b border-gray-100 hover:bg-gray-50">
-                              <td className="py-4 px-4">
-                                <div className="flex items-center gap-3">
-                                  {ev.image_url && <img src={ev.image_url} alt="" className="w-10 h-10 rounded object-cover" />}
-                                  <div>
-                                    <div className="font-bold text-gray-800">{ev.title}</div>
-                                    <div className="text-xs text-gray-500">{ev.slug}</div>
-                                  </div>
+                    /* FULL SCREEN EDITOR VIEW */
+                    <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 relative overflow-hidden">
+                      {/* Editor Header */}
+                      <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 backdrop-blur-xl sticky top-0 z-10">
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => {
+                              setOtherEventEditorView(false);
+                              setEditingOtherEvent(null);
+                            }}
+                            className="bg-white p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                          >
+                            <Icons.ArrowLeft className="w-5 h-5" />
+                          </button>
+                          <div>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                              {editingOtherEvent?.id === 'new' ? 'New Event' : 'Edit Event'}
+                            </h2>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                              {editingOtherEvent?.id === 'new' ? 'Create a new specific event' : `Updating: ${editingOtherEvent?.title}`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${editingOtherEvent?.is_public ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                            {editingOtherEvent?.is_public ? 'Published' : 'Draft'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Editor Content */}
+                      <div className="p-8 space-y-10 max-w-5xl mx-auto">
+
+                        {/* 1. Core Info Card */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-sm">
+                          <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-6 border-b border-slate-200 pb-4">📌 Core Information</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-6">
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Event Title *</label>
+                                <input
+                                  type="text"
+                                  id="oe-title"
+                                  value={editingOtherEvent?.title || ''}
+                                  onChange={(e) => updateOtherEventState({ title: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-base font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm placeholder:text-slate-300"
+                                  placeholder="e.g. AI Design Sprint 2026"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">URL Slug *</label>
+                                <div className="flex items-center bg-white border border-slate-200 rounded-xl px-4 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+                                  <span className="text-slate-400 text-sm font-bold select-none">nerds.com/events/</span>
+                                  <input
+                                    type="text"
+                                    id="oe-slug"
+                                    value={editingOtherEvent?.slug || ''}
+                                    onChange={(e) => updateOtherEventState({ slug: e.target.value })}
+                                    className="flex-1 bg-transparent border-none p-4 text-sm font-bold text-indigo-600 placeholder:text-indigo-200 focus:ring-0"
+                                    placeholder="ai-design-sprint-2026"
+                                  />
                                 </div>
-                              </td>
-                              <td className="py-4 px-4">
-                                <span className="inline-block px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider">{ev.event_type}</span>
-                              </td>
-                              <td className="py-4 px-4 text-sm text-gray-600">{ev.date}</td>
-                              <td className="py-4 px-4 text-sm text-gray-600">{ev.location}</td>
-                              <td className="py-4 px-4">
-                                <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${ev.status === 'open' ? 'bg-green-100 text-green-700' : ev.status === 'upcoming' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'}`}>
-                                  {ev.status?.toUpperCase()}
-                                </span>
-                              </td>
-                              <td className="py-4 px-4">
+                              </div>
+                              <div>
+                                <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Registration Link</label>
+                                <input
+                                  type="text"
+                                  id="oe-reg-link"
+                                  value={editingOtherEvent?.registration_link || ''}
+                                  onChange={(e) => updateOtherEventState({ registration_link: e.target.value })}
+                                  className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-medium text-blue-600 placeholder:text-slate-300"
+                                  placeholder="https://lu.ma/..."
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-6">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Type</label>
+                                  <select
+                                    id="oe-type"
+                                    value={editingOtherEvent?.event_type || 'other'}
+                                    onChange={(e) => updateOtherEventState({ event_type: e.target.value })}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
+                                  >
+                                    <option value="ideathon">Ideathon</option>
+                                    <option value="meetup">Meetup</option>
+                                    <option value="design-competition">Design Comp</option>
+                                    <option value="pitch-competition">Pitch Comp</option>
+                                    <option value="bootcamp">Bootcamp</option>
+                                    <option value="seminar">Seminar</option>
+                                    <option value="networking">Networking</option>
+                                    <option value="other">Other</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Status</label>
+                                  <select
+                                    id="oe-status"
+                                    value={editingOtherEvent?.status || 'upcoming'}
+                                    onChange={(e) => updateOtherEventState({ status: e.target.value })}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold appearance-none cursor-pointer"
+                                  >
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="open">Open</option>
+                                    <option value="ended">Ended</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Start Date</label>
+                                  <input
+                                    type="date"
+                                    id="oe-date"
+                                    value={editingOtherEvent?.date || ''}
+                                    onChange={(e) => updateOtherEventState({ date: e.target.value })}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">End Date</label>
+                                  <input
+                                    type="date"
+                                    id="oe-end-date"
+                                    value={editingOtherEvent?.end_date || ''}
+                                    onChange={(e) => updateOtherEventState({ end_date: e.target.value })}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Attendees</label>
+                                  <input
+                                    type="number"
+                                    id="oe-attendees"
+                                    value={editingOtherEvent?.attendees_count || 0}
+                                    onChange={(e) => updateOtherEventState({ attendees_count: parseInt(e.target.value) || 0 })}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                    min="0"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Prize</label>
+                                  <input
+                                    type="text"
+                                    id="oe-prize"
+                                    value={editingOtherEvent?.prize || ''}
+                                    onChange={(e) => updateOtherEventState({ prize: e.target.value })}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                    placeholder="e.g. $1000"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Media & Visuals */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-sm">
+                          <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-6 border-b border-slate-200 pb-4">🖼️ Media & Visuals</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                              <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Thumbnail Image</label>
+                              <div className="space-y-4">
                                 <div className="flex gap-2">
-                                  <button onClick={() => setEditingOtherEvent(ev)} className="text-indigo-600 font-bold text-xs p-2 hover:bg-indigo-50 rounded"><Icons.Edit /></button>
-                                  <button onClick={() => setDeleteConfirm({ id: String(ev.id), type: 'other_event' })} className="text-red-500 font-bold text-xs p-2 hover:bg-red-50 rounded"><Icons.Trash /></button>
+                                  <input
+                                    type="text"
+                                    value={editingOtherEvent?.image_url || ''}
+                                    onChange={(e) => updateOtherEventState({ image_url: e.target.value })}
+                                    id="oe-image"
+                                    className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                    placeholder="https://..."
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => document.getElementById('oe-image-upload')?.click()}
+                                    className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+                                    title="Upload"
+                                  >
+                                    <Icons.Image className="w-5 h-5" />
+                                  </button>
+                                  <input
+                                    id="oe-image-upload"
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const url = await uploadFile(file, 'event-images');
+                                      if (url) {
+                                        updateOtherEventState({ image_url: url });
+                                        showToast('Image uploaded', 'success');
+                                      }
+                                    }}
+                                  />
                                 </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                                {editingOtherEvent?.image_url && (
+                                  <div className="w-24 h-24 rounded-xl border border-gray-200 bg-white p-1 overflow-hidden shrink-0 shadow-sm">
+                                    <img src={editingOtherEvent.image_url} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Banner Image</label>
+                              <div className="space-y-4">
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={editingOtherEvent?.banner_url || ''}
+                                    onChange={(e) => updateOtherEventState({ banner_url: e.target.value })}
+                                    id="oe-banner"
+                                    className="flex-1 bg-white border border-slate-200 rounded-xl p-4 text-sm font-bold"
+                                    placeholder="https://..."
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => document.getElementById('oe-banner-upload')?.click()}
+                                    className="p-4 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+                                    title="Upload"
+                                  >
+                                    <Icons.Image className="w-5 h-5" />
+                                  </button>
+                                  <input
+                                    id="oe-banner-upload"
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const url = await uploadFile(file, 'event-banners');
+                                      if (url) {
+                                        updateOtherEventState({ banner_url: url });
+                                        showToast('Banner uploaded', 'success');
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                {editingOtherEvent?.banner_url && (
+                                  <div className="w-full h-24 rounded-xl border border-gray-200 bg-white p-1 overflow-hidden shrink-0 shadow-sm">
+                                    <img src={editingOtherEvent.banner_url} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3. Content */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-sm">
+                          <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-6 border-b border-slate-200 pb-4">📝 Content</h4>
+                          <div className="space-y-6">
+                            <div>
+                              <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">Short Description *</label>
+                              <textarea
+                                id="oe-desc"
+                                value={editingOtherEvent?.description || ''}
+                                onChange={(e) => updateOtherEventState({ description: e.target.value })}
+                                className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-medium h-24 resize-none"
+                                placeholder="Brief summary used in cards..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[13px] font-black text-slate-400 uppercase mb-2 tracking-wider">About (Full Details) *</label>
+                              <textarea
+                                id="oe-about"
+                                value={editingOtherEvent?.about || ''}
+                                onChange={(e) => updateOtherEventState({ about: e.target.value })}
+                                className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-medium h-64 resize-y font-mono"
+                                placeholder="# Event Details\n\nWrite your full event description here using Markdown..."
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 4. Settings */}
+                        <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <label className="flex items-center gap-3 cursor-pointer p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={editingOtherEvent?.is_public !== false}
+                                onChange={(e) => updateOtherEventState({ is_public: e.target.checked })}
+                                className="w-5 h-5 accent-indigo-600"
+                              />
+                              <div>
+                                <div className="font-bold text-slate-800">Public</div>
+                                <div className="text-xs text-slate-500">Visible to everyone</div>
+                              </div>
+                            </label>
+                            <label className="flex items-center gap-3 cursor-pointer p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={editingOtherEvent?.is_featured === true}
+                                onChange={(e) => updateOtherEventState({ is_featured: e.target.checked })}
+                                className="w-5 h-5 accent-indigo-600"
+                              />
+                              <div>
+                                <div className="font-bold text-slate-800">Featured</div>
+                                <div className="text-xs text-slate-500">Show on homepage</div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-4 pt-4">
+                          <button
+                            onClick={() => {
+                              setOtherEventEditorView(false);
+                              setEditingOtherEvent(null);
+                            }}
+                            className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-xl text-base font-black uppercase hover:bg-gray-200 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const title = (document.getElementById('oe-title') as HTMLInputElement).value.trim();
+                              const rawSlug = (document.getElementById('oe-slug') as HTMLInputElement).value.trim();
+                              const slug = (rawSlug || title).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+                              if (!title) { showToast('Title is required', 'error'); return; }
+
+                              // Gather all data from state (updated via onChange) or fallback to DOM for safe measure on some inputs
+                              const payload = {
+                                ...editingOtherEvent,
+                                title,
+                                slug,
+                                event_type: editingOtherEvent?.event_type || 'other',
+                                status: editingOtherEvent?.status || 'upcoming',
+                                // Clean up optional fields
+                                image_url: editingOtherEvent?.image_url || undefined,
+                                banner_url: editingOtherEvent?.banner_url || undefined,
+                                registration_link: editingOtherEvent?.registration_link || undefined,
+                                prize: editingOtherEvent?.prize || undefined,
+                                end_date: editingOtherEvent?.end_date || undefined
+                              };
+
+                              if (editingOtherEvent?.id === 'new') {
+                                const { id, ...createPayload } = payload;
+                                await handleAction(() => addOtherEvent(createPayload), 'Event created');
+                              } else {
+                                await handleAction(() => updateOtherEvent(editingOtherEvent.id, payload), 'Event updated');
+                              }
+                              setOtherEventEditorView(false);
+                              setEditingOtherEvent(null);
+                            }}
+                            className="flex-1 bg-indigo-600 text-white py-4 rounded-xl text-base font-black uppercase hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95"
+                          >
+                            {editingOtherEvent?.id === 'new' ? 'Create' : 'Save'} Event
+                          </button>
+                        </div>
+
+                      </div>
                     </div>
                   )}
                 </div>
@@ -3943,8 +4335,9 @@ const AdminPanel = () => {
       }
 
       {/* Add/Edit Other Event Modal */}
+      {/* Add/Edit Other Event Modal (Legacy - replaced by Full Screen Editor) */}
       {
-        (showAddOtherEvent || editingOtherEvent) && (
+        false && (showAddOtherEvent || editingOtherEvent) && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200 flex justify-between items-center">
