@@ -19,10 +19,12 @@ const OtherEventDetailPage = () => {
             );
 
             if (found) {
-                // Filter invalid organizers
-                if (found.organizers) {
-                    found.organizers = found.organizers.filter((o: any) => o.name && o.name.trim() !== '');
-                }
+                // Filter invalid organizers & other lists
+                if (found.organizers) found.organizers = found.organizers.filter((o: any) => o.name && o.name.trim() !== '');
+                if (found.format_process) found.format_process = found.format_process.filter((i: any) => (i.title && i.title.trim()) || (i.description && i.description.trim()));
+                if (found.rules) found.rules = found.rules.filter((r: string) => r && r.trim() !== '');
+                if (found.eligibilities) found.eligibilities = found.eligibilities.filter((i: any) => (i.title && i.title.trim()) || (i.description && i.description.trim()));
+                if (found.perks) found.perks = found.perks.filter((i: any) => (i.title && i.title.trim()) || (i.description && i.description.trim()));
 
                 setEvent(found);
 
@@ -314,22 +316,26 @@ const OtherEventDetailPage = () => {
                             )}
 
                             {/* Sidebar Metadata */}
-                            <div className="space-y-4 pt-8 border-t border-slate-50">
-                                {event.mode && (
-                                    <div className="flex items-center gap-4 text-slate-600 font-bold text-sm">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                                            <Globe className="w-5 h-5" />
+                            {(event.mode || event.event_type) && (
+                                <div className="space-y-4 pt-8 border-t border-slate-50">
+                                    {event.mode && (
+                                        <div className="flex items-center gap-4 text-slate-600 font-bold text-sm">
+                                            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                                                <Globe className="w-5 h-5" />
+                                            </div>
+                                            <span>{event.mode}</span>
                                         </div>
-                                        <span>{event.mode}</span>
-                                    </div>
-                                )}
-                                <div className="flex items-center gap-4 text-slate-600 font-bold text-sm">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                                        <Zap className="w-5 h-5" />
-                                    </div>
-                                    <span className="capitalize">{event.event_type?.replace(/-/g, ' ')}</span>
+                                    )}
+                                    {event.event_type && (
+                                        <div className="flex items-center gap-4 text-slate-600 font-bold text-sm">
+                                            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                                                <Zap className="w-5 h-5" />
+                                            </div>
+                                            <span className="capitalize">{event.event_type?.replace(/-/g, ' ')}</span>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
 
@@ -338,18 +344,14 @@ const OtherEventDetailPage = () => {
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
                             {/* OVERVIEW TAB */}
-                            {activeTab === 'overview' && (
+                            {activeTab === 'overview' && event.about && (
                                 <div className="space-y-12">
                                     <div className="bg-white rounded-[2rem] p-6 sm:p-10 border border-slate-100 shadow-sm">
                                         <h2 className="text-3xl font-black text-slate-900 mb-6 pb-4 border-b border-slate-50">About Event</h2>
-                                        {event.about ? (
-                                            <div
-                                                className="prose prose-lg prose-slate prose-headings:font-black prose-p:text-slate-600 prose-p:leading-relaxed whitespace-pre-wrap"
-                                                dangerouslySetInnerHTML={{ __html: event.about }}
-                                            />
-                                        ) : (
-                                            <p className="text-slate-500 italic">No details provided.</p>
-                                        )}
+                                        <div
+                                            className="prose prose-lg prose-slate prose-headings:font-black prose-p:text-slate-600 prose-p:leading-relaxed whitespace-pre-wrap"
+                                            dangerouslySetInnerHTML={{ __html: event.about }}
+                                        />
                                     </div>
                                 </div>
                             )}

@@ -134,14 +134,19 @@ const WorkshopDetailsPage = () => {
             <div className="border-b border-slate-100 sticky top-[72px] bg-white/80 backdrop-blur-xl z-40">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex gap-8 overflow-x-auto scrollbar-hide py-4 items-center justify-center lg:justify-start">
-                        {['overview', 'curriculum', 'mentors', 'faq'].map((tab) => (
+                        {[
+                            { id: 'overview', label: 'OVERVIEW' },
+                            ...((workshop.schedule?.length || 0) > 0 ? [{ id: 'curriculum', label: 'CURRICULUM' }] : []),
+                            ...((workshop.mentors?.length || 0) > 0 ? [{ id: 'mentors', label: 'MENTORS' }] : []),
+                            ...((workshop.faq?.length || 0) > 0 ? [{ id: 'faq', label: 'FAQ' }] : [])
+                        ].map((tab) => (
                             <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === tab ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`text-[11px] font-black uppercase tracking-[0.2em] transition-all relative py-2 ${activeTab === tab.id ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                {tab}
-                                {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300" />}
+                                {tab.label}
+                                {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300" />}
                             </button>
                         ))}
                     </div>

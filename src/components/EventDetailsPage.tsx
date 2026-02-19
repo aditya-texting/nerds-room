@@ -340,13 +340,13 @@ const EventDetailsPage = () => {
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-0 h-16">
             {[
               { id: 'overview', label: 'About' },
-              { id: 'challenges', label: 'Challenges' },
-              { id: 'mentors', label: 'Mentors' },
-              { id: 'jury', label: 'Jury Panel' },
-              { id: 'schedule', label: 'Schedule' },
-              { id: 'prizes', label: 'Prize' },
-              { id: 'partners', label: 'Partners' },
-              { id: 'faq', label: 'FAQ' }
+              ...((hackathon.challenges?.length || 0) > 0 ? [{ id: 'challenges', label: 'Challenges' }] : []),
+              ...((hackathon.mentors?.length || 0) > 0 ? [{ id: 'mentors', label: 'Mentors' }] : []),
+              ...((hackathon.jury?.length || 0) > 0 ? [{ id: 'jury', label: 'Jury Panel' }] : []),
+              ...((hackathon.schedule?.length || 0) > 0 ? [{ id: 'schedule', label: 'Schedule' }] : []),
+              ...((hackathon.prizes?.length || 0) > 0 ? [{ id: 'prizes', label: 'Prize' }] : []),
+              ...((hackathon.partners?.length || 0) > 0 ? [{ id: 'partners', label: 'Partners' }] : []),
+              ...((hackathon.faq?.length || 0) > 0 ? [{ id: 'faq', label: 'FAQ' }] : [])
             ].map((tab) => (
               <button
                 key={tab.id}
