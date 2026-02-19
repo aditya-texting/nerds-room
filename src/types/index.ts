@@ -100,6 +100,8 @@ export interface Hackathon {
     participants?: string;
     tags: string[];
     dates?: string;
+    end_date?: string;  // ISO date string e.g. '2025-12-31'
+    end_time?: string;  // e.g. '23:59'
     logo_url?: string;
     banner_url?: string;
     status: 'upcoming' | 'open' | 'ended';
@@ -160,6 +162,30 @@ export interface PastEvent {
     attendees_count: number;
     is_public: boolean;
     tags?: string[];
+}
+
+export type OtherEventType = 'ideathon' | 'meetup' | 'design-competition' | 'pitch-competition' | 'bootcamp' | 'seminar' | 'networking' | 'other';
+
+export interface OtherEvent {
+    id: number;
+    title: string;
+    slug: string;
+    event_type: OtherEventType;
+    description?: string;
+    about?: string;
+    date: string;
+    end_date?: string;
+    location: string;
+    image_url?: string;
+    banner_url?: string;
+    registration_link?: string;
+    status: 'upcoming' | 'open' | 'ended';
+    is_public: boolean;
+    is_featured: boolean;
+    attendees_count: number;
+    prize?: string;
+    tags?: string[];
+    created_at?: string;
 }
 
 export interface DashboardStats {

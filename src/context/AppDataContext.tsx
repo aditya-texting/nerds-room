@@ -14,6 +14,7 @@ import type {
   Hackathon,
   Workshop,
   PastEvent,
+  OtherEvent,
   DashboardStats,
   HeroContent,
   SocialLinks,
@@ -81,6 +82,12 @@ interface AppDataContextType {
   addPastEvent: (event: Omit<PastEvent, 'id'>) => Promise<void>;
   updatePastEvent: (id: number, updates: Partial<PastEvent>) => Promise<void>;
   deletePastEvent: (id: number) => Promise<void>;
+
+  // Other Events
+  otherEvents: OtherEvent[];
+  addOtherEvent: (event: Omit<OtherEvent, 'id'>) => Promise<void>;
+  updateOtherEvent: (id: number, updates: Partial<OtherEvent>) => Promise<void>;
+  deleteOtherEvent: (id: number) => Promise<void>;
 
   // Workshops
   workshops: Workshop[];
@@ -182,6 +189,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     }
   });
   const [pastEvents, setPastEvents] = useState<PastEvent[]>([]);
+  const [otherEvents, setOtherEvents] = useState<OtherEvent[]>([]);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [registrationForms, setRegistrationForms] = useState<RegistrationForm[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -239,6 +247,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       { key: 'chapters', fn: fetchChapters },
       { key: 'hackathons', fn: fetchHackathons },
       { key: 'pastEvents', fn: fetchPastEvents },
+      { key: 'otherEvents', fn: fetchOtherEvents },
       { key: 'workshops', fn: fetchWorkshops },
       { key: 'registrationForms', fn: fetchRegistrationForms },
       { key: 'tags', fn: fetchTags },
@@ -428,6 +437,11 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const fetchPastEvents = async () => {
     const { data } = await supabase.from('past_events').select('*').order('created_at', { ascending: false });
     if (data) setPastEvents(data);
+  };
+
+  const fetchOtherEvents = async () => {
+    const { data } = await supabase.from('other_events').select('*').order('created_at', { ascending: false });
+    if (data) setOtherEvents(data);
   };
 
   const fetchRegistrationForms = async () => {
@@ -784,6 +798,22 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     if (!error) fetchPastEvents();
   };
 
+  // Other Events
+  const addOtherEvent = async (event: Omit<OtherEvent, 'id'>) => {
+    const { error } = await supabase.from('other_events').insert([event]);
+    if (!error) fetchOtherEvents();
+  };
+
+  const updateOtherEvent = async (id: number, updates: Partial<OtherEvent>) => {
+    const { error } = await supabase.from('other_events').update(updates).eq('id', id);
+    if (!error) fetchOtherEvents();
+  };
+
+  const deleteOtherEvent = async (id: number) => {
+    const { error } = await supabase.from('other_events').delete().eq('id', id);
+    if (!error) fetchOtherEvents();
+  };
+
 
   // ... (existing helper functions for settings)
   // Partners/Settings (Simplified: update the single row)
@@ -1010,6 +1040,10 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     addPastEvent,
     updatePastEvent,
     deletePastEvent,
+    otherEvents,
+    addOtherEvent,
+    updateOtherEvent,
+    deleteOtherEvent,
     workshops,
     addWorkshop,
     updateWorkshop,
