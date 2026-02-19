@@ -7,6 +7,8 @@ const EventsPage = () => {
     const { pastEvents, flagshipEvents, workshops, hackathons, otherEvents, navigate } = useAppData();
     const [activeTab, setActiveTab] = useState<'all' | 'hackathons' | 'flagship' | 'workshops' | 'other' | 'past'>('all');
 
+    const [search, setSearch] = useState('');
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -36,40 +38,64 @@ const EventsPage = () => {
             <Navbar />
 
             {/* ── HERO HEADER ── */}
-            <header className="relative overflow-hidden bg-nerdBlue pt-28 pb-24 px-4 md:px-8">
-                {/* Grid pattern */}
-                <div className="absolute inset-0 opacity-10"
-                    style={{
-                        backgroundImage: 'linear-gradient(rgba(155,230,0,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(155,230,0,0.4) 1px, transparent 1px)',
-                        backgroundSize: '40px 40px'
-                    }}
-                />
-                {/* Glow blobs */}
-                <div className="absolute -top-20 -right-20 w-96 h-96 bg-nerdLime/20 rounded-full blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+            <header
+                className="relative pt-32 lg:pt-48 pb-20 lg:pb-32 px-4 sm:px-6 md:px-8 overflow-hidden bg-nerdBlue"
+                style={{
+                    backgroundImage: 'url("https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
+            >
+                {/* Dark Overlay with Gradient to White transition at bottom */}
+                <div className="absolute inset-0 z-0 bg-gradient-to-b from-nerdBlue/80 via-nerdBlue/50 to-white/10"></div>
+                <div className="absolute inset-0 z-0 bg-black/30"></div>
 
-                <div className="relative max-w-5xl mx-auto text-center">
-                    <span className="inline-block bg-nerdLime/20 text-nerdLime text-xs font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full mb-6 border border-nerdLime/30">
+                <div className="max-w-4xl mx-auto text-center relative z-10 px-4">
+                    <span className="inline-block bg-nerdLime/20 text-nerdLime text-xs font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full mb-6 border border-nerdLime/30 backdrop-blur-md">
                         Nerds Room Events
                     </span>
-                    <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
-                        BUILD. LEARN.<br />
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-[1.1] drop-shadow-2xl">
+                        BUILD. LEARN. <br />
                         <span className="text-nerdLime">CONNECT.</span>
                     </h1>
-                    <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed mb-10">
-                        From elite hackathons to hands-on workshops — explore every event happening at Nerds Room.
+
+                    <p className="max-w-2xl mx-auto text-white text-base md:text-lg mb-10 font-bold leading-relaxed drop-shadow-md">
+                        From elite hackathons to hands-on workshops — explore every event happening at Nerds Room. Join the community of builders.
                     </p>
 
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center items-center max-w-lg mx-auto">
+                        <div className="relative flex-1 w-full group">
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search events, topics, or hosts..."
+                                className="w-full px-5 py-4 pl-12 rounded-2xl border-none bg-white text-slate-900 focus:outline-none focus:ring-4 focus:ring-nerdLime/30 shadow-2xl transition-all font-semibold text-sm placeholder:text-slate-400"
+                            />
+                            <svg
+                                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-nerdBlue transition-colors"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <button className="w-full sm:w-auto px-10 py-4 bg-nerdLime text-nerdBlue rounded-2xl font-black uppercase tracking-widest hover:bg-white transition-all shadow-xl active:scale-95 text-xs">
+                            Search
+                        </button>
+                    </div>
+
                     {/* Stats row */}
-                    <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                    <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 mt-16 pt-8 border-t border-white/10">
                         {[
                             { value: publicHackathons.length + '+', label: 'Hackathons' },
                             { value: publicWorkshops.length + '+', label: 'Workshops' },
                             { value: pastEvents.length + '+', label: 'Past Events' },
                         ].map(stat => (
-                            <div key={stat.label} className="text-center">
-                                <div className="text-3xl font-black text-nerdLime">{stat.value}</div>
-                                <div className="text-white/50 text-xs font-bold uppercase tracking-widest mt-1">{stat.label}</div>
+                            <div key={stat.label} className="text-center group cursor-default">
+                                <div className="text-3xl md:text-4xl font-black text-white group-hover:text-nerdLime transition-colors drop-shadow-lg">{stat.value}</div>
+                                <div className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2 group-hover:text-white transition-colors">{stat.label}</div>
                             </div>
                         ))}
                     </div>
