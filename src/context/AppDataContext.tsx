@@ -898,23 +898,29 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const uploadFile = async (file: File, _bucket: string): Promise<string | null> => {
+    const BUCKET = 'images'; // Create this in Supabase Dashboard > Storage > New Bucket (public)
     try {
-      // Use ImgBB free image hosting — no Supabase bucket required
-      const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY;
+      // PRIMARY: Supabase Storage
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true });
+      if (!error && data) {
+        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(data.path);
+        return publicUrl;
+      }
+      console.warn('Supabase storage error:', error?.message, '— falling back to ImgBB');
 
+      // FALLBACK: ImgBB
+      const IMGBB_KEY = import.meta.env.VITE_IMGBB_API_KEY;
       if (IMGBB_KEY) {
         const formData = new FormData();
         formData.append('image', file);
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-          method: 'POST',
-          body: formData,
-        });
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: formData });
         const json = await res.json();
         if (json.success) return json.data.url as string;
-        throw new Error(json.error?.message || 'ImgBB upload failed');
       }
 
-      // Fallback: base64 data URL (works locally, not ideal for prod)
+      // LAST RESORT: base64
       return await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
@@ -928,6 +934,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       return null;
     }
   };
+
 
   const fetchWorkshops = async () => {
     const { data, error } = await supabase.from('workshops').select('*').order('created_at', { ascending: false });

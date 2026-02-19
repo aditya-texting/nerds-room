@@ -8,6 +8,7 @@ import WorkshopsPage from './components/WorkshopsPage';
 import EventsPage from './components/EventsPage';
 import EventDetailsPage from './components/EventDetailsPage';
 import WorkshopDetailsPage from './components/WorkshopDetailsPage';
+import OtherEventDetailPage from './components/OtherEventDetailPage';
 import { AppDataProvider, useAppData } from './context/AppDataContext';
 import './index.css';
 import GlobalLoadingScreen from './components/GlobalLoadingScreen';
@@ -62,6 +63,7 @@ const MainContent = () => {
 
   if (currentPath.startsWith('/hackathons/')) return <EventDetailsPage />;
   if (currentPath.startsWith('/workshops/')) return <WorkshopDetailsPage />;
+  if (currentPath.startsWith('/other-events/')) return <OtherEventDetailPage />;
 
   return (
     <>

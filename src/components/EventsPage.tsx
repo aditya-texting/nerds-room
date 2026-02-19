@@ -202,11 +202,6 @@ const EventsPage = () => {
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {(activeTab === 'all' ? publicOtherEvents.slice(0, 3) : publicOtherEvents).map((ev, idx) => {
-                                const hasLink = !!ev.registration_link && ev.registration_link.startsWith('http');
-                                const handleClick = () => {
-                                    if (!hasLink) return;
-                                    window.open(ev.registration_link, '_blank', 'noopener,noreferrer');
-                                };
                                 const typeColors: Record<string, string> = {
                                     'ideathon': 'bg-violet-500',
                                     'meetup': 'bg-sky-500',
@@ -221,8 +216,8 @@ const EventsPage = () => {
                                 return (
                                     <div
                                         key={`other-${ev.id ?? idx}`}
-                                        onClick={handleClick}
-                                        className={`bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col${hasLink ? ' cursor-pointer' : ''}`}
+                                        onClick={() => navigate(`/other-events/${ev.slug}`)}
+                                        className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:border-sky-200 transition-all group flex flex-col cursor-pointer"
                                     >
                                         <div className="aspect-video relative overflow-hidden bg-slate-100">
                                             {ev.image_url ? (
@@ -262,18 +257,17 @@ const EventsPage = () => {
                                                 </div>
                                             </div>
                                             {ev.prize && <p className="text-xs font-black text-nerdBlue mt-2">🏆 {ev.prize}</p>}
-                                            {hasLink && (
-                                                <div className="mt-3 text-nerdBlue text-xs font-black uppercase tracking-widest hover:text-nerdLime transition-colors flex items-center gap-1">
-                                                    Register Now
-                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                                    </svg>
-                                                </div>
-                                            )}
+                                            <div className="mt-3 text-nerdBlue text-xs font-black uppercase tracking-widest flex items-center gap-1">
+                                                View Details
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </div>
                                         </div>
                                     </div>
                                 );
                             })}
+
                         </div>
                     </section>
                 )}
