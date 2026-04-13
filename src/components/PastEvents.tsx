@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
-import Skeleton from './Skeleton';
 
 const PastEvents = () => {
   const { pastEvents, loading } = useAppData();
@@ -25,11 +24,11 @@ const PastEvents = () => {
     return (
       <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
-          <Skeleton className="h-[450px] w-full rounded-lg" />
+          <div className="h-[450px] w-full bg-slate-100 animate-pulse rounded-lg" />
           <div className="space-y-6">
-            <Skeleton className="h-16 w-48" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-12 w-64" />
+            <div className="h-16 w-48 bg-slate-100 animate-pulse rounded" />
+            <div className="h-24 w-full bg-slate-100 animate-pulse rounded" />
+            <div className="h-12 w-64 bg-slate-100 animate-pulse rounded" />
           </div>
         </div>
       </section>
