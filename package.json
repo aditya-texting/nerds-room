@@ -10,7 +10,6 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.60.1",
     "@studio-freight/lenis": "^1.0.42",
     "@supabase/supabase-js": "^2.95.3",
     "framer-motion": "^11.0.0",
