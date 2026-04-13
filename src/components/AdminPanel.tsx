@@ -2521,8 +2521,14 @@ const AdminPanel = () => {
 
                   {pastEvents.length === 0 ? (
                     <div className="text-center py-12 text-gray-400">
-                      <Icons.Calendar />
-                      <p className="mt-4 text-sm">No past events found. Add your first past event!</p>
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Icons.Calendar className="w-8 h-8 opacity-20" />
+                      </div>
+                      <p className="text-sm font-medium">No past events found in database.</p>
+                      <button 
+                        onClick={() => setShowAddPastEvent(true)}
+                        className="mt-4 text-indigo-600 text-xs font-black uppercase tracking-widest hover:underline"
+                      >+ Add Your First Event</button>
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
