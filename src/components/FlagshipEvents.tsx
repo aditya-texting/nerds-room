@@ -63,8 +63,6 @@ const FlagshipEvents = () => {
   } = useAppData();
 
   const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#ECEFF1]'];
-  const mtMobiles = ['mt-0', 'mt-[25vh]', 'mt-[25vh]'];
-  const mtDesktops = ['lg:mt-[39px]', 'lg:mt-[90px]', 'lg:mt-[39px]'];
   const zIndices = ['z-10', 'z-20', 'z-30'];
 
   const events: (EventData & { registration_link?: string })[] = useMemo(() => {
