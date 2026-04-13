@@ -157,11 +157,11 @@ const FlagshipEvents = () => {
           )}
 
           {events.length > 0 ? (
-            <div className="block lg:flex lg:flex-row lg:items-start lg:justify-center lg:gap-[120px]">
+            <div className="block lg:flex lg:flex-row lg:items-start lg:justify-center lg:gap-[120px] pb-12 lg:pb-0">
               {events.map((event, index) => (
                 <div
                   key={index}
-                  className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} ${mtMobiles[index % mtMobiles.length]} ${mtDesktops[index % mtDesktops.length]} lg:z-auto ${zIndices[index % zIndices.length]} sticky top-[20vh] lg:static transition-all duration-500`}
+                  className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} ${index > 0 ? 'mt-[25vh] lg:mt-[90px]' : 'mt-0 lg:mt-[39px]'} lg:z-auto ${zIndices[index % zIndices.length]} sticky top-[20vh] lg:static transition-all duration-500`}
                 >
                   {/* Event Title/Logo Section */}
                   <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
@@ -178,7 +178,7 @@ const FlagshipEvents = () => {
 
                   {/* Main Image Container */}
                   <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
-                    <div className="relative w-full h-full rounded-2xl overflow-hidden">
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-sm">
                       <img
                         src={event.image}
                         alt={event.title}
@@ -187,8 +187,8 @@ const FlagshipEvents = () => {
                       />
                     </div>
                     
-                    {/* Floating Stats - Inspired by GDG Noida */}
-                    <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[10%] md:left-[15%] lg:left-[20%] space-y-1.5 md:space-y-2 lg:space-y-2.5 pointer-events-none">
+                    {/* Floating Stats - GDG Style with dynamic positioning */}
+                    <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[30%] md:left-[32%] lg:left-[35%] space-y-1.5 md:space-y-2 lg:space-y-2.5 pointer-events-none">
                       {event.stats.map((stat, sIndex) => {
                         const num = parseFloat(stat.value.replace(/[^0-9.]/g, ''));
                         const suffix = stat.value.replace(/[\d,]/g, '');
@@ -196,7 +196,7 @@ const FlagshipEvents = () => {
                         return (
                           <div 
                             key={sIndex} 
-                            className="bg-white/95 backdrop-blur-md rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-2 md:px-2.5 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit"
+                            className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-2 md:px-2.5 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit"
                             style={{ 
                               animationDelay: `${index * 100 + sIndex * 150}ms`,
                               animation: isActive ? 'slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
@@ -204,10 +204,10 @@ const FlagshipEvents = () => {
                               transform: 'translateX(20px)'
                             }}
                           >
-                            <span className="text-[20px] md:text-[24px] lg:text-[28px] font-normal text-[#34A853]">
+                            <span className="text-[24px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853]">
                               <StatCounter target={isNaN(num) ? 0 : num} suffix={suffix} isActive={isActive} />
                             </span>
-                            <span className="text-[14px] md:text-[16px] lg:text-[18px] font-normal text-black truncate max-w-[120px]">
+                            <span className="text-[16px] md:text-[19px] lg:text-[22px] font-normal text-black truncate">
                               {stat.label}
                             </span>
                           </div>
