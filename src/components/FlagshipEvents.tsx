@@ -59,8 +59,7 @@ const FlagshipEvents = () => {
     hackathons,
     pastEvents,
     maintenanceMode,
-    loading,
-    navigate
+    loading
   } = useAppData();
 
   const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#ECEFF1]'];
