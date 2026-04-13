@@ -31,16 +31,6 @@ const WhatWeDo = () => {
     );
   }
 
-  const isComingSoon = (title: string) => {
-    const t = (title || '').toLowerCase();
-    return (
-      t.includes('ideathon') ||
-      t.includes('cohort') ||
-      t.includes('community') ||
-      t.includes('project')
-    );
-  };
-
   const getIconBgColor = (idx: number) => {
     const colors = ['bg-[#9BE600]', 'bg-[#00308F]', 'bg-yellow-400', 'bg-red-500'];
     return colors[idx % colors.length];
@@ -59,18 +49,11 @@ const WhatWeDo = () => {
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card, index) => {
-          const comingSoon = isComingSoon(card.title || '');
-
           return (
             <div
               key={index}
-              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] transition-all group rounded-xl flex flex-col justify-between h-full`}
+              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] hover:shadow-[8px_8px_0px_#00308F] hover:-translate-y-1 transition-all duration-300 group rounded-xl flex flex-col justify-between h-full`}
             >
-              {comingSoon && (
-                <div className="absolute top-4 right-4 bg-[#9BE600] text-[#00308F] text-xs font-black px-3 py-1 rounded-full">
-                  COMING SOON
-                </div>
-              )}
               <div>
                 <div className={`w-12 h-12 ${getIconBgColor(index)} rounded-lg flex items-center justify-center ${getIconTextColor(index)} mb-4 font-black text-xl`}>
                   {(() => {
