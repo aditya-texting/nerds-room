@@ -404,9 +404,22 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const fetchFlagshipEvents = async () => {
-    const { data, error } = await supabase.from('flagship_events').select('*').order('created_at', { ascending: true });
-    if (error) console.error('[NerdsRoom] fetchFlagshipEvents Error:', error);
-    if (data) setFlagshipEvents(data.map(d => ({ ...d, image: d.image_url })));
+    try {
+      const { data, error } = await supabase.from('flagship_events').select('*').order('created_at', { ascending: true });
+      if (error) {
+        console.error('[NerdsRoom] fetchFlagshipEvents Error:', error);
+        return;
+      }
+      if (data) {
+        setFlagshipEvents(data.map(d => ({
+          ...d,
+          // Handle both 'image' and 'image_url' column names
+          image: d.image_url || d.image || 'https://via.placeholder.com/800x1000'
+        })));
+      }
+    } catch (err) {
+      console.error('[NerdsRoom] fetchFlagshipEvents Unexpected Error:', err);
+    }
   };
 
   const fetchPhotoGallery = async () => {
@@ -437,8 +450,22 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const fetchPastEvents = async () => {
-    const { data } = await supabase.from('past_events').select('*').order('created_at', { ascending: false });
-    if (data) setPastEvents(data);
+    try {
+      const { data, error } = await supabase.from('past_events').select('*').order('created_at', { ascending: false });
+      if (error) {
+        console.error('[NerdsRoom] fetchPastEvents Error:', error);
+        return;
+      }
+      if (data) {
+        // Ensure image_url is populated even if DB column is named 'image'
+        setPastEvents(data.map(d => ({
+          ...d,
+          image_url: d.image_url || d.image || ''
+        })));
+      }
+    } catch (err) {
+      console.error('[NerdsRoom] fetchPastEvents Unexpected Error:', err);
+    }
   };
 
   const fetchOtherEvents = async () => {

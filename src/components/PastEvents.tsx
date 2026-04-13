@@ -77,14 +77,14 @@ const PastEvents = () => {
         {/* Content */}
         <div className="order-1 md:order-2 space-y-6 sm:space-y-8">
           <div>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-nerdBlue inline-block border-b-4 sm:border-b-6 md:border-b-8 border-nerdLime leading-[0.85] pb-2 sm:pb-3">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-nerdBlue inline-block border-b-4 sm:border-b-6 md:border-b-8 border-nerdLime leading-[0.85] pb-2 sm:pb-3 uppercase">
               PAST<br />
               EVENTS
             </h2>
           </div>
 
           <div className="text-base sm:text-lg font-medium text-gray-700 space-y-3 sm:space-y-4">     
-            <p className="border-l-4 border-nerdBlue pl-3 sm:pl-4 leading-relaxed">
+            <p className="border-l-4 border-nerdBlue pl-3 sm:pl-4 leading-relaxed font-semibold">
               We are tired of boring corporate conferences. We wanted a space where the energy is practical, the people
               are building, and the ideas are raw. 
             </p>

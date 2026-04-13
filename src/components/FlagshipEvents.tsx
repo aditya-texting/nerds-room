@@ -135,10 +135,10 @@ const FlagshipEvents = () => {
     <section ref={sectionRef} id="events" className="py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-black mb-4 tracking-tighter uppercase">
+          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 mb-4 tracking-tighter uppercase leading-[1.1]">
             Our <span className="text-nerdBlue">Flagship</span> Events
           </h2>
-          <p className="text-lg md:text-xl text-gray-500 font-bold uppercase tracking-widest">
+          <p className="text-xs md:text-sm text-slate-400 font-black uppercase tracking-[0.4em]">
             Our signature experiences that define excellence
           </p>
         </div>
