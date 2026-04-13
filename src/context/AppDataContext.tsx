@@ -460,6 +460,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
         // Ensure image_url is populated even if DB column is named 'image'
         setPastEvents(data.map(d => ({
           ...d,
+          date: d.date || d.dates || '',
           image_url: d.image_url || d.image || ''
         })));
       }

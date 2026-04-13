@@ -154,7 +154,7 @@ export interface Workshop {
 export interface PastEvent {
     id: number;
     title: string;
-    dates: string;
+    date: string;
     location: string;
     image_url: string;
     description: string;

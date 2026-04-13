@@ -758,7 +758,7 @@ const AdminPanel = () => {
                                   {event.image_url && <img src={event.image_url} alt="" className="w-10 h-10 rounded object-cover" />}
                                   <div>
                                     <div className="font-bold text-gray-800">{event.title}</div>
-                                    <div className="text-xs text-gray-500">{event.dates}</div>
+                                    <div className="text-xs text-gray-500">{event.date}</div>
                                   </div>
                                 </div>
                               </td>
@@ -1529,7 +1529,7 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Date *</label>
-                    <input type="text" defaultValue={editingPastEvent?.dates || ''} id="past-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Dec 15, 2025" />
+                    <input type="text" defaultValue={editingPastEvent?.date || ''} id="past-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Dec 15, 2025" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1567,7 +1567,7 @@ const AdminPanel = () => {
                 <button onClick={() => { setShowAddPastEvent(false); setEditingPastEvent(null); }} className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-gray-200">Cancel</button>
                 <button onClick={async () => {
                   const title = (document.getElementById('past-title') as HTMLInputElement).value;
-                  const dates = (document.getElementById('past-date') as HTMLInputElement).value;
+                  const date = (document.getElementById('past-date') as HTMLInputElement).value;
                   const location = (document.getElementById('past-location') as HTMLInputElement).value;
                   const event_type = (document.getElementById('past-type') as HTMLInputElement).value;
                   const attendees_count = parseInt((document.getElementById('past-attendees') as HTMLInputElement).value) || 0;
@@ -1576,7 +1576,7 @@ const AdminPanel = () => {
 
                   if (!title) { showToast('Title is required', 'error'); return; }
 
-                  const eventData = { title, dates, location, event_type, attendees_count, image_url, description, is_public: true };
+                  const eventData = { title, date, location, event_type, attendees_count, image_url, description, is_public: true };
 
                   if (editingPastEvent) {
                     await handleAction(() => updatePastEvent(editingPastEvent.id, eventData), 'Event updated');
