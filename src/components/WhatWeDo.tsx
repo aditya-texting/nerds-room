@@ -3,43 +3,16 @@ import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 
 const WhatWeDo = () => {
-  const { whatWeDoCards, hackathons, workshops, pastEvents, loading, navigate } = useAppData();
+  const { whatWeDoCards, loading, navigate } = useAppData();
   const [isActive, setIsActive] = useState(false);
-  const [animatedStats, setAnimatedStats] = useState<{ [key: number]: number }>({});
   const sectionRef = useRef<HTMLElement>(null);
 
   // Process cards to include real data counts
   const cards = useMemo(() => {
-    const publicHackathons = hackathons.filter(h => h.is_public !== false);
-    const publicWorkshops = workshops.filter(w => w.is_public !== false);
-
-    // Actual count for hackathons
-    const hackathonCount = publicHackathons.length + pastEvents.filter(e => e.event_type?.toLowerCase().includes('hackathon')).length;
-    // Actual count for workshops
-    const workshopCount = publicWorkshops.length;
-
     return whatWeDoCards.map(card => {
-      const title = (card.title || '').toLowerCase();
-      const label = (card.statLabel || '').toLowerCase();
-
-      if (title.includes('hackathon') || label.includes('hosted')) {
-        return { ...card, stat: `${hackathonCount}+` };
-      }
-      // Set stats for workshops
-      if (title.includes('workshop') || label.includes('sessions')) {
-        return { ...card, stat: `${workshopCount}+` };
-      }
-      // Others are still coming soon
-      if (title.includes('community') || label.includes('members')) {
-        return { ...card, stat: `0+` };
-      }
-      if (title.includes('project') || label.includes('shipped')) {
-        return { ...card, stat: `0+` };
-      }
-
-      return card;
+      return { ...card, stat: `0+` };
     });
-  }, [whatWeDoCards, hackathons, pastEvents]);
+  }, [whatWeDoCards]);
 
   useEffect(() => {
     if (loading || !sectionRef.current) return;
@@ -61,48 +34,6 @@ const WhatWeDo = () => {
     return () => observer.disconnect();
   }, [loading]);
 
-  // Handle Animation
-  useEffect(() => {
-    if (!isActive || cards.length === 0) return;
-
-    // Pre-initialize stats to avoid empty object access
-    setAnimatedStats(prev => {
-      if (Object.keys(prev).length === cards.length) return prev;
-      const initial: { [key: number]: number } = {};
-      cards.forEach((_, i) => { initial[i] = 0; });
-      return initial;
-    });
-
-    const duration = 2000;
-    const startTime = performance.now();
-    let frameId: number;
-
-    const parsedTargets = cards.map(card => {
-      const num = parseFloat((card.stat || '').replace(/[^0-9.]/g, ''));
-      return isNaN(num) ? 0 : num;
-    });
-
-    const animate = (time: number) => {
-      const progress = Math.min((time - startTime) / duration, 1);
-      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-
-      const next: { [key: number]: number } = {};
-      parsedTargets.forEach((target, i) => {
-        next[i] = target % 1 === 0 ? Math.floor(target * eased) : target * eased;
-      });
-      setAnimatedStats(next);
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(animate);
-      }
-    };
-
-    frameId = requestAnimationFrame(animate);
-    return () => {
-      if (frameId) cancelAnimationFrame(frameId);
-    };
-  }, [isActive, cards]);
-
   if (loading) {
     return (
       <section id="what-we-do" className="py-20 px-4 md:px-8 max-w-7xl mx-auto bg-gray-50 rounded-3xl my-10 border border-gray-200">
@@ -120,8 +51,7 @@ const WhatWeDo = () => {
   // Helper functions used in render
   const getCardLink = (title: string) => {
     const t = (title || '').toLowerCase();
-    if (t.includes('hackathon')) return '/hackathons';
-    if (t.includes('workshop')) return '/events'; // Redirect to /events as requested
+    if (t.includes('hackathon') || t.includes('workshop')) return '/events';
     return null;
   };
 
@@ -206,15 +136,6 @@ const WhatWeDo = () => {
                 </div>
                 <h3 className="text-2xl font-black text-[#00308F] mb-1 uppercase tracking-tight leading-tight">{card.title}</h3>
                 <p className="font-medium text-sm text-gray-500 mb-4 leading-relaxed">{card.description}</p>
-              </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-3xl font-black text-[#00308F]">
-                  {cards[index].stat.includes('.')
-                    ? (animatedStats[index] || 0).toFixed(1)
-                    : (animatedStats[index] || 0)}
-                  {(card.stat || '').replace(/[\d,.]/g, '')}
-                </span>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{card.statLabel || 'Hosted'}</span>
               </div>
             </div>
           );
