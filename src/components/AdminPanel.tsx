@@ -4691,7 +4691,7 @@ const AdminPanel = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Date *</label>
-                    <input type="text" defaultValue={editingPastEvent?.date || ''} id="past-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Dec 15, 2025" />
+                    <input type="text" defaultValue={editingPastEvent?.dates || ''} id="past-date" className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="e.g., Dec 15, 2025" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
