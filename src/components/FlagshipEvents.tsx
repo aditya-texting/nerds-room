@@ -201,7 +201,7 @@ const FlagshipEvents = () => {
                               animationDelay: `${index * 100 + sIndex * 150}ms`,
                               animation: isActive ? 'slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
                               opacity: 0,
-                              transform: 'translateX(20px)'
+                              transform: 'translateX(40px)'
                             }}
                           >
                             <span className="text-[24px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853]">
