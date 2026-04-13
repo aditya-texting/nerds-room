@@ -3,7 +3,7 @@ import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 
 const WhatWeDo = () => {
-  const { whatWeDoCards, loading, navigate } = useAppData();
+  const { whatWeDoCards, loading } = useAppData();
   const sectionRef = useRef<HTMLElement>(null);
 
   // Process cards to include real data counts
@@ -30,13 +30,6 @@ const WhatWeDo = () => {
       </section>
     );
   }
-
-  // Helper functions used in render
-  const getCardLink = (title: string) => {
-    const t = (title || '').toLowerCase();
-    if (t.includes('hackathon') || t.includes('workshop')) return '/events';
-    return null;
-  };
 
   const isComingSoon = (title: string) => {
     const t = (title || '').toLowerCase();
@@ -66,20 +59,12 @@ const WhatWeDo = () => {
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card, index) => {
-          const cardLink = getCardLink(card.title || '');
           const comingSoon = isComingSoon(card.title || '');
-          const isClickable = !!cardLink;
 
           return (
             <div
               key={index}
-              onClick={() => {
-                if (cardLink) {
-                  navigate(cardLink);
-                  window.scrollTo(0, 0);
-                }
-              }}
-              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] ${isClickable ? 'hover:shadow-[6px_6px_0px_#00308F] cursor-pointer' : 'opacity-75'} transition-all group rounded-xl flex flex-col justify-between h-full`}
+              className={`relative bg-white border-2 border-[#00308F] p-6 shadow-[5px_5px_0px_rgba(0,48,143,0.2)] transition-all group rounded-xl flex flex-col justify-between h-full`}
             >
               {comingSoon && (
                 <div className="absolute top-4 right-4 bg-[#9BE600] text-[#00308F] text-xs font-black px-3 py-1 rounded-full">
