@@ -1,34 +1,18 @@
-import { useEffect, useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { Clock, MapPin, Calendar } from 'lucide-react';
 
 const PastEvents = () => {
   const { pastEvents, loading } = useAppData();
-  // State for active slide index
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  // Auto-rotate slides
-  useEffect(() => {
-    if (loading || !pastEvents || pastEvents.length === 0) return;
-
-    const carouselEvents = pastEvents.filter(e => e.image_url);
-    if (carouselEvents.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setActiveIndex((current) => (current + 1) % carouselEvents.length);
-    }, 3500);
-
-    return () => clearInterval(interval);
-  }, [pastEvents, loading]);
 
   if (loading) {
     return (
       <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
-          <div className="h-[450px] w-full bg-slate-100 animate-pulse rounded-lg" />
-          <div className="space-y-6">
-            <div className="h-16 w-48 bg-slate-100 animate-pulse rounded" />
-            <div className="h-24 w-full bg-slate-100 animate-pulse rounded" />
-            <div className="h-12 w-64 bg-slate-100 animate-pulse rounded" />
+        <div className="flex flex-col gap-12">
+          <div className="h-16 w-64 bg-slate-100 animate-pulse rounded" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-[400px] w-full bg-slate-100 animate-pulse rounded-3xl" />
+            ))}
           </div>
         </div>
       </section>
@@ -37,70 +21,62 @@ const PastEvents = () => {
 
   if (!pastEvents || pastEvents.length === 0) return null;
 
-  // Filter events with images for the carousel
-  const carouselEvents = pastEvents.filter(e => e.image_url);
-  const totalBuilders = pastEvents.reduce((acc, curr) => acc + (curr.attendees_count || 0), 0);
+  const publicPastEvents = pastEvents.filter(e => (e as any).is_public !== false);
+
+  if (publicPastEvents.length === 0) return null;
 
   return (
-    <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
-      <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
-        {/* Image Carousel */}
-        <div className="order-2 md:order-1 relative">
-          <div className="bg-nerdBlue p-1.5 sm:p-2 shadow-hard transform md:-rotate-1 rounded-lg hover:shadow-[8px_8px_0px_0px_#00308F] transition-shadow duration-300">
-            <div className="carousel-container h-[250px] xs:h-[280px] sm:h-[320px] md:h-[400px] lg:h-[450px] w-full bg-black relative rounded overflow-hidden">
-              {carouselEvents.length > 0 ? carouselEvents.map((event, index) => (
-                <img
-                  key={event.id}
-                  src={event.image_url}
-                  className={`slide ${index === activeIndex ? 'active' : ''} absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${index === activeIndex ? 'opacity-100' : 'opacity-0'}`}
-                  alt={event.title}
-                />
-              )) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500 font-mono text-xs">NO_IMAGERY_AVAILABLE</div>
-              )}
-              {/* Overlay Gradient */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 h-24 flex items-end">
-                <div className="text-white">
-                  <h3 className="text-lg font-bold">{carouselEvents[activeIndex]?.title}</h3>
-                  <p className="text-xs text-gray-300">{carouselEvents[activeIndex]?.location}</p>
-                </div>
-              </div>
-            </div>
+    <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto scroll-mt-20">
+      <div className="flex flex-col gap-12">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-nerdBlue uppercase tracking-tighter leading-tight">
+              PAST<br />EVENTS
+            </h2>
+            <p className="text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest mt-3">Our journey of impact so far</p>
+          </div>
+          <div className="hidden sm:flex bg-slate-50 px-6 py-3 rounded-full border border-slate-100 items-center gap-3">
+            <span className="text-nerdBlue font-black text-xl">{publicPastEvents.length}</span>
+            <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">Completed</span>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="order-1 md:order-2 space-y-6 sm:space-y-8">
-          <div>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-nerdBlue inline-block border-b-4 sm:border-b-6 md:border-b-8 border-nerdLime leading-[0.85] pb-2 sm:pb-3">
-              PAST<br />
-              EVENTS
-            </h2>
-          </div>
-
-          <div className="text-base sm:text-lg font-medium text-gray-700 space-y-3 sm:space-y-4">
-            <p className="border-l-4 border-nerdBlue pl-3 sm:pl-4 leading-relaxed">
-              We are tired of boring corporate conferences. We wanted a space where the energy is practical, the people
-              are building, and the ideas are raw.
-            </p>
-            <p className="leading-relaxed">
-              From 24-hour hackathons to intense ideation jams, we've brought together hundreds of students across NCR
-              to build things that actually matter.
-            </p>
-          </div>
-
-          {/* Stats */}
-          <div className="flex gap-4 sm:gap-6 pt-2">
-            <div className="text-center flex-1">
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue">{pastEvents.length}+</span>
-              <span className="text-[10px] xs:text-xs font-bold uppercase text-gray-500 tracking-wide">Events Hosted</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {publicPastEvents.map((event, idx) => (
+            <div 
+              key={idx} 
+              className="group bg-white rounded-3xl overflow-hidden border border-slate-100 hover:border-nerdLime/50 hover:shadow-2xl hover:shadow-nerdBlue/10 transition-all duration-500 flex flex-col h-full"
+            >
+              <div className="aspect-video relative overflow-hidden bg-slate-100">
+                <img 
+                  src={event.image_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'} 
+                  alt={event.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute top-4 left-4">
+                  <span className="bg-white/90 backdrop-blur-md text-nerdBlue text-[10px] font-black px-3 py-1 rounded-full border border-white shadow-sm uppercase tracking-widest">
+                    {event.event_type || 'Workshop'}
+                  </span>
+                </div>
+              </div>
+              <div className="p-6 flex flex-col flex-1">
+                <h3 className="text-xl font-black text-nerdBlue mb-3 group-hover:text-nerdLime transition-colors line-clamp-1">{event.title}</h3>
+                <p className="text-slate-500 text-sm font-medium line-clamp-2 mb-6 flex-1">
+                  {event.description || 'Exploring technology and innovation with the community.'}
+                </p>
+                <div className="flex flex-wrap gap-4 items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-50 pt-6">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar size={12} className="text-nerdLime" />
+                    <span>{event.dates || 'Past Event'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <MapPin size={12} className="text-nerdLime" />
+                    <span>{event.location || 'Delhi, NCR'}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="w-px bg-gray-300 h-10 sm:h-12"></div>
-            <div className="text-center flex-1">
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue">{totalBuilders}+</span>
-              <span className="text-[10px] xs:text-xs font-bold uppercase text-gray-500 tracking-wide">Builders</span>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
