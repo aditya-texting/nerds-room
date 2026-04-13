@@ -63,8 +63,10 @@ const FlagshipEvents = () => {
     navigate
   } = useAppData();
 
-  const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#ECEFF1]', 'bg-[#FFF3E0]', 'bg-[#F3E5F5]'];
-  const zIndices = ['z-10', 'z-20', 'z-30', 'z-40', 'z-50'];
+  const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#ECEFF1]'];
+  const mtMobiles = ['mt-0', 'mt-[25vh]', 'mt-[25vh]'];
+  const mtDesktops = ['lg:mt-[39px]', 'lg:mt-[90px]', 'lg:mt-[39px]'];
+  const zIndices = ['z-10', 'z-20', 'z-30'];
 
   const events: (EventData & { registration_link?: string })[] = useMemo(() => {
     const totalHackathons = hackathons.length + pastEvents.filter(e => e.event_type?.toLowerCase().includes('hackathon')).length;
@@ -98,6 +100,7 @@ const FlagshipEvents = () => {
   }, [contextEvents, totalRegs, totalApprovedRegs, hackathons, pastEvents]);
 
   const [isActive, setIsActive] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -132,13 +135,13 @@ const FlagshipEvents = () => {
   }
 
   return (
-    <section ref={sectionRef} id="events" className="py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden">
+    <section ref={sectionRef} id="events" className="py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden transition-all duration-700">
       <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 mb-4 tracking-tighter uppercase leading-[1.1]">
-            Our <span className="text-nerdBlue">Flagship</span> Events
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
+            Our <span className="font-bold">Flagship Events</span>
           </h2>
-          <p className="text-xs md:text-sm text-slate-400 font-black uppercase tracking-[0.4em]">
+          <p className="text-base md:text-2xl text-gray-600 mt-3">
             Our signature experiences that define excellence
           </p>
         </div>
@@ -155,34 +158,38 @@ const FlagshipEvents = () => {
           )}
 
           {events.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div className="block lg:flex lg:flex-row lg:items-start lg:justify-center lg:gap-[120px]">
               {events.map((event, index) => (
                 <div
                   key={index}
-                  className={`group relative rounded-[2.5rem] p-6 md:p-8 flex flex-col h-full transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 ${event.bgColor} border border-black/5`}
+                  className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} ${mtMobiles[index % mtMobiles.length]} ${mtDesktops[index % mtDesktops.length]} lg:z-auto ${zIndices[index % zIndices.length]} sticky top-[20vh] lg:static transition-all duration-500`}
                 >
                   {/* Event Title/Logo Section */}
-                  <div className="flex flex-col items-center text-center mb-8">
+                  <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
                     {event.logo ? (
-                      <img src={event.logo} alt={event.title} className="h-12 md:h-16 object-contain mb-4" />
+                      <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
+                        <img src={event.logo} alt={event.title} className="object-contain w-full h-full" />
+                      </div>
                     ) : (
-                      <span className="text-2xl md:text-3xl font-black text-black leading-tight mb-2">
+                      <span className="text-2xl md:text-3xl font-black text-black leading-tight">
                         {event.title}
                       </span>
                     )}
                   </div>
 
                   {/* Main Image Container */}
-                  <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl mb-8 group-hover:scale-[1.02] transition-transform duration-700">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
-                      loading="lazy"
-                    />
+                  <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden">
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    </div>
                     
                     {/* Floating Stats - Inspired by GDG Noida */}
-                    <div className="absolute inset-0 p-4 flex flex-col justify-center items-end gap-3 md:gap-4 pointer-events-none">
+                    <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[10%] md:left-[15%] lg:left-[20%] space-y-1.5 md:space-y-2 lg:space-y-2.5 pointer-events-none">
                       {event.stats.map((stat, sIndex) => {
                         const num = parseFloat(stat.value.replace(/[^0-9.]/g, ''));
                         const suffix = stat.value.replace(/[\d,]/g, '');
@@ -190,7 +197,7 @@ const FlagshipEvents = () => {
                         return (
                           <div 
                             key={sIndex} 
-                            className="bg-white/95 backdrop-blur-md rounded-2xl md:rounded-3xl px-4 py-2 md:px-6 md:py-3 flex items-center gap-3 shadow-2xl border border-white/20 transform hover:scale-105 transition-all duration-300"
+                            className="bg-white/95 backdrop-blur-md rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-2 md:px-2.5 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit"
                             style={{ 
                               animationDelay: `${index * 100 + sIndex * 150}ms`,
                               animation: isActive ? 'slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'none',
@@ -198,10 +205,10 @@ const FlagshipEvents = () => {
                               transform: 'translateX(20px)'
                             }}
                           >
-                            <span className="text-2xl md:text-3xl font-black text-[#34A853]">
+                            <span className="text-[20px] md:text-[24px] lg:text-[28px] font-normal text-[#34A853]">
                               <StatCounter target={isNaN(num) ? 0 : num} suffix={suffix} isActive={isActive} />
                             </span>
-                            <span className="text-xs md:text-sm font-black text-gray-800 uppercase tracking-tighter">
+                            <span className="text-[14px] md:text-[16px] lg:text-[18px] font-normal text-black truncate max-w-[120px]">
                               {stat.label}
                             </span>
                           </div>
@@ -211,28 +218,11 @@ const FlagshipEvents = () => {
                   </div>
 
                   {/* Footer Section */}
-                  <div className="mt-auto space-y-4">
-                    <div className="flex items-center justify-center gap-2 text-gray-700 font-bold uppercase tracking-wider text-xs md:text-sm">
-                      <MapPin size={16} className="text-nerdBlue" />
-                      <span>{event.location}</span>
-                    </div>
-
-                    {event.registration_link && (
-                      <a
-                        href={event.registration_link}
-                        target={event.registration_link.startsWith('http') ? "_blank" : "_self"}
-                        rel="noopener noreferrer"
-                        className="block w-full text-center bg-black text-white text-xs md:text-sm font-black py-4 md:py-5 rounded-2xl hover:bg-nerdBlue transition-all uppercase tracking-[0.2em] shadow-xl hover:shadow-nerdBlue/20 active:scale-[0.98]"
-                        onClick={(e) => {
-                          if (event.registration_link && !event.registration_link.startsWith('http')) {
-                            e.preventDefault();
-                            navigate(event.registration_link);
-                          }
-                        }}
-                      >
-                        EXPLORE EVENT
-                      </a>
-                    )}
+                  <div className="flex items-center justify-center gap-1.5 md:gap-2 text-black mt-auto pt-1.5 md:pt-2 pb-4 md:pb-5 lg:pb-6 px-4">
+                    <MapPin size={16} className="shrink-0" />
+                    <span className="text-[14px] md:text-[17px] lg:text-[20px] font-medium text-center leading-tight">
+                      {event.location}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -244,6 +234,23 @@ const FlagshipEvents = () => {
               <p className="text-gray-400 text-sm mt-2">Our team is busy planning the next big thing. Stay tuned!</p>
             </div>
           )}
+        </div>
+
+        {/* Carousel Dots - GDG Style */}
+        <div className="flex justify-center gap-3 mt-6 lg:mt-16">
+          {events.map((_, index) => (
+            <button
+              key={index}
+              className={`relative rounded-full overflow-hidden transition-all duration-300 ${index === currentIndex ? 'w-12 h-3' : 'w-3 h-3'}`}
+              aria-label={`Go to event ${index + 1}`}
+              onClick={() => setCurrentIndex(index)}
+            >
+              <div className="absolute inset-0 bg-gray-300"></div>
+              <div
+                className={`absolute inset-0 bg-gradient-to-r from-[#4285F4] to-[#34A853] origin-left transition-all duration-300 ${index === currentIndex ? 'scale-x-100' : 'scale-x-0'}`}
+              />
+            </button>
+          ))}
         </div>
       </div>
 
