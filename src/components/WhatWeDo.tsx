@@ -4,7 +4,6 @@ import Skeleton from './Skeleton';
 
 const WhatWeDo = () => {
   const { whatWeDoCards, loading, navigate } = useAppData();
-  const [isActive, setIsActive] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   // Process cards to include real data counts
@@ -15,24 +14,8 @@ const WhatWeDo = () => {
   }, [whatWeDoCards]);
 
   useEffect(() => {
-    if (loading || !sectionRef.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsActive(true);
-      },
-      { threshold: 0.05, rootMargin: '0px 0px -10% 0px' }
-    );
-
-    // Initial check
-    const rect = sectionRef.current.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom >= 0) {
-      setIsActive(true);
-    }
-
-    observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, [loading]);
+    window.scrollTo(0, 0);
+  }, []);
 
   if (loading) {
     return (
