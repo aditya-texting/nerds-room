@@ -102,6 +102,15 @@ const Navbar = () => {
                 </svg>
               )}
             </button>
+
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSegbpqFbVYJKHiIXdK8tqGzbOntQGNHaW64qvkGpr9k85lE1Q/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center justify-center bg-nerdBlue text-white font-bold px-6 py-2.5 rounded-lg border border-transparent hover:bg-nerdLime hover:text-nerdBlue transition-all shadow-md hover:shadow-none text-sm tracking-wide"
+            >
+              Partner
+            </a>
           </div>
         </div>
       </nav>
@@ -141,6 +150,16 @@ const Navbar = () => {
               onClick={(e) => handleSmoothScroll(e, '#what-we-do')}
             >
               WHAT WE DO <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
+            </a>
+
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSegbpqFbVYJKHiIXdK8tqGzbOntQGNHaW64qvkGpr9k85lE1Q/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-nerdBlue text-white text-center py-3 rounded-xl hover:bg-nerdLime hover:text-nerdBlue transition-colors font-black"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              BECOME A PARTNER
             </a>
           </div>
         </div>
