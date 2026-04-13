@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const { navigate } = useAppData();
@@ -86,46 +85,23 @@ const Navbar = () => {
               </a>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-4">
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="hidden sm:flex items-center justify-center bg-nerdBlue text-white font-bold px-6 py-2.5 rounded-lg border border-transparent hover:bg-nerdLime hover:text-nerdBlue transition-all shadow-md hover:shadow-none text-sm tracking-wide">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSegbpqFbVYJKHiIXdK8tqGzbOntQGNHaW64qvkGpr9k85lE1Q/viewform?usp=publish-editor"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:flex items-center justify-center bg-nerdBlue text-white font-bold px-6 py-2.5 rounded-lg border border-transparent hover:bg-nerdLime hover:text-nerdBlue transition-all shadow-md hover:shadow-none text-sm tracking-wide"
-              >
-                Partner
-              </a>
-
-              {/* Hamburger */}
-              <button
-                id="mobile-menu-btn"
-                className="lg:hidden text-nerdBlue p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
-              </button>
-            </div>
+            {/* Hamburger */}
+            <button
+              id="mobile-menu-btn"
+              className="lg:hidden text-nerdBlue p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </nav>
@@ -165,16 +141,6 @@ const Navbar = () => {
               onClick={(e) => handleSmoothScroll(e, '#what-we-do')}
             >
               WHAT WE DO <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
-            </a>
-
-            <a
-              href="https://docs.google.com/forms/d/e/1FAIpQLSegbpqFbVYJKHiIXdK8tqGzbOntQGNHaW64qvkGpr9k85lE1Q/viewform?usp=publish-editor"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-nerdBlue text-white text-center py-3 rounded-xl hover:bg-nerdLime hover:text-nerdBlue transition-colors font-black"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              BECOME A PARTNER
             </a>
           </div>
         </div>
