@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
-import { Clock, Trophy, MapPin, Globe, Users, Zap, Twitter, Linkedin, Github, Instagram, CheckCircle, Calendar, ExternalLink } from 'lucide-react';
 
 const OtherEventDetailPage = () => {
     const { otherEvents, navigate, loading: contextLoading } = useAppData();

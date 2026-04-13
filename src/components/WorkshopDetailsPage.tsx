@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
-import { Clock, Users, Calendar, MapPin, ArrowRight, MessageCircle } from 'lucide-react';
 
 const WorkshopDetailsPage = () => {
     const { workshops: dbWorkshops, loading, navigate } = useAppData();
