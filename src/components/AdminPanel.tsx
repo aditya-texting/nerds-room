@@ -1516,7 +1516,7 @@ const AdminPanel = () => {
       {/* Add/Edit Past Event Modal */}
       {
         (showAddPastEvent || editingPastEvent) && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div key={editingPastEvent?.id || 'new'} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800">{editingPastEvent ? 'Edit Past Event' : 'Add Past Event'}</h2>
@@ -1570,7 +1570,7 @@ const AdminPanel = () => {
                   const dates = (document.getElementById('past-date') as HTMLInputElement).value;
                   const location = (document.getElementById('past-location') as HTMLInputElement).value;
                   const event_type = (document.getElementById('past-type') as HTMLInputElement).value;
-                  const attendees_count = parseInt((document.getElementById('past-attendees') as HTMLInputElement).value);
+                  const attendees_count = parseInt((document.getElementById('past-attendees') as HTMLInputElement).value) || 0;
                   const image_url = (document.getElementById('past-image') as HTMLInputElement).value;
                   const description = (document.getElementById('past-desc') as HTMLTextAreaElement).value;
 

@@ -814,17 +814,20 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
 
   const addPastEvent = async (event: Omit<PastEvent, 'id'>) => {
     const { error } = await supabase.from('past_events').insert([event]);
-    if (!error) fetchPastEvents();
+    if (error) throw error;
+    await fetchPastEvents();
   };
 
   const updatePastEvent = async (id: number, updates: Partial<PastEvent>) => {
     const { error } = await supabase.from('past_events').update(updates).eq('id', id);
-    if (!error) fetchPastEvents();
+    if (error) throw error;
+    await fetchPastEvents();
   };
 
   const deletePastEvent = async (id: number) => {
     const { error } = await supabase.from('past_events').delete().eq('id', id);
-    if (!error) fetchPastEvents();
+    if (error) throw error;
+    await fetchPastEvents();
   };
 
   // Other Events
