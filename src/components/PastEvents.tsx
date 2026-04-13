@@ -36,14 +36,12 @@ const PastEvents = () => {
     );
   }
 
-  if (!pastEvents || pastEvents.length === 0) return null;
-
   // Filter events with images for the carousel    
-  const carouselEvents = pastEvents.filter(e => e.image_url);
-  const totalBuilders = pastEvents.reduce((acc, curr) => acc + (curr.attendees_count || 0), 0);       
+  const carouselEvents = pastEvents?.filter(e => e.image_url) || [];
+  const totalBuilders = pastEvents?.reduce((acc, curr) => acc + (curr.attendees_count || 0), 0) || 0;       
 
   return (
-    <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+    <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto scroll-mt-20">
       <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
         {/* Image Carousel */}
         <div className="order-2 md:order-1 relative">
@@ -57,15 +55,21 @@ const PastEvents = () => {
                   alt={event.title}
                 />
               )) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500 font-mono text-xs">NO_IMAGERY_AVAILABLE</div>
+                <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 font-mono text-xs gap-4 p-8 text-center bg-gray-900/50">
+                  <div className="text-4xl">📸</div>
+                  <span>NO_PAST_EVENTS_DATA_FOUND</span>
+                  <p className="text-[10px] text-gray-600 max-w-[200px]">Add events in the admin panel to see them here.</p>
+                </div>
               )}
               {/* Overlay Gradient */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 h-24 flex items-end">
-                <div className="text-white">       
-                  <h3 className="text-lg font-bold">{carouselEvents[activeIndex]?.title}</h3>
-                  <p className="text-xs text-gray-300">{carouselEvents[activeIndex]?.location}</p>    
+              {carouselEvents.length > 0 && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-6 h-24 flex items-end">
+                  <div className="text-white">       
+                    <h3 className="text-lg font-bold">{carouselEvents[activeIndex]?.title}</h3>
+                    <p className="text-xs text-gray-300">{carouselEvents[activeIndex]?.location}</p>    
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -93,7 +97,7 @@ const PastEvents = () => {
           {/* Stats */}
           <div className="flex gap-4 sm:gap-6 pt-2">
             <div className="text-center flex-1">   
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue">{pastEvents.length}+</span>
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue">{(pastEvents?.length || 0)}+</span>
               <span className="text-[10px] xs:text-xs font-bold uppercase text-gray-500 tracking-wide">Events Hosted</span>
             </div>
             <div className="w-px bg-gray-300 h-10 sm:h-12"></div>
