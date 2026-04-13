@@ -1,5 +1,5 @@
 import { useAppData } from '../context/AppDataContext';
-import { Clock, MapPin, Calendar } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 
 const PastEvents = () => {
   const { pastEvents, loading } = useAppData();
