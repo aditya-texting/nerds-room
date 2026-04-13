@@ -5,7 +5,7 @@ import { Calendar, Clock, MapPin } from 'lucide-react';
 import { useAppData } from '../context/AppDataContext';
 
 const EventsPage = () => {
-    const { pastEvents, loading, navigate } = useAppData();
+    const { pastEvents, loading } = useAppData();
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -113,7 +113,7 @@ const EventsPage = () => {
                                                 <div className="flex flex-wrap gap-4 items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-t border-slate-50 pt-6">
                                                     <div className="flex items-center gap-1.5">
                                                         <Clock size={12} className="text-nerdLime" />
-                                                        <span>{event.date || 'Past Event'}</span>
+                                                        <span>{event.dates || 'Past Event'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1.5">
                                                         <MapPin size={12} className="text-nerdLime" />
