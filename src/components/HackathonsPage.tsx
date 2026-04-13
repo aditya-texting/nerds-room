@@ -1,79 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
-import { QrCode, Calendar } from 'lucide-react';
-import { QRCodeCanvas } from 'qrcode.react';
-
-interface Hackathon {
-  id: number;
-  title: string;
-  slug: string;
-  organizer: string;
-  timeLeft?: string;
-  mode: 'Online' | 'In-person';
-  prize: string;
-  participants?: string;
-  tags: string[];
-  dates?: string;
-  logo?: string;
-  status: 'upcoming' | 'open' | 'ended';
-  is_featured: boolean;
-  registration_link?: string;
-  registration_type?: 'external' | 'managed';
-  managed_form_id?: string;
-  managed_by_nerds?: boolean;
-  length_category?: 'short' | 'medium' | 'long';
-  is_public?: boolean;
-  description?: string;
-  about?: string;
-}
-
-// Icons Component
-const Icons = {
-  X: ({ className }: { className?: string }) => (
-    <svg className={className || "w-6 h-6"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  )
-};
-
+import { Calendar } from 'lucide-react';
 
 const HackathonsPage = () => {
-  const { hackathons: dbHackathons, navigate } = useAppData();
-
-  // Map database hackathons to component format
-  const hackathons: Hackathon[] = useMemo(() => dbHackathons
-    .filter(h => h.is_public !== false)
-    .sort((a, b) => {
-      if (a.is_featured && !b.is_featured) return -1;
-      if (!a.is_featured && b.is_featured) return 1;
-      return 0;
-    })
-    .map(h => ({
-      id: h.id,
-      title: h.title,
-      slug: h.slug,
-      organizer: h.organizer,
-      timeLeft: h.time_left || 'TBA',
-      mode: h.mode,
-      prize: h.prize,
-      participants: h.participants || '0',
-      tags: h.tags || [],
-      dates: h.dates || 'TBA',
-      logo: h.logo_url,
-      status: h.status,
-      is_featured: !!h.is_featured,
-      registration_link: h.registration_link,
-      registration_type: h.registration_type || 'external',
-      managed_form_id: h.managed_form_id,
-      managed_by_nerds: h.managed_by_nerds,
-      length_category: h.length_category,
-      is_public: h.is_public
-    })), [dbHackathons]);
-
-  const [showTicket, setShowTicket] = useState(false);
-  const [viewingTicket, setViewingTicket] = useState<any>(null);
+  const { navigate } = useAppData();
 
   return (
     <div className="min-h-screen bg-slate-50">

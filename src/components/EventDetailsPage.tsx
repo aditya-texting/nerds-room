@@ -2,9 +2,6 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
-import { Clock, Trophy, ShieldCheck, Globe, Users, Zap, QrCode, Twitter, Linkedin, Github, Instagram } from 'lucide-react';
-import { QRCodeCanvas } from 'qrcode.react';
-import ParticipantBadge from './ParticipantBadge';
 
 // --- Types ---
 interface Hackathon {
@@ -58,22 +55,10 @@ const LoadingSkeleton = memo(() => (
   </div>
 ));
 
-const BadgeViewWrapper = memo(({ hackathon, onClose }: { hackathon: any, onClose: () => void }) => {
-  return (
-    <ParticipantBadge
-      hackathonId={hackathon.id}
-      hackathonTitle={hackathon.title}
-      badgeImageUrl={hackathon.badge_image_url}
-      onClose={onClose}
-    />
-  );
-});
-
 // --- Main Page Component ---
 
 const EventDetailsPage = () => {
   const { hackathons: dbHackathons, loading, navigate } = useAppData();
-  const [activeTab, setActiveTab] = useState('overview');
   const [hackathon, setHackathon] = useState<Hackathon | null>(null);
 
   // Derive registration state from AppData (real-time) with useMemo for performance
