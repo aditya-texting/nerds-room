@@ -132,22 +132,24 @@ const FlagshipEvents = () => {
   }
 
   return (
-    <section ref={sectionRef} id="events" className="py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden transition-all duration-700">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
+    <section ref={sectionRef} id="events" className="py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden transition-all duration-1000">
+      <div 
+        className={`max-w-[1400px] mx-auto transition-all duration-1000 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+      >
+        <div className="text-center mb-12 lg:mb-20">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl text-black tracking-tight">
             Our <span className="font-bold">Flagship Events</span>
           </h2>
-          <p className="text-base md:text-2xl text-gray-600 mt-3">
-            Our signature experiences that define excellence
+          <p className="text-base md:text-2xl text-gray-600 mt-4 max-w-2xl mx-auto">
+            Our signature experiences that define excellence in technology and community
           </p>
         </div>
 
         <div className="relative">
           {maintenanceMode && (
-            <div className="absolute inset-0 z-[50] bg-white/95 backdrop-blur-md flex items-center justify-center p-6 text-center rounded-[40px]">
+            <div className="absolute inset-0 z-[50] bg-white/95 backdrop-blur-sm flex items-center justify-center p-6 text-center rounded-[40px]">
               <div className="max-w-md">
-                <div className="text-6xl mb-6">🛠️</div>
+                <div className="text-6xl mb-6 animate-bounce">🛠️</div>
                 <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tight">EVENTS UNAVAILABLE</h1>
                 <p className="text-gray-600 font-bold mb-8">Scheduling maintenance in progress. Check back soon!</p>
               </div>
@@ -159,7 +161,15 @@ const FlagshipEvents = () => {
               {events.map((event, index) => (
                 <div
                   key={index}
-                  className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} ${index > 0 ? 'mt-[25vh] lg:mt-[90px]' : 'mt-0 lg:mt-[39px]'} lg:z-auto ${zIndices[index % zIndices.length]} sticky top-[20vh] lg:static transition-all duration-500`}
+                  id={`flagship-card-${index}`}
+                  className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} 
+                    ${index === 0 ? 'mt-0 lg:mt-[39px]' : index === 1 ? 'mt-[25vh] lg:mt-[90px]' : 'mt-[25vh] lg:mt-[39px]'} 
+                    lg:z-auto ${zIndices[index % zIndices.length]} sticky top-[20vh] lg:static transition-all duration-700
+                    ${isActive ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95'}`}
+                  style={{ 
+                    transitionDelay: `${index * 200}ms`,
+                    zIndex: (index + 1) * 10 
+                  }}
                 >
                   {/* Event Title/Logo Section */}
                   <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
@@ -233,18 +243,27 @@ const FlagshipEvents = () => {
           )}
         </div>
 
-        {/* Carousel Dots - GDG Style */}
-        <div className="flex justify-center gap-3 mt-6 lg:mt-16">
+        <div className="flex justify-center gap-3 mt-12 lg:mt-16">
           {events.map((_, index) => (
             <button
               key={index}
-              className={`relative rounded-full overflow-hidden transition-all duration-300 ${index === currentIndex ? 'w-12 h-3' : 'w-3 h-3'}`}
+              className={`relative rounded-full overflow-hidden transition-all duration-500 ${index === currentIndex ? 'w-12 h-2.5' : 'w-2.5 h-2.5 hover:bg-gray-400'}`}
               aria-label={`Go to event ${index + 1}`}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => {
+                setCurrentIndex(index);
+                const element = document.getElementById(`flagship-card-${index}`);
+                if (element) {
+                  const offset = window.innerHeight * 0.15;
+                  window.scrollTo({
+                    top: element.offsetTop - offset,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
             >
-              <div className="absolute inset-0 bg-gray-300"></div>
+              <div className="absolute inset-0 bg-gray-200"></div>
               <div
-                className={`absolute inset-0 bg-gradient-to-r from-[#4285F4] to-[#34A853] origin-left transition-all duration-300 ${index === currentIndex ? 'scale-x-100' : 'scale-x-0'}`}
+                className={`absolute inset-0 bg-gradient-to-r from-[#4285F4] via-[#34A853] to-[#FBBC05] origin-left transition-all duration-500 ${index === currentIndex ? 'scale-x-100' : 'scale-x-0'}`}
               />
             </button>
           ))}
@@ -255,11 +274,13 @@ const FlagshipEvents = () => {
         @keyframes slideInRight {
           from {
             opacity: 0;
-            transform: translateX(40px);
+            transform: translateX(40px) scale(0.9);
+            filter: blur(4px);
           }
           to {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateX(0) scale(1);
+            filter: blur(0);
           }
         }
       `}</style>
