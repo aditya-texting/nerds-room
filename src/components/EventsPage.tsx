@@ -19,13 +19,6 @@ const EventsPage = () => {
     const publicFlagship = flagshipEvents.filter(e => (e as any).is_public !== false);
     const publicOtherEvents = (otherEvents || []).filter(e => e.is_public !== false);
 
-    const featuredEvents = [
-        ...publicHackathons.filter(h => h.is_featured).map(h => ({ ...h, type: 'hackathon' as const })),
-        ...publicWorkshops.filter(w => (w as any).is_featured).map(w => ({ ...w, type: 'workshop' as const })),
-        ...publicFlagship.filter(f => (f as any).is_featured).map(f => ({ ...f, type: 'flagship' as const })),
-        ...publicOtherEvents.filter(o => o.is_featured).map(o => ({ ...o, type: 'other' as const })),
-    ];
-
     const tabs = [
         { id: 'all', label: 'All', count: publicHackathons.length + publicWorkshops.length + publicFlagship.length + publicOtherEvents.length + pastEvents.length },
         { id: 'hackathons', label: 'Hackathons', count: publicHackathons.length },
@@ -110,99 +103,32 @@ const EventsPage = () => {
                 </div>
             </header>
 
-            {/* ── FEATURED & CALENDAR SECTION ── */}
+            {/* ── EVENT CALENDAR SECTION ── */}
             <section className="bg-white border-b border-slate-100">
                 <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 md:py-16">
-                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+                    <div className="flex flex-col gap-8">
                         {/* Luma Calendar Embed */}
-                        <div className="lg:w-1/2 flex flex-col">
-                            <div className="mb-6">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Calendar className="text-nerdBlue" size={20} />
-                                    <h2 className="text-xl md:text-2xl font-bold text-nerdBlue">Event Calendar</h2>
+                        <div className="w-full flex flex-col">
+                            <div className="mb-6 text-center">
+                                <div className="flex items-center justify-center gap-2 mb-2">
+                                    <Calendar className="text-nerdBlue" size={24} />
+                                    <h2 className="text-2xl md:text-3xl font-bold text-nerdBlue">Event Calendar</h2>
                                 </div>
-                                <p className="text-slate-500 text-xs md:text-sm font-medium">Check out our upcoming schedule and register directly on Luma.</p>
+                                <p className="text-slate-500 text-sm md:text-base font-medium">Check out our upcoming schedule and register directly on Luma.</p>
                             </div>
-                            <div className="flex-1 min-h-[450px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white relative group">
+                            <div className="w-full min-h-[600px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white relative group">
                                 <div className="absolute inset-0 bg-slate-50 animate-pulse -z-10" />
                                 <iframe
                                     src="https://luma.com/embed/calendar/cal-RnzTQXOxDIzD7SU/events"
                                     width="100%"
-                                    height="100%"
+                                    height="600"
                                     frameBorder="0"
                                     style={{ border: 'none' }}
                                     allowFullScreen
                                     aria-hidden="false"
                                     tabIndex={0}
-                                    className="relative z-10"
+                                    className="relative z-10 w-full"
                                 />
-                            </div>
-                        </div>
-
-                        {/* Featured Events Cards */}
-                        <div className="lg:w-1/2 flex flex-col">
-                            <div className="mb-6">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-nerdLime animate-pulse" />
-                                        <h2 className="text-xl md:text-2xl font-bold text-nerdBlue">Featured Events</h2>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded">
-                                        {featuredEvents.length} Selected
-                                    </span>
-                                </div>
-                                <p className="text-slate-500 text-xs md:text-sm font-medium">Handpicked high-impact experiences from our community.</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                                {featuredEvents.length > 0 ? (
-                                    featuredEvents.slice(0, 4).map((event, idx) => (
-                                        <div
-                                            key={`featured-${idx}`}
-                                            onClick={() => {
-                                                if (event.type === 'hackathon') navigate(`/hackathons/${event.slug}`);
-                                                else if (event.type === 'workshop') navigate(`/workshops/${event.slug}`);
-                                                else if (event.type === 'other') navigate(`/other-events/${event.slug}`);
-                                                else if (event.type === 'flagship' && (event as any).registration_link) {
-                                                    const link = (event as any).registration_link;
-                                                    if (link.startsWith('http')) window.open(link, '_blank');
-                                                    else navigate(link);
-                                                }
-                                            }}
-                                            className="group bg-slate-50/50 rounded-2xl p-4 border border-slate-100 hover:border-nerdLime/40 hover:bg-white hover:shadow-xl hover:shadow-nerdBlue/5 transition-all duration-300 cursor-pointer flex flex-col"
-                                        >
-                                            <div className="aspect-video rounded-xl overflow-hidden mb-4 bg-slate-200 relative">
-                                                <img
-                                                    src={(event as any).banner_url || (event as any).image_url || (event as any).image}
-                                                    alt={event.title}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                                />
-                                                <div className="absolute top-2 right-2">
-                                                    <span className="bg-white/90 backdrop-blur-sm text-nerdBlue text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-white shadow-sm">
-                                                        {event.type}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <h3 className="font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-nerdBlue transition-colors mb-2">
-                                                {event.title}
-                                            </h3>
-                                            <div className="mt-auto flex items-center justify-between">
-                                                <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-medium">
-                                                    <Calendar size={10} className="text-slate-300" />
-                                                    <span>{(event as any).date || (event as any).dates || 'TBA'}</span>
-                                                </div>
-                                                <ArrowRight size={12} className="text-slate-300 group-hover:text-nerdLime transition-colors group-hover:translate-x-1" />
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="col-span-2 py-12 flex flex-col items-center justify-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                                            <Calendar className="text-slate-200" size={24} />
-                                        </div>
-                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">More coming soon</p>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
