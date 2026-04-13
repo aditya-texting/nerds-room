@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { Calendar } from 'lucide-react';
-import PastEvents from './PastEvents';
 
 const EventsPage = () => {
     useEffect(() => {
@@ -13,12 +12,12 @@ const EventsPage = () => {
         <div className="min-h-screen bg-[#f8fafc]">
             <Navbar />
 
-            {/* ── HERO HEADER ── */}
+            {/* ── HERO HEADER ── */}      
             <header
                 className="relative pt-24 lg:pt-32 pb-12 lg:pb-20 px-4 sm:px-6 md:px-8 overflow-hidden bg-nerdBlue"
                 style={{
                     backgroundImage: 'url("https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=80")',
-                    backgroundSize: 'cover',
+                    backgroundSize: 'cover',       
                     backgroundPosition: 'center',
                 }}
             >
@@ -26,11 +25,11 @@ const EventsPage = () => {
                 <div className="absolute inset-0 z-0 bg-black/20"></div>
 
                 <div className="max-w-5xl mx-auto text-center relative z-10 px-4">
-                    <span className="inline-block bg-nerdLime/20 text-nerdLime text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full mb-4 border border-nerdLime/30 backdrop-blur-md">
+                    <span className="inline-block bg-nerdLime/20 text-nerdLime text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full mb-4 border border-nerdLime/30 backdrop-blur-md">  
                         Nerds Room Events
                     </span>
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight leading-[1.2]">
-                        Build. Learn. <br />
+                        Build. Learn. <br />       
                         <span className="text-nerdLime">Connect.</span>
                     </h1>
 
@@ -43,35 +42,30 @@ const EventsPage = () => {
             {/* ── EVENT CALENDAR SECTION ── */}
             <section className="bg-white border-b border-slate-100">
                 <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 md:py-16">
-                    <div className="flex flex-col gap-12">
+                    <div className="flex flex-col gap-8">
                         {/* Luma Calendar Embed */}
                         <div className="w-full flex flex-col">
                             <div className="mb-6 text-center">
                                 <div className="flex items-center justify-center gap-2 mb-2">
                                     <Calendar className="text-nerdBlue" size={24} />
-                                    <h2 className="text-2xl md:text-3xl font-bold text-nerdBlue uppercase tracking-tighter">Event Calendar</h2>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-nerdBlue">Event Calendar</h2>
                                 </div>
                                 <p className="text-slate-500 text-sm md:text-base font-medium">Check out our upcoming schedule and register directly on Luma.</p>
                             </div>
-                            <div className="w-full min-h-[600px] rounded-3xl overflow-hidden border-2 border-slate-100 shadow-xl shadow-slate-200/50 bg-white relative group">
-                                <div className="absolute inset-0 bg-slate-50 animate-pulse -z-10" />
+                            <div className="w-full min-h-[600px] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white relative group"> 
+                                <div className="absolute inset-0 bg-slate-50 animate-pulse -z-10" />  
                                 <iframe
-                                    src="https://luma.com/embed/calendar/cal-RnzTQXOxDIzD7SU/events"
-                                    width="100%"
-                                    height="600"
+                                    src="https://luma.com/embed/calendar/cal-RnzTQXOxDIzD7SU/events"  
+                                    width="100%"   
+                                    height="600"   
                                     frameBorder="0"
                                     style={{ border: 'none' }}
                                     allowFullScreen
                                     aria-hidden="false"
-                                    tabIndex={0}
+                                    tabIndex={0}   
                                     className="relative z-10 w-full"
                                 />
                             </div>
-                        </div>
-
-                        {/* Use the shared PastEvents component */}
-                        <div className="w-full pt-12 border-t border-slate-100">
-                            <PastEvents />
                         </div>
                     </div>
                 </div>
