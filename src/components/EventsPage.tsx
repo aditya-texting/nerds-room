@@ -2,12 +2,9 @@ import { useEffect } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { Calendar } from 'lucide-react';
-import { useAppData } from '../context/AppDataContext';
 import PastEvents from './PastEvents';
 
 const EventsPage = () => {
-    const { loading } = useAppData();
-
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
