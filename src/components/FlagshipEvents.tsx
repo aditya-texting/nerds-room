@@ -1,9 +1,8 @@
-// v1.5 - Enhanced Borders & Consistent 3-Card Display
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 
 interface EventData {
   title: string;
@@ -18,12 +17,18 @@ interface EventData {
   bgColor: string;
 }
 
+
 const CountUp = ({ value }: { value: string }) => {
     const [displayValue, setDisplayValue] = useState(0);
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true, amount: 0.5 });
+    
     const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
     const suffix = value.replace(/[0-9]/g, '');
 
     useEffect(() => {
+        if (!isInView) return;
+
         let start = 0;
         const duration = 2000;
         const increment = target / (duration / 16);
@@ -39,21 +44,36 @@ const CountUp = ({ value }: { value: string }) => {
         }, 16);
 
         return () => clearInterval(timer);
-    }, [target]);
+    }, [target, isInView]);
 
-    return <span>{displayValue.toLocaleString()}{suffix}</span>;
+    return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
 };
 
-const Card = ({ event, index }: { event: EventData, index: number }) => {
+const Card = ({ event, index, isMobile }: { event: EventData, index: number, isMobile?: boolean }) => {
   const isLower = index % 2 !== 0;
-
+  
+  // Mobile Stacking Logic from gdg.html
+  // z-indices: 10, 20, 30...
+  const zShift = [10, 20, 30, 40, 50];
+  const mobileZIndex = zShift[index % zShift.length];
+  
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -30 }}
-      transition={{ delay: index * 0.1 }}
-      className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} transition-transform duration-300 hover:scale-[1.02] ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}`}
+      initial={isMobile ? { opacity: 0, y: 50 } : { opacity: 0, y: 30 }}
+      whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
+      animate={!isMobile ? { opacity: 1, y: 0 } : undefined}
+      exit={!isMobile ? { opacity: 0, y: -30 } : undefined}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-100px" }}
+      className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
+        w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
+        h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
+        ${event.bgColor} transition-transform duration-300 hover:scale-[1.02]
+        ${isMobile ? `sticky top-[20vh] z-[${mobileZIndex}]` : 'lg:static lg:z-auto'}
+        ${isMobile && index > 0 ? 'mt-[25vh]' : 'mt-0'}
+        ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
+      `}
+      style={isMobile ? { zIndex: mobileZIndex } : {}}
     >
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
         {event.logo ? (
@@ -114,6 +134,15 @@ const FlagshipEvents = () => {
   } = useAppData();
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobileView = windowWidth < 1024;
 
   const events = useMemo(() => {
     return contextEvents
@@ -155,15 +184,16 @@ const FlagshipEvents = () => {
   const numPages = Math.ceil(events.length / 3);
 
   useEffect(() => {
-    if (events.length <= 3) return;
+    if (isMobileView || events.length <= 3) return;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % numPages);
     }, 6000);
     return () => clearInterval(interval);
-  }, [events.length, numPages]);
+  }, [events.length, numPages, isMobileView]);
 
   const visibleEvents = useMemo(() => {
     if (events.length === 0) return [];
+    if (isMobileView) return events; // Show all for stacking on mobile
     if (events.length <= 3) return events;
     const start = activeIndex * 3;
     let sliced = events.slice(start, start + 3);
@@ -171,7 +201,7 @@ const FlagshipEvents = () => {
         sliced = [...sliced, ...events.slice(0, 3 - sliced.length)];
     }
     return sliced;
-  }, [events, activeIndex]);
+  }, [events, activeIndex, isMobileView]);
 
   if (loading) {
     return (
@@ -200,25 +230,35 @@ const FlagshipEvents = () => {
       </div>
 
       <div className="relative w-full flex justify-center min-h-[583px]">
-        <div className="flex flex-col lg:flex-row items-start justify-center gap-12 lg:gap-[120px] w-full max-w-7xl">
-            <AnimatePresence mode="wait">
-                <motion.div 
-                    key={activeIndex}
-                    className="flex flex-col lg:flex-row gap-12 lg:gap-[120px] w-full justify-center"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 1.05 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    {visibleEvents.map((event, index) => (
-                        <Card key={`${activeIndex}-${index}`} index={index} event={event} />
-                    ))}
-                </motion.div>
-            </AnimatePresence>
-        </div>
+        {isMobileView ? (
+            // Small Screen: Stacking Scroll (from gdg.html)
+            <div className="flex flex-col gap-0 w-full max-w-7xl pb-[20vh]">
+                {visibleEvents.map((event, index) => (
+                    <Card key={event.id} index={index} event={event} isMobile={true} />
+                ))}
+            </div>
+        ) : (
+            // Large Screen: Slider/Carousel
+            <div className="flex flex-row items-start justify-center gap-[120px] w-full max-w-7xl">
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={activeIndex}
+                        className="flex flex-row gap-[120px] w-full justify-center"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        {visibleEvents.map((event, index) => (
+                            <Card key={`${activeIndex}-${index}`} index={index} event={event} isMobile={false} />
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        )}
       </div>
 
-      {events.length > 3 && (
+      {!isMobileView && events.length > 3 && (
         <div className="flex justify-center gap-3 mt-12 lg:mt-16">
             {Array.from({ length: numPages }).map((_, i) => (
                 <button
