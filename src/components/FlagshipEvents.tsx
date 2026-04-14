@@ -179,16 +179,18 @@ const FlagshipEvents = () => {
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
   useLayoutEffect(() => {
-    if (!isMobileView || events.length === 0) return;
+    if (!isMobileView || events.length === 0 || !containerRef.current) return;
 
     const ctx = gsap.context(() => {
-        const wrappers = gsap.utils.toArray(".f-card-wrapper");
-        const cards = gsap.utils.toArray(".f-card");
+        const wrappers = gsap.utils.toArray<HTMLElement>(".f-card-wrapper");
+        const cards = gsap.utils.toArray<HTMLElement>(".f-card");
 
-        wrappers.forEach((wrapper: any, i: number) => {
-            const card = cards[i] as HTMLElement;
+        wrappers.forEach((wrapper, i) => {
+            const card = cards[i];
+            if (!card) return;
+
             let scaleValue = 1, rotationXValue = 0;
-            if (i !== cards.length - 1) {
+            if (i !== wrappers.length - 1) {
                 scaleValue = 0.9 + 0.025 * i;
                 rotationXValue = -10;
             }
@@ -200,20 +202,30 @@ const FlagshipEvents = () => {
                 ease: "none",
                 scrollTrigger: {
                     trigger: wrapper,
-                    start: `top ${60 + 10 * i}`,
-                    end: "bottom 550",
-                    endTrigger: ".f-cards-container",
+                    start: `top ${80 + 10 * i}`,
+                    end: "bottom 450", 
+                    endTrigger: containerRef.current,
                     scrub: true,
-                    pin: true,
+                    pin: wrapper,
                     pinSpacing: false,
-                    id: `card-${i+1}`
+                    id: `card-${i+1}`,
+                    onRefresh: (self) => {
+                        // Ensure pinning doesn't break on resize
+                        if (!isMobileView) self.kill();
+                    }
                 }
             });
         });
-    }, containerRef);
 
-    return () => ctx.revert();
-  }, [isMobileView, events]);
+        // Forced refresh for dynamic content
+        ScrollTrigger.refresh();
+    }, containerRef); // Scope to containerRef
+
+    return () => {
+        ctx.revert();
+        ScrollTrigger.getAll().forEach(st => st.kill());
+    };
+  }, [isMobileView, events, events.length]);
 
   const numPages = Math.ceil(events.length / 3);
 
