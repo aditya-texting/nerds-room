@@ -1,9 +1,9 @@
-// v1.3 - Precise Sizing from gdg.html
-import { useState, useMemo } from 'react';
+// v1.4 - Discrete Auto-Slider with Counting Animations & Card Borders
+import { useState, useMemo, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface EventData {
   title: string;
@@ -18,14 +18,41 @@ interface EventData {
   bgColor: string;
 }
 
+const CountUp = ({ value }: { value: string }) => {
+    const [displayValue, setDisplayValue] = useState(0);
+    const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
+    const suffix = value.replace(/[0-9]/g, '');
+
+    useEffect(() => {
+        let start = 0;
+        const duration = 2000; // 2 seconds
+        const increment = target / (duration / 16);
+        
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                setDisplayValue(target);
+                clearInterval(timer);
+            } else {
+                setDisplayValue(Math.floor(start));
+            }
+        }, 16);
+
+        return () => clearInterval(timer);
+    }, [target]);
+
+    return <span>{displayValue.toLocaleString()}{suffix}</span>;
+};
+
 const Card = ({ event, index }: { event: EventData, index: number }) => {
-  // Stagger effect from gdg.html: middle card is lower
-  // HTML uses mt-[39px] for card1/3 and mt-[90px] for card2
   const isLower = index % 2 !== 0;
 
   return (
-    <div 
-      className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} transition-transform duration-300 hover:scale-[1.02] ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}`}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={`rounded-[20px] shadow-xl border border-black/5 flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} transition-transform duration-300 hover:scale-[1.02] ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}`}
     >
       {/* Event Title/Logo Section */}
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
@@ -42,7 +69,7 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
 
       {/* Main Image Container */}
       <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
-        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner">
+        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-black/5">
           <img
             src={event.image}
             alt={event.title}
@@ -50,18 +77,18 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
           />
         </div>
 
-        {/* Floating Stats - Precisely aligned to gdg.html */}
+        {/* Floating Stats */}
         <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[30%] md:left-[32%] lg:left-[35%] space-y-1.5 md:space-y-2 lg:space-y-2.5">
           {event.stats.map((stat: any, sIndex: number) => (
             <motion.div
               key={sIndex}
-              className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-2 md:px-2.5 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit"
+              className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-black/5 w-fit"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * sIndex }}
             >
               <span className="text-[24px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853]">
-                {stat.value}
+                <CountUp value={stat.value} />
               </span>
               <span className="text-[16px] md:text-[19px] lg:text-[22px] font-normal text-black truncate">
                 {stat.label}
@@ -78,7 +105,7 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
           {event.location}
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -87,11 +114,10 @@ const FlagshipEvents = () => {
     flagshipEvents: contextEvents,
     totalRegs,
     totalApprovedRegs,
-    maintenanceMode,
     loading
   } = useAppData();
 
-  const [isPaused, setIsPaused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const events = useMemo(() => {
     return contextEvents
@@ -130,17 +156,29 @@ const FlagshipEvents = () => {
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // Double the events for seamless marquee
-  const marqueeEvents = useMemo(() => [...events, ...events], [events]);
+  // Discrete Auto-Slider Logic
+  useEffect(() => {
+    if (events.length <= 3) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % Math.ceil(events.length / 3));
+    }, 5000); // Change every 5 seconds
+    return () => clearInterval(interval);
+  }, [events.length]);
+
+  const visibleEvents = useMemo(() => {
+    if (events.length <= 3) return events;
+    const start = activeIndex * 3;
+    return events.slice(start, start + 3);
+  }, [events, activeIndex]);
 
   if (loading) {
     return (
       <section className="py-20 px-4">
         <div className="max-w-[1400px] mx-auto">
           <Skeleton className="h-10 w-64 mx-auto mb-12" />
-          <div className="flex gap-8 overflow-hidden">
+          <div className="flex gap-8 overflow-hidden justify-center">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="min-w-[320px] h-[430px] rounded-[20px]" />
+              <Skeleton key={i} className="w-[372px] h-[493px] rounded-[20px]" />
             ))}
           </div>
         </div>
@@ -159,53 +197,47 @@ const FlagshipEvents = () => {
         </div>
       </div>
 
-      <div 
-        className="relative w-full overflow-visible"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        {maintenanceMode && (
-          <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex items-center justify-center p-6 text-center">
-                <div className="bg-white p-8 rounded-[20px] shadow-2xl border border-gray-100 max-w-md">
-                    <span className="text-5xl mb-4 block animate-bounce">📅</span>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Upcoming Experiences</h3>
-                    <p className="text-gray-500 font-medium">We're refreshing our event calendar. Stay tuned!</p>
-                </div>
-          </div>
-        )}
-
-        <div className="flex overflow-hidden">
-          <motion.div 
-            className="flex gap-20 lg:gap-[120px] px-4"
-            animate={{
-              x: isPaused ? undefined : [0, -50 + "%"]
-            }}
-            transition={{
-              duration: Math.max(25, events.length * 10),
-              ease: "linear",
-              repeat: Infinity,
-            }}
-            style={{ width: "max-content", display: "flex" }}
-          >
-            {marqueeEvents.map((event, index) => (
-              <Card key={index} index={index} event={event} />
-            ))}
-          </motion.div>
+      <div className="relative w-full flex justify-center min-h-[583px]">
+        <div className="flex flex-col lg:flex-row items-start justify-center gap-12 lg:gap-[120px] w-full max-w-7xl">
+            <AnimatePresence mode="wait">
+                <motion.div 
+                    key={activeIndex}
+                    className="flex flex-col lg:flex-row gap-12 lg:gap-[120px] w-full justify-center"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    {visibleEvents.map((event, index) => (
+                        <Card key={`${activeIndex}-${index}`} index={index} event={event} />
+                    ))}
+                </motion.div>
+            </AnimatePresence>
         </div>
-
-        {/* Edge Shadows */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
       </div>
 
-      {/* Pagination View */}
-      <div className="flex justify-center gap-3 mt-12 lg:mt-16">
-          <div className="w-12 h-3 rounded-full bg-gray-200 relative overflow-hidden">
-              <div className="absolute inset-0 bg-nerdBlue/20" />
-          </div>
-          <div className="w-3 h-3 rounded-full bg-gray-200" />
-          <div className="w-3 h-3 rounded-full bg-gray-200" />
-      </div>
+      {/* Pagination Dots with active indicator */}
+      {events.length > 3 && (
+        <div className="flex justify-center gap-3 mt-12 lg:mt-16">
+            {Array.from({ length: Math.ceil(events.length / 3) }).map((_, i) => (
+                <button
+                    key={i}
+                    onClick={() => setActiveIndex(i)}
+                    className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-300'}`}
+                >
+                    {i === activeIndex && (
+                        <motion.div 
+                            className="absolute inset-0 bg-nerdBlue"
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 5, ease: "linear" }}
+                            style={{ originX: 0 }}
+                        />
+                    )}
+                </button>
+            ))}
+        </div>
+      )}
     </section>
   );
 };
