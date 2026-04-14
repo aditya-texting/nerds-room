@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
-import { MapPin } from 'lucide-react';
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { MapPin, Users, UserCheck, Mic2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface EventData {
   title: string;
@@ -15,134 +15,72 @@ interface EventData {
   description: string;
   location: string;
   bgColor: string;
-  zIndex: string;
 }
 
-const StatCounter = ({ target, suffix, isActive }: { target: number, suffix: string, isActive: boolean }) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isActive) {
-      setCount(0);
-      return;
-    }
-
-    let startTime: number;
-    const duration = 2000;
-    const startValue = 0;
-
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const easeOutExpo = 1 - Math.pow(2, -10 * progress);
-      const currentCount = Math.floor(startValue + (target - startValue) * easeOutExpo);
-      
-      setCount(currentCount);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [target, isActive]);
+const Card = ({ event }: { event: EventData }) => {
+  // Map stats to specific icons for the badges
+  const getStatIcon = (label: string) => {
+    const l = label.toLowerCase();
+    if (l.includes('registration')) return <Users size={16} className="text-[#10b981]" />;
+    if (l.includes('attendee')) return <UserCheck size={16} className="text-[#10b981]" />;
+    if (l.includes('speaker')) return <Mic2 size={16} className="text-[#10b981]" />;
+    return null;
+  };
 
   return (
-    <span className="flex items-center">
-      {count.toLocaleString()}
-      <span className="ml-0.5">{suffix}</span>
-    </span>
-  );
-};
-
-const Card = ({ event, index, total, scrollYProgress }: { event: any, index: number, total: number, scrollYProgress: any }) => {
-  // Use a unique range for each card to trigger its individual reveal
-  const start = index / total;
-  const end = (index + 1) / total;
-  
-  // Stacking effect: earlier cards scale down as later cards come in
-  const scale = useTransform(scrollYProgress, [start, end], [1, 0.95]);
-  const opacity = useTransform(scrollYProgress, [start, end], [1, 0.9]);
-  
-  const [isInView, setIsInView] = useState(false);
-
-  return (
-    <motion.div
-      id={`flagship-card-${index}`}
-      style={{
-        scale: index === total - 1 ? 1 : scale,
-        opacity: index === total - 1 ? 1 : opacity,
-        zIndex: (index + 1) * 10,
-        top: `calc(15vh + ${index * 20}px)`
-      }}
-      className={`rounded-[20px] shadow-2xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} sticky overflow-hidden mb-[15vh] lg:mb-0`}
-      whileInView={{ y: [50, 0], opacity: [0, 1] }}
-      viewport={{ once: true, amount: 0.2 }}
-      onViewportEnter={() => setIsInView(true)}
+    <div 
+      className={`flex flex-col items-center ${event.bgColor} rounded-[2.5rem] p-6 md:p-8 min-w-[320px] md:min-w-[400px] shadow-sm transition-transform duration-300 hover:scale-[1.02]`}
     >
-      {/* Event Title/Logo Section */}
-      <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
+      {/* Card Header: Logo and Title */}
+      <div className="mb-6 text-center w-full">
         {event.logo ? (
-          <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
-            <img src={event.logo} alt={event.title} className="object-contain w-full h-full" />
-          </div>
+          <img src={event.logo} alt={event.title} className="h-10 md:h-12 object-contain mx-auto mb-2" />
         ) : (
-          <span className="text-2xl md:text-3xl font-black text-black leading-tight">
-            {event.title}
-          </span>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">{event.title}</h3>
         )}
-      </div>
-
-      {/* Main Image Container */}
-      <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0 pointer-events-none">
-        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner">
-          <img
-            src={event.image}
-            alt={event.title}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-        
-        {/* Floating Stats */}
-        <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[30%] md:left-[32%] lg:left-[35%] space-y-1.5 md:space-y-2 lg:space-y-2.5">
-          {event.stats.map((stat: any, sIndex: number) => {
-            const num = parseFloat(stat.value.replace(/[^0-9.]/g, ''));
-            const suffix = stat.value.replace(/[\d,]/g, '');
-            
-            return (
-              <motion.div 
-                key={sIndex} 
-                className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-2 md:px-2.5 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit"
-                initial={{ opacity: 0, x: 40 }}
-                animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 40 }}
-                transition={{ 
-                  delay: (sIndex * 0.1) + 0.3,
-                  type: "spring",
-                  stiffness: 100,
-                  damping: 15
-                }}
-              >
-                <span className="text-[24px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853]">
-                  <StatCounter target={isNaN(num) ? 0 : num} suffix={suffix} isActive={isInView} />
-                </span>
-                <span className="text-[16px] md:text-[19px] lg:text-[22px] font-normal text-black truncate">
-                  {stat.label}
-                </span>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Footer Section */}
-      <div className="flex items-center justify-center gap-1.5 md:gap-2 text-black mt-auto pt-1.5 md:pt-2 pb-4 md:pb-5 lg:pb-6 px-4">
-        <MapPin size={16} className="shrink-0" />
-        <span className="text-[14px] md:text-[17px] lg:text-[20px] font-medium text-center leading-tight">
-          {event.location}
+        <span className="block text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400">
+          {event.title} {new Date().getFullYear()}
         </span>
       </div>
-    </motion.div>
+
+      {/* Image & Badges Container */}
+      <div className="relative w-full rounded-[2rem] overflow-hidden group aspect-[4/3]">
+        <img 
+          src={event.image} 
+          alt={event.title} 
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+        />
+        
+        {/* Floating Badge Stack - Matches GDG Noida Style */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+          {event.stats.map((stat: any, i: number) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 * i }}
+              className="bg-white/90 backdrop-blur-md px-3 md:px-4 py-1.5 md:py-2 rounded-2xl flex items-center gap-2 shadow-lg border border-white/20"
+            >
+              <span className="text-lg md:text-xl font-bold text-[#10b981]">
+                {stat.value}
+              </span>
+              <span className="text-[10px] md:text-xs font-semibold text-gray-900 whitespace-nowrap">
+                {stat.label}
+              </span>
+              {getStatIcon(stat.label)}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Card Footer: Location */}
+      <div className="mt-6 flex items-center gap-2 text-gray-500">
+        <MapPin size={16} className="text-nerdBlue" />
+        <p className="text-xs md:text-sm font-semibold truncate max-w-[250px]">
+          {event.location}
+        </p>
+      </div>
+    </div>
   );
 };
 
@@ -157,31 +95,13 @@ const FlagshipEvents = () => {
     loading
   } = useAppData();
 
-  const sectionRef = useRef<HTMLElement>(null);
-  
-  // Hook scroll to the container for the stacking effect
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"]
-  });
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Sync scroll to current index on mobile
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (window.innerWidth < 1024) {
-      const index = Math.min(Math.floor(latest * 3), 2); // 3 events total
-      setCurrentIndex(Math.max(0, index));
-    }
-  });
-
-  const events: (EventData & { registration_link?: string })[] = useMemo(() => {
-    const totalHackathons = hackathons.length + pastEvents.filter(e => e.event_type?.toLowerCase().includes('hackathon')).length;
-    return contextEvents
-      .filter((ce: any) => ce.is_public !== false)
-      .slice(0, 3)
+  const [isPaused, setIsPaused] = useState(false);
+ 
+   const events = useMemo(() => {
+     return contextEvents
+       .filter((ce: any) => ce.is_public !== false)
       .map((ce: any, i: number) => {
-        const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#ECEFF1]'];
+        const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#E3F2FD]', 'bg-[#FFF9C4]'];
         const dynamicStats = (ce.stats || []).map((s: any) => {
           const label = (s.label || '').toLowerCase();
           const rawVal = String(s.value || '').trim();
@@ -191,32 +111,41 @@ const FlagshipEvents = () => {
           if (isEmpty) {
             if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
             if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || Math.floor(totalRegs * 0.8)}+` };
-            if (label.includes('hackathon')) return { ...s, value: `${totalHackathons}+` };
+            if (label.includes('speaker')) return { ...s, value: `30+` };
           }
           return s;
         });
 
+        // Ensure we have at least 3 stats to match the style
+        if (dynamicStats.length < 3) {
+            if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('registration'))) 
+                dynamicStats.push({ label: 'Registrations', value: `${totalRegs}+` });
+            if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('attendee'))) 
+                dynamicStats.push({ label: 'Attendees', value: `${totalApprovedRegs || 350}+` });
+            if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('speaker'))) 
+                dynamicStats.push({ label: 'Speakers', value: '30+' });
+        }
+
         return {
           ...ce,
-          stats: dynamicStats,
+          stats: dynamicStats.slice(0, 3),
           bgColor: bgColors[i % bgColors.length],
-          location: ce.location || "TBA",
-          registration_link: ce.registration_link
+          location: ce.location || "Noida, India",
         };
       });
   }, [contextEvents, totalRegs, totalApprovedRegs, hackathons, pastEvents]);
 
+  // Double the events for seamless marquee
+  const marqueeEvents = useMemo(() => [...events, ...events], [events]);
+
   if (loading) {
     return (
-      <section className="py-20 px-4 md:px-8 lg:px-16">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="text-center mb-12">
-            <Skeleton className="h-10 w-64 mx-auto mb-4" />
-            <Skeleton className="h-6 w-96 mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <Skeleton className="h-12 w-64 mx-auto mb-12 rounded-xl" />
+          <div className="flex gap-8 overflow-hidden">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="w-full h-[550px] rounded-[40px]" />
+              <Skeleton key={i} className="min-w-[400px] h-[500px] rounded-[2.5rem]" />
             ))}
           </div>
         </div>
@@ -225,87 +154,69 @@ const FlagshipEvents = () => {
   }
 
   return (
-    <section ref={sectionRef} id="events" className="relative py-20 px-4 md:px-8 lg:px-16 bg-white overflow-visible">
-      <div className="max-w-[1400px] mx-auto mb-16 lg:mb-24">
-        <div className="text-center">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-5xl lg:text-6xl text-black tracking-tight font-black"
-          >
-            OUR <span className="text-nerdBlue">FLAGSHIP</span> EVENTS
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-base md:text-xl text-gray-500 mt-4 max-w-2xl mx-auto font-medium"
-          >
-            Pioneering digital excellence through our signature community initiatives.
-          </motion.p>
-        </div>
+    <section id="events" className="relative py-24 bg-[#FCFCFD] overflow-hidden">
+      {/* Section Header */}
+      <div className="max-w-7xl mx-auto px-4 mb-20 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="space-y-4"
+        >
+          <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight">
+            Our <span className="text-nerdBlue relative">
+              Flagship
+              <span className="absolute -bottom-2 left-0 w-full h-2 bg-nerdBlue/10 -z-10 rounded-full" />
+            </span> Events
+          </h2>
+          <p className="text-lg md:text-xl text-gray-500 font-medium max-w-2xl mx-auto">
+            Our signature experiences that define excellence
+          </p>
+        </motion.div>
       </div>
 
-      <div className="relative max-w-[1400px] mx-auto">
+      {/* Marquee Slider Container */}
+      <div className="relative w-full">
         {maintenanceMode && (
-          <div className="absolute inset-0 z-[100] bg-white/95 backdrop-blur-sm flex items-center justify-center p-6 text-center rounded-[40px]">
-            <div className="max-w-md">
-              <div className="text-6xl mb-6 animate-bounce">🛠️</div>
-              <h1 className="text-4xl font-black text-nerdBlue mb-4 tracking-tight">EVENTS UNAVAILABLE</h1>
-              <p className="text-gray-600 font-bold mb-8">Scheduling maintenance in progress. Check back soon!</p>
-            </div>
+          <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex items-center justify-center p-6 text-center">
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 max-w-md">
+                    <span className="text-5xl mb-4 block animate-pulse">🛠️</span>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Scheduling Events</h3>
+                    <p className="text-gray-500">We're updating our event lineup. Check back in a few minutes!</p>
+                </div>
           </div>
         )}
 
-        {events.length > 0 ? (
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-center lg:gap-[40px] xl:gap-[60px]">
-            {events.map((event, index) => (
-              <Card 
-                key={index} 
-                event={event} 
-                index={index} 
-                total={events.length} 
-                scrollYProgress={scrollYProgress} 
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="py-20 text-center bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
-            <div className="text-6xl mb-4 text-gray-300">📅</div>
-            <h3 className="text-xl font-black text-gray-400 uppercase tracking-widest">No Flagship Events Yet</h3>
-            <p className="text-gray-400 text-sm mt-2">Our team is busy planning the next big thing. Stay tuned!</p>
-          </div>
-        )}
-      </div>
-
-      <div className="flex lg:hidden justify-center gap-4 mt-8">
-        {events.map((_, index) => (
-          <button
-            key={index}
-            className={`relative h-2 rounded-full transition-all duration-500 ${index === currentIndex ? 'w-16 bg-nerdBlue/20' : 'w-4 bg-gray-100 hover:bg-gray-200'}`}
-            aria-label={`Go to event ${index + 1}`}
-            onClick={() => {
-              setCurrentIndex(index);
-              const element = document.getElementById(`flagship-card-${index}`);
-              if (element) {
-                // Ensure reliable scroll target for sticky items in flex col
-                const offset = window.innerHeight * 0.15;
-                window.scrollTo({
-                  top: element.offsetTop - offset,
-                  behavior: 'smooth'
-                });
-              }
+        {/* The Slider Track */}
+        <div 
+          className="flex overflow-hidden group"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <motion.div 
+            className="flex gap-8 px-4"
+            animate={{
+              x: isPaused ? undefined : [0, -50 + "%"]
+            }}
+            transition={{
+              duration: events.length * 10, // Adjust speed based on number of items
+              ease: "linear",
+              repeat: Infinity,
+            }}
+            style={{
+                width: "max-content",
+                display: "flex"
             }}
           >
-            <motion.div
-              layoutId="active-dot"
-              className={`absolute inset-0 bg-nerdBlue rounded-full origin-left ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            />
-          </button>
-        ))}
+            {marqueeEvents.map((event, index) => (
+              <Card key={index} event={event} />
+            ))}
+          </motion.div>
+        </div>
+        
+        {/* Gradient Overlays for smooth edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#FCFCFD] to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#FCFCFD] to-transparent z-10" />
       </div>
     </section>
   );
