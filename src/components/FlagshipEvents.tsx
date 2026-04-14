@@ -181,50 +181,48 @@ const FlagshipEvents = () => {
   useLayoutEffect(() => {
     if (!isMobileView || events.length === 0 || !containerRef.current) return;
 
-    const ctx = gsap.context(() => {
-        const wrappers = gsap.utils.toArray<HTMLElement>(".f-card-wrapper");
-        const cards = gsap.utils.toArray<HTMLElement>(".f-card");
+    // Small timeout to ensure browser has settled
+    const timeout = setTimeout(() => {
+        const ctx = gsap.context(() => {
+            const wrappers = gsap.utils.toArray<HTMLElement>(".f-card-wrapper");
+            const cards = gsap.utils.toArray<HTMLElement>(".f-card");
 
-        wrappers.forEach((wrapper, i) => {
-            const card = cards[i];
-            if (!card) return;
+            wrappers.forEach((wrapper, i) => {
+                const card = cards[i];
+                if (!card) return;
 
-            let scaleValue = 1, rotationXValue = 0;
-            if (i !== wrappers.length - 1) {
-                scaleValue = 0.9 + 0.025 * i;
-                rotationXValue = -10;
-            }
-
-            gsap.to(card, {
-                scale: scaleValue,
-                rotationX: rotationXValue,
-                transformOrigin: "top center",
-                ease: "none",
-                scrollTrigger: {
-                    trigger: wrapper,
-                    start: `top ${80 + 10 * i}`,
-                    end: "bottom 450", 
-                    endTrigger: containerRef.current,
-                    scrub: true,
-                    pin: wrapper,
-                    pinSpacing: false,
-                    id: `card-${i+1}`,
-                    onRefresh: (self) => {
-                        // Ensure pinning doesn't break on resize
-                        if (!isMobileView) self.kill();
-                    }
+                let scaleValue = 1;
+                let rotationXValue = 0;
+                if (i !== wrappers.length - 1) {
+                    scaleValue = 0.9 + 0.025 * i;
+                    rotationXValue = -10;
                 }
+
+                gsap.to(card, {
+                    scale: scaleValue,
+                    rotationX: rotationXValue,
+                    transformOrigin: "top center",
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: wrapper,
+                        start: "top 80",
+                        end: "bottom 550",
+                        endTrigger: ".f-cards-container",
+                        scrub: true,
+                        pin: true,
+                        pinSpacing: false,
+                        invalidateOnRefresh: true,
+                    }
+                });
             });
-        });
 
-        // Forced refresh for dynamic content
-        ScrollTrigger.refresh();
-    }, containerRef); // Scope to containerRef
+            ScrollTrigger.refresh();
+        }, containerRef.current as any);
 
-    return () => {
-        ctx.revert();
-        ScrollTrigger.getAll().forEach(st => st.kill());
-    };
+        return () => ctx.revert();
+    }, 100);
+
+    return () => clearTimeout(timeout);
   }, [isMobileView, events, events.length]);
 
   const numPages = Math.ceil(events.length / 3);
@@ -278,7 +276,7 @@ const FlagshipEvents = () => {
       <div className="relative w-full flex justify-center min-h-[583px]">
         {isMobileView ? (
             // Mobile: GSAP Pinning Stacking
-            <div ref={containerRef} className="f-cards-container flex flex-col items-center w-full max-w-7xl pt-10 pb-[100px]">
+            <div ref={containerRef} className="f-cards-container block w-full max-w-7xl pt-10 pb-[100px]">
                 {visibleEvents.map((event, index) => (
                     <Card key={event.id} index={index} event={event} isMobile={true} />
                 ))}
