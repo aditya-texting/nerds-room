@@ -1,3 +1,4 @@
+// v1.1 - Updated Flagship Events with Automatic Slider
 import { useState, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
