@@ -53,14 +53,14 @@ const Card = ({ event, index, isMobile }: { event: EventData, index: number, isM
   const isLower = index % 2 !== 0;
   const cardRef = useRef(null);
   
-  // Mobile Stacking Logic from gdg.html + Parallax Shrink
+  // High-Fidelity Mobile Stacking Parallax
   const { scrollYProgress } = useScroll({
     target: cardRef,
     offset: ["start start", "end start"]
   });
 
-  // Scale down the card as it scrolls away (being covered)
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  // Scale down the card as it scrolls away (being covered by the next card)
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   
   const zShift = [10, 20, 30, 40, 50];
@@ -74,13 +74,13 @@ const Card = ({ event, index, isMobile }: { event: EventData, index: number, isM
       animate={!isMobile ? { opacity: 1, y: 0 } : undefined}
       exit={!isMobile ? { opacity: 0, y: -30 } : undefined}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      viewport={{ once: false, amount: 0.1 }}
-      className={`rounded-[20px] shadow-2xl border border-black/5 flex flex-col items-center 
+      viewport={{ once: true, amount: 0.1 }}
+      className={`rounded-[40px] shadow-2xl border border-black/5 flex flex-col items-center 
         w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
-        h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
+        h-[420px] md:h-[460px] lg:h-[493px] mx-auto lg:mx-0 
         ${event.bgColor} transition-shadow duration-500
-        ${isMobile ? `sticky top-[15vh]` : 'lg:static lg:z-auto'}
-        ${isMobile && index > 0 ? 'mt-[30vh]' : 'mt-0'}
+        ${isMobile ? `sticky top-[100px]` : 'lg:static lg:z-auto'}
+        ${isMobile && index > 0 ? 'mt-[15vh]' : 'mt-0'}
         ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
       `}
       style={{ 
@@ -246,7 +246,7 @@ const FlagshipEvents = () => {
       <div className="relative w-full flex justify-center min-h-[583px]">
         {isMobileView ? (
             // Small Screen: Stacking Scroll (from gdg.html)
-            <div className="flex flex-col gap-0 w-full max-w-7xl pb-[20vh]">
+            <div className="flex flex-col gap-0 w-full max-w-7xl pb-[50vh]">
                 {visibleEvents.map((event, index) => (
                     <Card key={event.id} index={index} event={event} isMobile={true} />
                 ))}
