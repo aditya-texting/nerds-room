@@ -15,23 +15,21 @@ const EventsPage = () => {
 
             {/* ── HERO SECTION ── */}
             <section className="relative pt-40 pb-32 overflow-hidden bg-black">
-                {/* Background Image Container with Lighting Effects */}
+                {/* Background Image Container with Brand-Matched Lighting */}
                 <div className="absolute inset-0 z-0 overflow-hidden">
                     <img 
                         src="/hackathon-hero.jpg" 
                         alt="Background" 
-                        className="w-full h-full object-cover opacity-40 mix-blend-luminosity scale-105"
+                        className="w-full h-full object-cover opacity-60"
                     />
                     
-                    {/* Premium Lighting Effects / Orbs */}
-                    <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[70%] bg-nerdBlue/30 blur-[120px] rounded-full animate-pulse-slow"></div>
-                    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[70%] bg-nerdLime/20 blur-[120px] rounded-full animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-600/10 blur-[150px] rounded-full"></div>
-
-                    {/* Gradient Overlays */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-black via-black/40 to-nerdBlue/20"></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60"></div>
-                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"></div>
+                    {/* Brand-Matched Lighting Orbs */}
+                    <div className="absolute -top-24 -left-24 w-[60%] h-[70%] bg-[#00308F]/40 blur-[130px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute -bottom-24 -right-24 w-[60%] h-[70%] bg-[#9BE600]/25 blur-[130px] rounded-full animate-pulse-slow" style={{ animationDelay: '4s' }}></div>
+                    
+                    {/* Gradient Overlays for Depth - Lightened */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-transparent to-[#00308F]/10"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
