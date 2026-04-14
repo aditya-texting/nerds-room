@@ -14,11 +14,15 @@ const EventsPage = () => {
             <Navbar />
 
             {/* ── HERO SECTION ── */}
-            <section className="relative pt-32 pb-12 overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
-                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[60%] bg-nerdBlue/5 blur-[120px] rounded-full"></div>
-                    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-nerdLime/5 blur-[120px] rounded-full"></div>
+            <section className="relative pt-32 pb-24 overflow-hidden bg-black">
+                {/* Background Decor / Image */}
+                <div className="absolute inset-0 -z-10">
+                    <img 
+                        src="/assets/events-hero-bg.png" 
+                        alt="Background" 
+                        className="w-full h-full object-cover opacity-60"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-white"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 text-center">
@@ -27,17 +31,17 @@ const EventsPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-nerdBlue/5 border border-nerdBlue/10 text-nerdBlue text-[11px] font-medium uppercase tracking-[0.2em] mb-6">
-                            <span className="w-2 h-2 rounded-full bg-nerdBlue/40 animate-pulse flex items-center justify-center">
-                                <span className="w-1 h-1 rounded-full bg-nerdBlue"></span>
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-nerdLime/20 border border-nerdLime/30 text-nerdLime text-[11px] font-medium uppercase tracking-[0.2em] mb-6">
+                            <span className="w-2 h-2 rounded-full bg-nerdLime/40 animate-pulse flex items-center justify-center">
+                                <span className="w-1 h-1 rounded-full bg-nerdLime"></span>
                             </span>
                             Community Hub
                         </span>
-                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-black mb-6 tracking-tight leading-[1.1]">
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
                             Experience the <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-nerdBlue via-blue-600 to-nerdBlue bg-300-pc animate-gradient">Future, Today.</span>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-nerdBlue via-blue-400 to-nerdLime bg-300-pc animate-gradient">Future, Today.</span>
                         </h1>
-                        <p className="max-w-2xl mx-auto text-gray-500 text-lg md:text-xl mb-10 font-medium">
+                        <p className="max-w-2xl mx-auto text-gray-300 text-lg md:text-xl mb-10 font-medium">
                             Join our curated events, from elite hackathons to deep-dive technical workshops.
                         </p>
                     </motion.div>
@@ -45,14 +49,14 @@ const EventsPage = () => {
             </section>
 
             {/* ── CALENDAR SECTION ── */}
-            <section className="pb-32 px-4 md:px-8 relative -mt-4">
+            <section className="pb-32 px-4 md:px-8 relative -mt-10">
                 <div className="max-w-6xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="bg-white rounded-[40px] shadow-[0_20px_80px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden relative group"
+                        className="bg-white rounded-[40px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden relative group"
                     >
                         {/* Header within the card */}
                         <div className="px-8 py-10 border-b border-gray-50 bg-[#fafafa]/50 backdrop-blur-sm">
@@ -66,14 +70,6 @@ const EventsPage = () => {
                                     </h2>
                                     <p className="text-gray-500 font-medium ml-13">Synchronize with our upcoming community initiatives.</p>
                                 </div>
-                                <a
-                                    href="https://lu.ma/nerdsroom"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-black text-white text-sm font-bold hover:bg-nerdBlue transition-all duration-300 shadow-xl shadow-black/10 hover:shadow-nerdBlue/20 hover:-translate-y-0.5"
-                                >
-                                    Open in Luma
-                                </a>
                             </div>
                         </div>
 

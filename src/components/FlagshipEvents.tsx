@@ -59,18 +59,18 @@ const Card = ({ event, index, isMobile }: { event: EventData, index: number, isM
   
   return (
     <motion.div 
-      initial={isMobile ? { opacity: 0, y: 50 } : { opacity: 0, y: 30 }}
-      whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
+      initial={isMobile ? { opacity: 0, y: 100, scale: 0.9 } : { opacity: 0, y: 30 }}
+      whileInView={isMobile ? { opacity: 1, y: 0, scale: 1 } : undefined}
       animate={!isMobile ? { opacity: 1, y: 0 } : undefined}
       exit={!isMobile ? { opacity: 0, y: -30 } : undefined}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      viewport={{ once: true, margin: "-100px" }}
-      className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ once: false, amount: 0.2 }}
+      className={`rounded-[20px] shadow-2xl border border-black/5 flex flex-col items-center 
         w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
         h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
-        ${event.bgColor} transition-transform duration-300 hover:scale-[1.02]
-        ${isMobile ? `sticky top-[20vh] z-[${mobileZIndex}]` : 'lg:static lg:z-auto'}
-        ${isMobile && index > 0 ? 'mt-[25vh]' : 'mt-0'}
+        ${event.bgColor} transition-shadow duration-500
+        ${isMobile ? `sticky top-[12vh]` : 'lg:static lg:z-auto'}
+        ${isMobile && index > 0 ? 'mt-[40vh]' : 'mt-0'}
         ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
       `}
       style={isMobile ? { zIndex: mobileZIndex } : {}}
