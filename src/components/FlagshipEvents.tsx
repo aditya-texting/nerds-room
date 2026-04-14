@@ -1,4 +1,4 @@
-// v1.4 - Discrete Auto-Slider with Counting Animations & Card Borders
+// v1.5 - Enhanced Borders & Consistent 3-Card Display
 import { useState, useMemo, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
@@ -25,7 +25,7 @@ const CountUp = ({ value }: { value: string }) => {
 
     useEffect(() => {
         let start = 0;
-        const duration = 2000; // 2 seconds
+        const duration = 2000;
         const increment = target / (duration / 16);
         
         const timer = setInterval(() => {
@@ -49,12 +49,12 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className={`rounded-[20px] shadow-xl border border-black/5 flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} transition-transform duration-300 hover:scale-[1.02] ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}`}
+      exit={{ opacity: 0, y: -30 }}
+      transition={{ delay: index * 0.1 }}
+      className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 ${event.bgColor} transition-transform duration-300 hover:scale-[1.02] ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}`}
     >
-      {/* Event Title/Logo Section */}
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
         {event.logo ? (
           <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
@@ -67,9 +67,8 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
         )}
       </div>
 
-      {/* Main Image Container */}
       <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
-        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-black/5">
+        <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#0000001a]">
           <img
             src={event.image}
             alt={event.title}
@@ -77,15 +76,13 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
           />
         </div>
 
-        {/* Floating Stats */}
         <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[30%] md:left-[32%] lg:left-[35%] space-y-1.5 md:space-y-2 lg:space-y-2.5">
           {event.stats.map((stat: any, sIndex: number) => (
             <motion.div
               key={sIndex}
-              className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-black/5 w-fit"
+              className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 * sIndex }}
             >
               <span className="text-[24px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853]">
                 <CountUp value={stat.value} />
@@ -98,7 +95,6 @@ const Card = ({ event, index }: { event: EventData, index: number }) => {
         </div>
       </div>
 
-      {/* Footer Section */}
       <div className="flex items-center justify-center gap-1.5 md:gap-2 text-black mt-auto pt-1.5 md:pt-2 pb-4 md:pb-5 lg:pb-6 px-4">
         <MapPin size={20} className="shrink-0 text-nerdBlue" />
         <span className="text-[14px] md:text-[17px] lg:text-[20px] font-medium text-center leading-tight">
@@ -156,19 +152,25 @@ const FlagshipEvents = () => {
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // Discrete Auto-Slider Logic
+  const numPages = Math.ceil(events.length / 3);
+
   useEffect(() => {
     if (events.length <= 3) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % Math.ceil(events.length / 3));
-    }, 5000); // Change every 5 seconds
+      setActiveIndex((prev) => (prev + 1) % numPages);
+    }, 6000);
     return () => clearInterval(interval);
-  }, [events.length]);
+  }, [events.length, numPages]);
 
   const visibleEvents = useMemo(() => {
+    if (events.length === 0) return [];
     if (events.length <= 3) return events;
     const start = activeIndex * 3;
-    return events.slice(start, start + 3);
+    let sliced = events.slice(start, start + 3);
+    if (sliced.length < 3) {
+        sliced = [...sliced, ...events.slice(0, 3 - sliced.length)];
+    }
+    return sliced;
   }, [events, activeIndex]);
 
   if (loading) {
@@ -203,10 +205,10 @@ const FlagshipEvents = () => {
                 <motion.div 
                     key={activeIndex}
                     className="flex flex-col lg:flex-row gap-12 lg:gap-[120px] w-full justify-center"
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.6 }}
                 >
                     {visibleEvents.map((event, index) => (
                         <Card key={`${activeIndex}-${index}`} index={index} event={event} />
@@ -216,21 +218,20 @@ const FlagshipEvents = () => {
         </div>
       </div>
 
-      {/* Pagination Dots with active indicator */}
       {events.length > 3 && (
         <div className="flex justify-center gap-3 mt-12 lg:mt-16">
-            {Array.from({ length: Math.ceil(events.length / 3) }).map((_, i) => (
+            {Array.from({ length: numPages }).map((_, i) => (
                 <button
                     key={i}
                     onClick={() => setActiveIndex(i)}
-                    className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-300'}`}
+                    className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'}`}
                 >
                     {i === activeIndex && (
                         <motion.div 
                             className="absolute inset-0 bg-nerdBlue"
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: 1 }}
-                            transition={{ duration: 5, ease: "linear" }}
+                            transition={{ duration: 6, ease: "linear" }}
                             style={{ originX: 0 }}
                         />
                     )}
