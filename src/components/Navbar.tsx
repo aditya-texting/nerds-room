@@ -77,11 +77,11 @@ const Navbar = () => {
                 Events
               </a>
               <a
-                href="#what-we-do"
+                href="#who-we-are"
                 className="hover:text-nerdBlue transition-colors"
-                onClick={(e) => handleSmoothScroll(e, '#what-we-do')}
+                onClick={(e) => handleSmoothScroll(e, '#who-we-are')}
               >
-                What We Do
+                Who We Are
               </a>
             </div>
 
@@ -145,11 +145,11 @@ const Navbar = () => {
               EVENTS <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
             </a>
             <a
-              href="#what-we-do"
+              href="#who-we-are"
               className="mobile-link p-3 rounded-lg hover:bg-gray-50 flex items-center justify-between group"
-              onClick={(e) => handleSmoothScroll(e, '#what-we-do')}
+              onClick={(e) => handleSmoothScroll(e, '#who-we-are')}
             >
-              WHAT WE DO <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
+              WHO WE ARE <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
             </a>
 
             <a

@@ -22,7 +22,8 @@ import type {
   MissionLetterData,
   RegistrationForm,
   Tag,
-  Toast
+  Toast,
+  WhoWeAreContent
 } from '../types';
 
 interface AppDataContextType {
@@ -118,6 +119,8 @@ interface AppDataContextType {
   setFooterDescription: (text: string) => Promise<void>;
   announcementText: string;
   setAnnouncementText: (text: string) => Promise<void>;
+  whoWeAreContent: WhoWeAreContent;
+  updateWhoWeAreContent: (updates: Partial<WhoWeAreContent>) => Promise<void>;
 
   // Mission Letter
   missionLetter: MissionLetterData | null;
@@ -214,6 +217,12 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   });
   const [footerDescription, setFooterDescriptionState] = useState('');
   const [announcementText, setAnnouncementTextState] = useState('');
+  const [whoWeAreContent, setWhoWeAreContentState] = useState<WhoWeAreContent>({
+    headingLine1: 'WHO WE',
+    headingLine2: 'ARE',
+    description: 'We are tired of boring corporate conferences. We wanted a space where the energy is practical, the people are building, and the ideas are raw.',
+    description2: "From 24-hour hackathons to intense ideation jams, we've brought together hundreds of students across NCR to build things that actually matter."
+  });
 
   // Config
   const [registrationsOpen, setRegistrationsOpenState] = useState(true);
@@ -505,6 +514,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
           case 'email_notifications': setEmailNotificationsState(val); break;
           case 'auto_approve': setAutoApproveState(val); break;
           case 'maintenance_mode': setMaintenanceModeState(val); break;
+          case 'who_we_are_content': if (val) setWhoWeAreContentState(val); break;
         }
       });
     }
@@ -891,6 +901,12 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     updateSetting('social_links', newVal);
   };
 
+  const updateWhoWeAreContent = async (updates: Partial<WhoWeAreContent>) => {
+    const newVal = { ...whoWeAreContent, ...updates };
+    setWhoWeAreContentState(newVal);
+    updateSetting('who_we_are_content', newVal);
+  };
+
   const setFooterDescription = async (text: string) => {
     setFooterDescriptionState(text);
     updateSetting('footer_description', text);
@@ -1135,6 +1151,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     updateHeroContent,
     socialLinks,
     updateSocialLinks,
+    whoWeAreContent,
+    updateWhoWeAreContent,
     footerDescription,
     setFooterDescription,
     announcementText,

@@ -72,11 +72,11 @@ const Footer = () => {
                 <h3 className="text-white text-base font-semibold">Resources</h3>
                 <div className="flex flex-col gap-3">
                   <a
-                    href="/#past-events"
-                    onClick={(e) => handleNav(e, '/#past-events')}
+                    href="/#who-we-are"
+                    onClick={(e) => handleNav(e, '/#who-we-are')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
-                    Past Events
+                    Who We Are
                   </a>
                   <a
                     href="/#gallery"

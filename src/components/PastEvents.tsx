@@ -3,7 +3,7 @@ import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 
 const PastEvents = () => {
-  const { pastEvents, loading } = useAppData();    
+  const { pastEvents, whoWeAreContent, loading } = useAppData();    
   // State for active slide index
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -23,7 +23,7 @@ const PastEvents = () => {
 
   if (loading) {
     return (
-      <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+      <section id="who-we-are" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
           <Skeleton className="h-[450px] w-full rounded-lg" />
           <div className="space-y-6">
@@ -41,7 +41,7 @@ const PastEvents = () => {
   const totalBuilders = pastEvents?.reduce((acc, curr) => acc + (curr.attendees_count || 0), 0) || 0;       
 
   return (
-    <section id="past-events" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto scroll-mt-20">
+    <section id="who-we-are" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto scroll-mt-20">
       <div className="grid md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center">
         {/* Image Carousel */}
         <div className="order-2 md:order-1 relative">
@@ -78,19 +78,17 @@ const PastEvents = () => {
         <div className="order-1 md:order-2 space-y-6 sm:space-y-8">
           <div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-nerdBlue inline-block border-b-4 sm:border-b-6 md:border-b-8 border-nerdLime leading-[0.85] pb-2 sm:pb-3 uppercase">
-              PAST<br />
-              EVENTS
+              {whoWeAreContent.headingLine1 || 'WHO WE'}<br />
+              {whoWeAreContent.headingLine2 || 'ARE'}
             </h2>
           </div>
 
           <div className="text-base sm:text-lg font-medium text-gray-700 space-y-3 sm:space-y-4">     
             <p className="border-l-4 border-nerdBlue pl-3 sm:pl-4 leading-relaxed font-semibold">
-              We are tired of boring corporate conferences. We wanted a space where the energy is practical, the people
-              are building, and the ideas are raw. 
+              {whoWeAreContent.description}
             </p>
             <p className="leading-relaxed">        
-              From 24-hour hackathons to intense ideation jams, we've brought together hundreds of students across NCR
-              to build things that actually matter.
+              {whoWeAreContent.description2}
             </p>
           </div>
 

@@ -211,6 +211,13 @@ export interface HeroContent {
     secondaryCTALink?: string;
 }
 
+export interface WhoWeAreContent {
+    headingLine1: string;
+    headingLine2: string;
+    description: string;
+    description2: string;
+}
+
 export interface SocialLinks {
     telegram: string;
     instagram: string;

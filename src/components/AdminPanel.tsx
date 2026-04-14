@@ -117,7 +117,8 @@ const AdminPanel = () => {
     getGrowthData,
     totalRegs,
     totalApprovedRegs,
-
+    whoWeAreContent,
+    updateWhoWeAreContent,
   } = useAppData();
 
 
@@ -304,7 +305,7 @@ const AdminPanel = () => {
     { id: 'media_gallery', label: 'Gallery', icon: <Icons.Image /> },
     { id: 'success_stories', label: 'Stories', icon: <Icons.Message /> },
     { id: 'chapters', label: 'Chapters', icon: <Icons.MapPin /> },
-    { id: 'past_events', label: 'Past Events', icon: <Icons.Calendar /> },
+    { id: 'past_events', label: 'Who We Are', icon: <Icons.Calendar /> },
     { id: 'mission_letter', label: 'Mission Letter', icon: <Icons.Content /> },
     { id: 'core_systems', label: 'Settings', icon: <Icons.Settings /> },
 
@@ -718,11 +719,35 @@ const AdminPanel = () => {
 
 
 
-              {/* PAST EVENTS */}
+              {/* WHO WE ARE */}
               {activeTab === 'past_events' && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-bold text-gray-800 text-lg">Past Events ({pastEvents.length})</h3>
+                <div className="space-y-6">
+                  {/* Content Editor */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 className="font-bold text-gray-800 text-lg mb-6">Header Content</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Heading Line 1</label>
+                        <input type="text" value={whoWeAreContent.headingLine1} onChange={e => updateWhoWeAreContent({ headingLine1: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="Line 1 (e.g. WHO WE)" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Heading Line 2</label>
+                        <input type="text" value={whoWeAreContent.headingLine2} onChange={e => updateWhoWeAreContent({ headingLine2: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="Line 2 (e.g. ARE)" />
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Main Description (Bold)</label>
+                      <textarea value={whoWeAreContent.description} onChange={e => updateWhoWeAreContent({ description: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" placeholder="Main Description" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Secondary Description</label>
+                      <textarea value={whoWeAreContent.description2} onChange={e => updateWhoWeAreContent({ description2: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" placeholder="Secondary Description" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Past Events List ({pastEvents.length})</h3>
                     <button onClick={() => setShowAddPastEvent(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD PAST EVENT</button>
                   </div>
 
@@ -787,6 +812,7 @@ const AdminPanel = () => {
                     </div>
                   )}
                 </div>
+              </div>
               )}
 
 

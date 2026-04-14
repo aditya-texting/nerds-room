@@ -3,7 +3,7 @@ import PartnersMarquee from './components/PartnersMarquee';
 import PastEvents from './components/PastEvents';
 import FlagshipEvents from './components/FlagshipEvents';
 import Chapters from './components/Chapters';
-import WhatWeDo from './components/WhatWeDo';
+
 import CommunitySays from './components/CommunitySays';
 import JoinCommunity from './components/JoinCommunity';
 import MissionLetter from './components/MissionLetter';
@@ -76,7 +76,6 @@ function App() {
       <Hero />
       <PartnersMarquee />
       <PastEvents />
-      <WhatWeDo />
       <FlagshipEvents />
       <Workshops />
       <Chapters />
