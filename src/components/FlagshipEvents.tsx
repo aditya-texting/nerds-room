@@ -21,120 +21,130 @@ interface EventData {
   bgColor: string;
 }
 
-
 const CountUp = ({ value }: { value: string }) => {
-    const [displayValue, setDisplayValue] = useState(0);
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, amount: 0.5 });
-    
-    const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
-    const suffix = value.replace(/[0-9]/g, '');
+  const [displayValue, setDisplayValue] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
 
-    useEffect(() => {
-        if (!isInView) return;
+  const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
+  const suffix = value.replace(/[0-9]/g, '');
 
-        let start = 0;
-        const duration = 2000;
-        const increment = target / (duration / 16);
-        
-        const timer = setInterval(() => {
-            start += increment;
-            if (start >= target) {
-                setDisplayValue(target);
-                clearInterval(timer);
-            } else {
-                setDisplayValue(Math.floor(start));
-            }
-        }, 16);
+  useEffect(() => {
+    if (!isInView) return;
+    let start = 0;
+    const duration = 2000;
+    const increment = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        setDisplayValue(target);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(Math.floor(start));
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, isInView]);
 
-        return () => clearInterval(timer);
-    }, [target, isInView]);
-
-    return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
+  return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
 };
 
-const Card = ({ event, index, isMobile }: { event: EventData, index: number, isMobile?: boolean }) => {
+// ─── Shared inner card content ────────────────────────────────────────────────
+const CardInner = ({ event }: { event: EventData }) => (
+  <>
+    <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
+      {event.logo ? (
+        <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
+          <img src={event.logo} alt={event.title} className="object-contain w-full h-full" />
+        </div>
+      ) : (
+        <span className="text-2xl md:text-3xl font-black text-black leading-tight">
+          {event.title}
+        </span>
+      )}
+    </div>
+
+    <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
+      <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#0000001a]">
+        <img
+          src={event.image}
+          alt={event.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      </div>
+      <div className="absolute bottom-2 left-[30%] space-y-1.5">
+        {event.stats.map((stat: any, sIndex: number) => (
+          <div
+            key={sIndex}
+            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
+          >
+            <span className="text-[24px] font-normal text-[#34A853]">
+              <CountUp value={stat.value} />
+            </span>
+            <span className="text-[16px] font-normal text-black truncate">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="flex items-center justify-center gap-1.5 text-black mt-auto pt-1.5 pb-4 px-4">
+      <MapPin className="w-4 h-4 shrink-0" />
+      <span className="text-[14px] font-medium text-center leading-tight">{event.location}</span>
+    </div>
+  </>
+);
+
+// ─── Desktop card — Framer Motion allowed here ────────────────────────────────
+const DesktopCard = ({ event, index }: { event: EventData; index: number }) => {
   const isLower = index % 2 !== 0;
-  
   return (
-    <div
-      className={`${isMobile ? 'f-card-wrapper w-full mb-12 last:mb-0' : 'flex-shrink-0'}`}
-      style={isMobile ? { perspective: '500px' } : {}}
-    >
-      <motion.div 
+    <div className="flex-shrink-0">
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        viewport={{ once: true, margin: "-100px" }}
-        className={`f-card rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
-          w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
-          h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
+        viewport={{ once: true, margin: '-100px' }}
+        className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
+          max-w-[280px] md:max-w-[320px] lg:max-w-[372px]
+          h-[380px] md:h-[430px] lg:h-[493px]
           ${event.bgColor}
-          ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
+          ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}
         `}
       >
-        <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
-          {event.logo ? (
-            <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
-               <img src={event.logo} alt={event.title} className="object-contain w-full h-full" />
-            </div>
-          ) : (
-            <span className="text-2xl md:text-3xl font-black text-black leading-tight">
-              {event.title}
-            </span>
-          )}
-        </div>
-
-        <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
-          <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#0000001a]">
-            <img
-              src={event.image}
-              alt={event.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[30%] md:left-[32%] lg:left-[35%] space-y-1.5 md:space-y-2 lg:space-y-2.5">
-            {event.stats.map((stat: any, sIndex: number) => (
-              <motion.div
-                key={sIndex}
-                className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-              >
-                <span className="text-[24px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853]">
-                  <CountUp value={stat.value} />
-                </span>
-                <span className="text-[16px] md:text-[19px] lg:text-[22px] font-normal text-black truncate">
-                  {stat.label}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center gap-1.5 md:gap-2 text-black mt-auto pt-1.5 md:pt-2 pb-4 md:pb-5 lg:pb-6 px-4">
-          <MapPin className="w-4 h-4 md:w-[18px] md:h-[18px] lg:w-5 lg:h-5 shrink-0" />
-          <span className="text-[14px] md:text-[17px] lg:text-[20px] font-medium text-center leading-tight">
-            {event.location}
-          </span>
-        </div>
+        <CardInner event={event} />
       </motion.div>
     </div>
   );
 };
 
+// ─── Mobile card — plain div, GSAP owns the transform ────────────────────────
+const MobileCard = ({ event }: { event: EventData }) => (
+  <div
+    className="f-card-wrapper w-full mb-12 last:mb-0"
+    style={{ perspective: '500px' }}
+  >
+    <div
+      className={`f-card rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
+        w-full max-w-[320px] h-[420px] mx-auto
+        ${event.bgColor}
+      `}
+    >
+      <CardInner event={event} />
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const FlagshipEvents = () => {
-  const {
-    flagshipEvents: contextEvents,
-    totalRegs,
-    totalApprovedRegs,
-    loading
-  } = useAppData();
+  const { flagshipEvents: contextEvents, totalRegs, totalApprovedRegs, loading } = useAppData();
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
   const containerRef = useRef<HTMLDivElement>(null);
+  const gsapCtxRef   = useRef<gsap.Context | null>(null);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -150,87 +160,93 @@ const FlagshipEvents = () => {
       .map((ce: any, i: number) => {
         const bgColors = ['bg-[#e8f5e9]', 'bg-[#fce4ec]', 'bg-[#eceff1]', 'bg-[#fff9c4]'];
         const dynamicStats = (ce.stats || []).map((s: any) => {
-          const label = (s.label || '').toLowerCase();
+          const label  = (s.label || '').toLowerCase();
           const rawVal = String(s.value || '').trim();
           const numVal = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
           const isEmpty = !rawVal || rawVal === '0' || isNaN(numVal);
-
           if (isEmpty) {
             if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
-            if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || 350}+` };
-            if (label.includes('speaker')) return { ...s, value: `30+` };
+            if (label.includes('attendee'))     return { ...s, value: `${totalApprovedRegs || 350}+` };
+            if (label.includes('speaker'))      return { ...s, value: '30+' };
           }
           return s;
         });
-
         if (dynamicStats.length < 3) {
-            if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('registration'))) 
-                dynamicStats.push({ label: 'Registrations', value: `${totalRegs}+` });
-            if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('attendee'))) 
-                dynamicStats.push({ label: 'Attendees', value: `${totalApprovedRegs || 350}+` });
-            if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('speaker'))) 
-                dynamicStats.push({ label: 'Speakers', value: '30+' });
+          if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('registration')))
+            dynamicStats.push({ label: 'Registrations', value: `${totalRegs}+` });
+          if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('attendee')))
+            dynamicStats.push({ label: 'Attendees', value: `${totalApprovedRegs || 350}+` });
+          if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('speaker')))
+            dynamicStats.push({ label: 'Speakers', value: '30+' });
         }
-
         return {
           ...ce,
           stats: dynamicStats.slice(0, 3),
           bgColor: bgColors[i % bgColors.length],
-          location: ce.location || "Noida, India",
+          location: ce.location || 'Noida, India',
         };
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // ── Mobile GSAP stacking pin ──────────────────────────────────────────────
+  // ── GSAP stacking scroll — mobile only ───────────────────────────────────
   useLayoutEffect(() => {
+    // Clean up any previous GSAP context
+    if (gsapCtxRef.current) {
+      gsapCtxRef.current.revert();
+      gsapCtxRef.current = null;
+    }
+
     if (!isMobileView || events.length === 0 || !containerRef.current) return;
 
-    // Kill any pre-existing ScrollTriggers to avoid duplicates on re-mount
-    ScrollTrigger.getAll().forEach((st) => st.kill());
+    const tid = setTimeout(() => {
+      const container = containerRef.current;
+      if (!container) return;
 
-    const timeout = setTimeout(() => {
+      // Query elements directly from the container — avoids stale selectors
+      const wrappers = Array.from(container.querySelectorAll<HTMLElement>('.f-card-wrapper'));
+      const cards    = Array.from(container.querySelectorAll<HTMLElement>('.f-card'));
+
+      if (!wrappers.length) return;
+
       const ctx = gsap.context(() => {
-        // Select within the container only
-        const wrappers = gsap.utils.toArray<HTMLElement>('.f-card-wrapper');
-        const cards    = gsap.utils.toArray<HTMLElement>('.f-card');
-
         wrappers.forEach((wrapper, i) => {
-          const card = cards[i];
+          const card    = cards[i];
           if (!card) return;
 
-          // Last card stays flat; earlier cards scale down & tilt as they stack
-          const scaleValue    = i !== wrappers.length - 1 ? 0.9 + 0.025 * i : 1;
-          const rotationValue = i !== wrappers.length - 1 ? -10 : 0;
+          const isLast  = i === wrappers.length - 1;
+          const scale   = isLast ? 1 : 0.9 + 0.025 * i;
+          const rotX    = isLast ? 0 : -10;
 
           gsap.to(card, {
-            scale: scaleValue,
-            rotationX: rotationValue,
+            scale,
+            rotationX: rotX,
             transformOrigin: 'top center',
             ease: 'none',
             scrollTrigger: {
-              trigger: wrapper,
-              // ↓ KEY FIX: dynamic top offset per card, matching the example exactly
-              start: `top ${60 + 10 * i}`,
-              end: 'bottom 550',
-              endTrigger: '.f-cards-container',
-              scrub: true,
-              // ↓ KEY FIX: pass the wrapper element, NOT `true`
-              pin: wrapper,
-              pinSpacing: false,
+              trigger:     wrapper,
+              start:       `top ${60 + 10 * i}`,   // stagger pin point per card
+              end:         'bottom 550',
+              endTrigger:  container,               // use the ref directly
+              scrub:       true,
+              pin:         wrapper,                 // pin the ELEMENT, never `true`
+              pinSpacing:  false,
               invalidateOnRefresh: true,
             },
           });
         });
 
         ScrollTrigger.refresh();
-      }, containerRef.current!);
+      });
 
-      return () => ctx.revert();
-    }, 150);
+      gsapCtxRef.current = ctx;
+    }, 300);
 
     return () => {
-      clearTimeout(timeout);
-      ScrollTrigger.getAll().forEach((st) => st.kill());
+      clearTimeout(tid);
+      if (gsapCtxRef.current) {
+        gsapCtxRef.current.revert();
+        gsapCtxRef.current = null;
+      }
     };
   }, [isMobileView, events.length]);
   // ─────────────────────────────────────────────────────────────────────────
@@ -246,14 +262,12 @@ const FlagshipEvents = () => {
   }, [events.length, numPages, isMobileView]);
 
   const visibleEvents = useMemo(() => {
-    if (events.length === 0) return [];
+    if (!events.length) return [];
     if (isMobileView) return events;
     if (events.length <= 3) return events;
-    const start = activeIndex * 3;
-    let sliced = events.slice(start, start + 3);
-    if (sliced.length < 3) {
-        sliced = [...sliced, ...events.slice(0, 3 - sliced.length)];
-    }
+    const start  = activeIndex * 3;
+    let sliced   = events.slice(start, start + 3);
+    if (sliced.length < 3) sliced = [...sliced, ...events.slice(0, 3 - sliced.length)];
     return sliced;
   }, [events, activeIndex, isMobileView]);
 
@@ -273,32 +287,43 @@ const FlagshipEvents = () => {
   }
 
   return (
-    <section id="events" className="relative py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden">
+    /*
+     * ⚠️  overflow-hidden on any ancestor BREAKS GSAP pin.
+     *     Use overflow-x-hidden on mobile so pinned cards can
+     *     escape the section vertically, but horizontal clips still apply.
+     *     On lg+ screens overflow-hidden is fine (no pinning there).
+     */
+    <section
+      id="events"
+      className="relative py-20 px-4 md:px-8 lg:px-16 bg-white overflow-x-hidden lg:overflow-hidden"
+    >
       <div className="max-w-[1400px] mx-auto mb-12">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
-              Our <span className="font-bold">Flagship Events</span>
+            Our <span className="font-bold">Flagship Events</span>
           </h2>
-          <p className="text-base md:text-2xl text-gray-600 mt-3">Our signature experiences that define excellence</p>
+          <p className="text-base md:text-2xl text-gray-600 mt-3">
+            Our signature experiences that define excellence
+          </p>
         </div>
       </div>
 
       <div className="relative w-full flex justify-center min-h-[583px]">
         {isMobileView ? (
-          // ── Mobile: GSAP pin-stacking ────────────────────────────────────
+          // ── Mobile: GSAP pin-stacking ──────────────────────────────────
           <div
             ref={containerRef}
-            className="f-cards-container block w-full max-w-xl pt-10 pb-[100px]"
+            className="f-cards-container block w-full max-w-sm mx-auto pt-6 pb-[200px]"
           >
             {visibleEvents.map((event, index) => (
-              <Card key={event.id} index={index} event={event} isMobile={true} />
+              <MobileCard key={event.id ?? index} event={event} index={index} />
             ))}
           </div>
         ) : (
-          // ── Desktop: Animated carousel ───────────────────────────────────
+          // ── Desktop: animated carousel ─────────────────────────────────
           <div className="flex flex-row items-start justify-center gap-[120px] w-full max-w-7xl">
             <AnimatePresence mode="wait">
-              <motion.div 
+              <motion.div
                 key={activeIndex}
                 className="flex flex-row gap-[120px] w-full justify-center"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -307,7 +332,7 @@ const FlagshipEvents = () => {
                 transition={{ duration: 0.6 }}
               >
                 {visibleEvents.map((event, index) => (
-                  <Card key={`${activeIndex}-${index}`} index={index} event={event} isMobile={false} />
+                  <DesktopCard key={`${activeIndex}-${index}`} index={index} event={event} />
                 ))}
               </motion.div>
             </AnimatePresence>
@@ -326,11 +351,11 @@ const FlagshipEvents = () => {
               }`}
             >
               {i === activeIndex && (
-                <motion.div 
+                <motion.div
                   className="absolute inset-0 bg-nerdBlue"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  transition={{ duration: 6, ease: "linear" }}
+                  transition={{ duration: 6, ease: 'linear' }}
                   style={{ originX: 0 }}
                 />
               )}
