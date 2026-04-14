@@ -160,14 +160,14 @@ const FlagshipEvents = () => {
       .map((ce: any, i: number) => {
         const bgColors = ['bg-[#e8f5e9]', 'bg-[#fce4ec]', 'bg-[#eceff1]', 'bg-[#fff9c4]'];
         const dynamicStats = (ce.stats || []).map((s: any) => {
-          const label = (s.label || '').toLowerCase();
+          const label  = (s.label || '').toLowerCase();
           const rawVal = String(s.value || '').trim();
           const numVal = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
           const isEmpty = !rawVal || rawVal === '0' || isNaN(numVal);
           if (isEmpty) {
             if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
-            if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || 350}+` };
-            if (label.includes('speaker')) return { ...s, value: '30+' };
+            if (label.includes('attendee'))     return { ...s, value: `${totalApprovedRegs || 350}+` };
+            if (label.includes('speaker'))      return { ...s, value: '30+' };
           }
           return s;
         });
@@ -204,18 +204,18 @@ const FlagshipEvents = () => {
 
       // Query elements directly from the container — avoids stale selectors
       const wrappers = Array.from(container.querySelectorAll<HTMLElement>('.f-card-wrapper'));
-      const cards = Array.from(container.querySelectorAll<HTMLElement>('.f-card'));
+      const cards    = Array.from(container.querySelectorAll<HTMLElement>('.f-card'));
 
       if (!wrappers.length) return;
 
       const ctx = gsap.context(() => {
         wrappers.forEach((wrapper, i) => {
-          const card = cards[i];
+          const card    = cards[i];
           if (!card) return;
 
-          const isLast = i === wrappers.length - 1;
-          const scale = isLast ? 1 : 0.9 + 0.025 * i;
-          const rotX = isLast ? 0 : -10;
+          const isLast  = i === wrappers.length - 1;
+          const scale   = isLast ? 1 : 0.9 + 0.025 * i;
+          const rotX    = isLast ? 0 : -10;
 
           gsap.to(card, {
             scale,
@@ -223,13 +223,13 @@ const FlagshipEvents = () => {
             transformOrigin: 'top center',
             ease: 'none',
             scrollTrigger: {
-              trigger: wrapper,
-              start: `top ${60 + 10 * i}`,   // stagger pin point per card
-              end: 'bottom 550',
-              endTrigger: container,               // use the ref directly
-              scrub: true,
-              pin: wrapper,                 // pin the ELEMENT, never `true`
-              pinSpacing: false,
+              trigger:     wrapper,
+              start:       `top ${60 + 10 * i}`,   // stagger pin point per card
+              end:         'bottom 550',
+              endTrigger:  container,               // use the ref directly
+              scrub:       true,
+              pin:         wrapper,                 // pin the ELEMENT, never `true`
+              pinSpacing:  false,
               invalidateOnRefresh: true,
             },
           });
@@ -265,8 +265,8 @@ const FlagshipEvents = () => {
     if (!events.length) return [];
     if (isMobileView) return events;
     if (events.length <= 3) return events;
-    const start = activeIndex * 3;
-    let sliced = events.slice(start, start + 3);
+    const start  = activeIndex * 3;
+    let sliced   = events.slice(start, start + 3);
     if (sliced.length < 3) sliced = [...sliced, ...events.slice(0, 3 - sliced.length)];
     return sliced;
   }, [events, activeIndex, isMobileView]);
@@ -346,8 +346,9 @@ const FlagshipEvents = () => {
             <button
               key={i}
               onClick={() => setActiveIndex(i)}
-              className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
-                }`}
+              className={`relative rounded-full overflow-hidden transition-all duration-300 ${
+                i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+              }`}
             >
               {i === activeIndex && (
                 <motion.div
