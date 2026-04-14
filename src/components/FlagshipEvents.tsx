@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
 
 interface EventData {
   title: string;
@@ -51,29 +51,43 @@ const CountUp = ({ value }: { value: string }) => {
 
 const Card = ({ event, index, isMobile }: { event: EventData, index: number, isMobile?: boolean }) => {
   const isLower = index % 2 !== 0;
+  const cardRef = useRef(null);
   
-  // Mobile Stacking Logic from gdg.html
-  // z-indices: 10, 20, 30...
+  // Mobile Stacking Logic from gdg.html + Parallax Shrink
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start start", "end start"]
+  });
+
+  // Scale down the card as it scrolls away (being covered)
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  
   const zShift = [10, 20, 30, 40, 50];
   const mobileZIndex = zShift[index % zShift.length];
   
   return (
     <motion.div 
-      initial={isMobile ? { opacity: 0, y: 100, scale: 0.9 } : { opacity: 0, y: 30 }}
-      whileInView={isMobile ? { opacity: 1, y: 0, scale: 1 } : undefined}
+      ref={cardRef}
+      initial={isMobile ? { opacity: 0, y: 100 } : { opacity: 0, y: 30 }}
+      whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
       animate={!isMobile ? { opacity: 1, y: 0 } : undefined}
       exit={!isMobile ? { opacity: 0, y: -30 } : undefined}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      viewport={{ once: false, amount: 0.2 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: false, amount: 0.1 }}
       className={`rounded-[20px] shadow-2xl border border-black/5 flex flex-col items-center 
         w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
         h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
         ${event.bgColor} transition-shadow duration-500
-        ${isMobile ? `sticky top-[12vh]` : 'lg:static lg:z-auto'}
-        ${isMobile && index > 0 ? 'mt-[40vh]' : 'mt-0'}
+        ${isMobile ? `sticky top-[15vh]` : 'lg:static lg:z-auto'}
+        ${isMobile && index > 0 ? 'mt-[30vh]' : 'mt-0'}
         ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
       `}
-      style={isMobile ? { zIndex: mobileZIndex } : {}}
+      style={{ 
+        zIndex: isMobile ? mobileZIndex : 'auto',
+        scale: isMobile ? scale : 1,
+        opacity: isMobile ? opacity : 1
+      }}
     >
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
         {event.logo ? (
