@@ -1,8 +1,12 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface EventData {
   title: string;
@@ -52,26 +56,19 @@ const CountUp = ({ value }: { value: string }) => {
 const Card = ({ event, index, isMobile }: { event: EventData, index: number, isMobile?: boolean }) => {
   const isLower = index % 2 !== 0;
   
-  const zShift = [10, 20, 30, 40, 50];
-  const mobileZIndex = zShift[index % zShift.length];
-  
   return (
+    <div className={`${isMobile ? 'f-card-wrapper w-full mb-12' : 'flex-shrink-0'}`} style={isMobile ? { perspective: '500px' } : {}}>
     <motion.div 
-      initial={isMobile ? { opacity: 0, y: 30 } : { opacity: 0, y: 30 }}
-      whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
-      animate={!isMobile ? { opacity: 1, y: 0 } : undefined}
-      exit={!isMobile ? { opacity: 0, y: -30 } : undefined}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       viewport={{ once: true, margin: "-100px" }}
-      className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
+      className={`f-card rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
         w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
         h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
         ${event.bgColor}
-        ${isMobile ? `sticky top-[20vh] z-[${mobileZIndex}]` : 'lg:static lg:z-auto'}
-        ${isMobile && index > 0 ? 'mt-[25vh]' : 'mt-0'}
         ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
       `}
-      style={isMobile ? { zIndex: mobileZIndex } : {}}
     >
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
         {event.logo ? (
@@ -114,12 +111,13 @@ const Card = ({ event, index, isMobile }: { event: EventData, index: number, isM
       </div>
 
       <div className="flex items-center justify-center gap-1.5 md:gap-2 text-black mt-auto pt-1.5 md:pt-2 pb-4 md:pb-5 lg:pb-6 px-4">
-        <MapPin size={20} className="shrink-0 text-nerdBlue" />
+        <MapPin className="w-4 h-4 md:w-[18px] md:h-[18px] lg:w-5 lg:h-5 shrink-0" />
         <span className="text-[14px] md:text-[17px] lg:text-[20px] font-medium text-center leading-tight">
           {event.location}
         </span>
       </div>
     </motion.div>
+    </div>
   );
 };
 
@@ -133,6 +131,7 @@ const FlagshipEvents = () => {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -178,6 +177,43 @@ const FlagshipEvents = () => {
         };
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
+
+  useLayoutEffect(() => {
+    if (!isMobileView || events.length === 0) return;
+
+    const ctx = gsap.context(() => {
+        const wrappers = gsap.utils.toArray(".f-card-wrapper");
+        const cards = gsap.utils.toArray(".f-card");
+
+        wrappers.forEach((wrapper: any, i: number) => {
+            const card = cards[i] as HTMLElement;
+            let scaleValue = 1, rotationXValue = 0;
+            if (i !== cards.length - 1) {
+                scaleValue = 0.9 + 0.025 * i;
+                rotationXValue = -10;
+            }
+
+            gsap.to(card, {
+                scale: scaleValue,
+                rotationX: rotationXValue,
+                transformOrigin: "top center",
+                ease: "none",
+                scrollTrigger: {
+                    trigger: wrapper,
+                    start: `top ${60 + 10 * i}`,
+                    end: "bottom 550",
+                    endTrigger: ".f-cards-container",
+                    scrub: true,
+                    pin: true,
+                    pinSpacing: false,
+                    id: `card-${i+1}`
+                }
+            });
+        });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMobileView, events]);
 
   const numPages = Math.ceil(events.length / 3);
 
@@ -229,8 +265,8 @@ const FlagshipEvents = () => {
 
       <div className="relative w-full flex justify-center min-h-[583px]">
         {isMobileView ? (
-            // Small Screen: Stacking Scroll (from gdg.html)
-            <div className="flex flex-col gap-0 w-full max-w-7xl pb-[20vh]">
+            // Mobile: GSAP Pinning Stacking
+            <div ref={containerRef} className="f-cards-container flex flex-col items-center w-full max-w-7xl pt-10 pb-[100px]">
                 {visibleEvents.map((event, index) => (
                     <Card key={event.id} index={index} event={event} isMobile={true} />
                 ))}
