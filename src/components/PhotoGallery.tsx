@@ -119,7 +119,21 @@ const PhotoGallery = () => {
   }, []);
 
 
-  if (visibleImages.length === 0) return null;
+  if (visibleImages.length === 0) {
+    return (
+      <section id="gallery" className="relative w-full overflow-hidden bg-gradient-to-b from-gray-50 to-white py-12 lg:py-24">
+        <div className="text-center px-4">
+          <h2 className="text-3xl font-semibold sm:text-4xl md:text-5xl text-zinc-900 lg:text-[64px]">Photo Gallery</h2>
+          <p className="mt-4 text-base sm:text-lg md:text-xl text-zinc-600">A glimpse into our most memorable moments</p>
+          <div className="mt-12 w-full max-w-xl mx-auto flex flex-col items-center justify-center text-gray-500 font-mono text-xs gap-4 p-12 text-center bg-gray-100/50 rounded-3xl border border-gray-200">
+            <div className="text-4xl grayscale opacity-50">📸</div>
+            <span className="font-bold tracking-widest uppercase">NO_GALLERY_DATA_FOUND</span>
+            <p className="text-xs text-gray-400">Add photos in the admin panel to see them here.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // Slices for layout
   const col1 = visibleImages.slice(0, 2);
