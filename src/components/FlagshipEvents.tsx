@@ -51,43 +51,27 @@ const CountUp = ({ value }: { value: string }) => {
 
 const Card = ({ event, index, isMobile }: { event: EventData, index: number, isMobile?: boolean }) => {
   const isLower = index % 2 !== 0;
-  const cardRef = useRef(null);
-  
-  // High-Fidelity Mobile Stacking Parallax
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ["start start", "end start"]
-  });
-
-  // Scale down the card as it scrolls away (being covered by the next card)
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   
   const zShift = [10, 20, 30, 40, 50];
   const mobileZIndex = zShift[index % zShift.length];
   
   return (
     <motion.div 
-      ref={cardRef}
-      initial={isMobile ? { opacity: 0, y: 100 } : { opacity: 0, y: 30 }}
+      initial={isMobile ? { opacity: 0, y: 30 } : { opacity: 0, y: 30 }}
       whileInView={isMobile ? { opacity: 1, y: 0 } : undefined}
       animate={!isMobile ? { opacity: 1, y: 0 } : undefined}
       exit={!isMobile ? { opacity: 0, y: -30 } : undefined}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      viewport={{ once: true, amount: 0.1 }}
-      className={`rounded-[40px] shadow-2xl border border-black/5 flex flex-col items-center 
+      transition={{ duration: 0.6 }}
+      viewport={{ once: true, margin: "-100px" }}
+      className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center 
         w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] 
-        h-[420px] md:h-[460px] lg:h-[493px] mx-auto lg:mx-0 
-        ${event.bgColor} transition-shadow duration-500
-        ${isMobile ? `sticky top-[100px]` : 'lg:static lg:z-auto'}
-        ${isMobile && index > 0 ? 'mt-[15vh]' : 'mt-0'}
+        h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 
+        ${event.bgColor}
+        ${isMobile ? `sticky top-[20vh] z-[${mobileZIndex}]` : 'lg:static lg:z-auto'}
+        ${isMobile && index > 0 ? 'mt-[25vh]' : 'mt-0'}
         ${!isMobile && isLower ? 'lg:mt-[90px]' : !isMobile ? 'lg:mt-[39px]' : ''}
       `}
-      style={{ 
-        zIndex: isMobile ? mobileZIndex : 'auto',
-        scale: isMobile ? scale : 1,
-        opacity: isMobile ? opacity : 1
-      }}
+      style={isMobile ? { zIndex: mobileZIndex } : {}}
     >
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
         {event.logo ? (
@@ -246,7 +230,7 @@ const FlagshipEvents = () => {
       <div className="relative w-full flex justify-center min-h-[583px]">
         {isMobileView ? (
             // Small Screen: Stacking Scroll (from gdg.html)
-            <div className="flex flex-col gap-0 w-full max-w-7xl pb-[50vh]">
+            <div className="flex flex-col gap-0 w-full max-w-7xl pb-[20vh]">
                 {visibleEvents.map((event, index) => (
                     <Card key={event.id} index={index} event={event} isMobile={true} />
                 ))}
