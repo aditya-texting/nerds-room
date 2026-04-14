@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 
 interface EventData {
   title: string;
@@ -167,10 +167,19 @@ const FlagshipEvents = () => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Sync scroll to current index on mobile
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (window.innerWidth < 1024) {
+      const index = Math.min(Math.floor(latest * 3), 2); // 3 events total
+      setCurrentIndex(Math.max(0, index));
+    }
+  });
+
   const events: (EventData & { registration_link?: string })[] = useMemo(() => {
     const totalHackathons = hackathons.length + pastEvents.filter(e => e.event_type?.toLowerCase().includes('hackathon')).length;
     return contextEvents
       .filter((ce: any) => ce.is_public !== false)
+      .slice(0, 3)
       .map((ce: any, i: number) => {
         const bgColors = ['bg-[#E8F5E9]', 'bg-[#FCE4EC]', 'bg-[#ECEFF1]'];
         const dynamicStats = (ce.stats || []).map((s: any) => {
@@ -271,7 +280,7 @@ const FlagshipEvents = () => {
         )}
       </div>
 
-      <div className="flex justify-center gap-4 mt-8 lg:mt-24">
+      <div className="flex lg:hidden justify-center gap-4 mt-8">
         {events.map((_, index) => (
           <button
             key={index}
@@ -281,7 +290,8 @@ const FlagshipEvents = () => {
               setCurrentIndex(index);
               const element = document.getElementById(`flagship-card-${index}`);
               if (element) {
-                const offset = window.innerHeight * 0.1;
+                // Ensure reliable scroll target for sticky items in flex col
+                const offset = window.innerHeight * 0.15;
                 window.scrollTo({
                   top: element.offsetTop - offset,
                   behavior: 'smooth'

@@ -76,9 +76,9 @@ function App() {
       <Hero />
       <PartnersMarquee />
       <PastEvents />
+      <Chapters />
       <FlagshipEvents />
       <Workshops />
-      <Chapters />
       <CommunitySays />
       <JoinCommunity />
       <MissionLetter />
