@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 
 interface EventData {
   title: string;
