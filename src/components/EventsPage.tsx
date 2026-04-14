@@ -14,15 +14,15 @@ const EventsPage = () => {
             <Navbar />
 
             {/* ── HERO SECTION ── */}
-            <section className="relative pt-32 pb-24 overflow-hidden bg-black">
-                {/* Background Decor / Image */}
-                <div className="absolute inset-0 -z-10">
+            <section className="relative pt-32 pb-24 overflow-hidden">
+                {/* Background Image Container */}
+                <div className="absolute inset-0 -z-10 bg-black overflow-hidden">
                     <img 
                         src="/hackathon-hero.jpg" 
                         alt="Background" 
-                        className="w-full h-full object-cover opacity-50"
+                        className="w-full h-full object-cover opacity-60"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-white"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-white"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 text-center">
