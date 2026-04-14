@@ -18,7 +18,7 @@ const EventsPage = () => {
                 {/* Background Image Container with Brand-Matched Lighting */}
                 <div className="absolute inset-0 z-0 overflow-hidden">
                     <img 
-                        src="/hackathon-hero.jpg" 
+                        src="/hackathon.png" 
                         alt="Background" 
                         className="w-full h-full object-cover opacity-60"
                     />
