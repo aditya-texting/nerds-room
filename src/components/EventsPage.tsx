@@ -14,18 +14,18 @@ const EventsPage = () => {
             <Navbar />
 
             {/* ── HERO SECTION ── */}
-            <section className="relative pt-32 pb-24 overflow-hidden">
+            <section className="relative pt-32 pb-24 overflow-hidden bg-black">
                 {/* Background Image Container */}
-                <div className="absolute inset-0 -z-10 bg-black overflow-hidden">
+                <div className="absolute inset-0 z-0 overflow-hidden">
                     <img 
                         src="/hackathon-hero.jpg" 
                         alt="Background" 
                         className="w-full h-full object-cover opacity-60"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-white"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/20"></div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-6 text-center">
+                <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
