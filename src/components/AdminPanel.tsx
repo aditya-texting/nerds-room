@@ -139,6 +139,15 @@ const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
+  // Local state for Who We Are (Past Events Tab)
+  const [localWhoWeAre, setLocalWhoWeAre] = useState(whoWeAreContent);
+
+  useEffect(() => {
+    if (whoWeAreContent) {
+      setLocalWhoWeAre(whoWeAreContent);
+    }
+  }, [whoWeAreContent]);
+
 
 
   // Helper for UI Feedback
@@ -724,24 +733,65 @@ const AdminPanel = () => {
                 <div className="space-y-6">
                   {/* Content Editor */}
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 className="font-bold text-gray-800 text-lg mb-6">Header Content</h3>
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Header Content</h3>
+                      <button 
+                        onClick={() => handleAction(() => updateWhoWeAreContent(localWhoWeAre), 'Content Updated Successfully')}
+                        className="bg-[#9BE600] text-[#00308F] px-6 py-2 rounded-lg text-xs font-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+                      >
+                        SAVE CHANGES
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Heading Line 1</label>
-                        <input type="text" value={whoWeAreContent.headingLine1} onChange={e => updateWhoWeAreContent({ headingLine1: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="Line 1 (e.g. WHO WE)" />
+                        <input 
+                          type="text" 
+                          value={localWhoWeAre.headingLine1 || ''} 
+                          onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, headingLine1: e.target.value })} 
+                          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" 
+                          placeholder="Line 1 (e.g. WHO WE)" 
+                        />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Heading Line 2</label>
-                        <input type="text" value={whoWeAreContent.headingLine2} onChange={e => updateWhoWeAreContent({ headingLine2: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="Line 2 (e.g. ARE)" />
+                        <input 
+                          type="text" 
+                          value={localWhoWeAre.headingLine2 || ''} 
+                          onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, headingLine2: e.target.value })} 
+                          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" 
+                          placeholder="Line 2 (e.g. ARE)" 
+                        />
                       </div>
                     </div>
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Main Description (Bold)</label>
-                      <textarea value={whoWeAreContent.description} onChange={e => updateWhoWeAreContent({ description: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" placeholder="Main Description" />
+                      <textarea 
+                        value={localWhoWeAre.description || ''} 
+                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, description: e.target.value })} 
+                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" 
+                        placeholder="Main Description" 
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Secondary Description</label>
+                      <textarea 
+                        value={localWhoWeAre.description2 || ''} 
+                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, description2: e.target.value })} 
+                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" 
+                        placeholder="Secondary Description" 
+                      />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Secondary Description</label>
-                      <textarea value={whoWeAreContent.description2} onChange={e => updateWhoWeAreContent({ description2: e.target.value })} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" placeholder="Secondary Description" />
+                      <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Builders Count Override (Optional)</label>
+                      <input 
+                        type="number" 
+                        value={localWhoWeAre.buildersOverride || ''} 
+                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, buildersOverride: parseInt(e.target.value) || undefined })} 
+                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm" 
+                        placeholder="Enter manual count (leave blank to use sum of past events)" 
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1 italic">If left empty, the system will automatically sum the attendees of all past events.</p>
                     </div>
                   </div>
 

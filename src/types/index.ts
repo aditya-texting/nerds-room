@@ -216,6 +216,7 @@ export interface WhoWeAreContent {
     headingLine2: string;
     description: string;
     description2: string;
+    buildersOverride?: number;
 }
 
 export interface SocialLinks {

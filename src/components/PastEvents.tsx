@@ -38,7 +38,10 @@ const PastEvents = () => {
 
   // Filter events with images for the carousel    
   const carouselEvents = pastEvents?.filter(e => e.image_url) || [];
-  const totalBuilders = pastEvents?.reduce((acc, curr) => acc + (curr.attendees_count || 0), 0) || 0;       
+  
+  // Calculate builders: Use override from admin if set, otherwise sum of past events
+  const calculatedBuilders = pastEvents?.reduce((acc, curr) => acc + (curr.attendees_count || 0), 0) || 0;
+  const displayBuilders = whoWeAreContent.buildersOverride ?? calculatedBuilders;       
 
   return (
     <section id="who-we-are" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto scroll-mt-20">
@@ -100,7 +103,7 @@ const PastEvents = () => {
             </div>
             <div className="w-px bg-gray-300 h-10 sm:h-12"></div>
             <div className="text-center flex-1">   
-              <span className="block text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue">{totalBuilders}+</span>
+              <span className="block text-2xl sm:text-3xl md:text-4xl font-black text-nerdBlue">{displayBuilders.toLocaleString()}+</span>
               <span className="text-[10px] xs:text-xs font-bold uppercase text-gray-500 tracking-wide">Builders</span>
             </div>
           </div>
