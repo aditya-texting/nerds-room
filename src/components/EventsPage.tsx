@@ -18,11 +18,11 @@ const EventsPage = () => {
                 {/* Background Decor / Image */}
                 <div className="absolute inset-0 -z-10">
                     <img 
-                        src="/assets/events-hero-bg.png" 
+                        src="/events-hero-bg.png" 
                         alt="Background" 
-                        className="w-full h-full object-cover opacity-60"
+                        className="w-full h-full object-cover opacity-80"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-white"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-white"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto px-6 text-center">
