@@ -174,7 +174,6 @@ const FlagshipEvents = () => {
     ScrollTrigger.config({ 
       ignoreMobileResize: true,
     });
-    ScrollTrigger.normalizeScroll(true);
 
     if (!isMobileView || visibleMobileEvents.length === 0) return;
 
@@ -196,6 +195,9 @@ const FlagshipEvents = () => {
           const card = cards[i];
           if (!card) return;
 
+          // Explicitly set z-index to prevent clipping
+          gsap.set(wrapper, { zIndex: 10 + i });
+
           let scale = 1, rotation = 0;
           if (i !== cards.length - 1) {
             scale = 0.9 + 0.025 * i;
@@ -206,6 +208,7 @@ const FlagshipEvents = () => {
             scale: scale,
             rotationX: rotation,
             transformOrigin: "top center",
+            force3D: true, // Hardware acceleration
             ease: "none",
             scrollTrigger: {
               trigger: wrapper,
@@ -216,15 +219,18 @@ const FlagshipEvents = () => {
               pin: wrapper,
               pinSpacing: false,
               anticipatePin: 1,
+              fastScrollEnd: true, // Prevent glitches on fast scroll
               id: `mobile-p${mobileActiveIndex}-c${i}`
             }
           });
         });
 
-        // Forced refresh after tiny delay to ensure DOM is ready
-        setTimeout(() => ScrollTrigger.refresh(), 50);
+        // Forced refresh after delay to ensure DOM is ready on mobile devices
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 200);
       }, containerRef.current);
-    }, 150);
+    }, 250);
 
     return () => {
       clearTimeout(timeout);
