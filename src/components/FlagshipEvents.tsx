@@ -120,7 +120,6 @@ const DesktopEventCard = ({ event, index }: { event: EventData; index: number })
 const FlagshipEvents = () => {
   const { flagshipEvents: contextEvents, totalRegs, totalApprovedRegs, loading } = useAppData();
 
-  const [activeIndex, setActiveIndex] = useState(0);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
