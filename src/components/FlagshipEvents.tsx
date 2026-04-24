@@ -211,7 +211,7 @@ const FlagshipEvents = () => {
             ease: 'none',
             scrollTrigger: {
               trigger: wrapper,
-              start: 'top 60', 
+              start: 'top 60',
               end: '+=300',
               scrub: true,
               pin: wrapper,
@@ -272,7 +272,7 @@ const FlagshipEvents = () => {
 
       {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
-        <div 
+        <div
           className="wrapper relative w-full pt-4"
           ref={containerRef}
         >
