@@ -1,61 +1,58 @@
-import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface EventData {
   id?: string | number;
   title: string;
   logo?: string;
   image: string;
-  stats: { label: string; value: string }[];
+  stats: { label: string; value: number }[];
   description: string;
   location: string;
   bgColor: string;
 }
 
-// ─── CountUp ──────────────────────────────────────────────────────────────────
-const CountUp = ({ value }: { value: string }) => {
-  const [displayValue, setDisplayValue] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const [isInView, setIsInView] = useState(false);
-  const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
-  const suffix = value.replace(/[0-9]/g, '');
+// ─── Utility: CountUp animation ─────────────────────────────────────────────
+const CountUp = ({ value, duration = 2000 }: { value: number; duration?: number }) => {
+  const [count, setCount] = useState(0);
+  const countRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setIsInView(true); },
-      { threshold: 0.5 }
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          let start = 0;
+          const end = value;
+          if (start === end) return;
+
+          const totalFrames = Math.round(duration / 16);
+          const increment = end / totalFrames;
+          let currentFrame = 0;
+
+          const timer = setInterval(() => {
+            currentFrame++;
+            start += increment;
+            if (currentFrame >= totalFrames) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(start));
+            }
+          }, 16);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
     );
-    observer.observe(el);
+
+    if (countRef.current) observer.observe(countRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [value, duration]);
 
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const duration = 2000;
-    const increment = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) {
-        setDisplayValue(target);
-        clearInterval(timer);
-      } else {
-        setDisplayValue(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(timer);
-  }, [target, isInView]);
-
-  return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
+  return <span ref={countRef}>{count.toLocaleString()}</span>;
 };
 
 // ─── Shared card content ───────────────────────────────────────────────────────
@@ -91,7 +88,7 @@ const CardInner = ({ event }: { event: EventData }) => (
             className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-[#00000008] w-fit"
           >
             <span className="text-[18px] md:text-[24px] lg:text-[33px] font-medium text-[#34A853]">
-              <CountUp value={stat.value} />
+              <CountUp value={stat.value} />+
             </span>
             <span className="text-[13px] md:text-[16px] lg:text-[22px] font-normal text-black whitespace-nowrap">
               {stat.label}
@@ -131,7 +128,7 @@ const DesktopEventCard = ({ event, index }: { event: EventData; index: number })
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const FlagshipEvents = () => {
-  const { flagshipEvents: contextEvents, totalRegs, totalApprovedRegs, loading } = useAppData();
+  const { flagshipEvents: contextEvents, loading } = useAppData();
 
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
@@ -145,47 +142,19 @@ const FlagshipEvents = () => {
 
   const isMobileView = windowWidth < 1024;
 
-  // ── Build events list ─────────────────────────────────────────────────────
-  const events = useMemo(() => {
-    return contextEvents
-      .filter((ce: any) => ce.is_public !== false)
-      .map((ce: any, i: number) => {
-        const bgColors = ['bg-[#e8f5e9]', 'bg-[#fce4ec]', 'bg-[#eceff1]', 'bg-[#fff9c4]'];
-        const dynamicStats = (ce.stats || []).map((s: any) => {
-          const label = (s.label || '').toLowerCase();
-          const rawVal = String(s.value || '').trim();
-          const numVal = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
-          const isEmpty = !rawVal || rawVal === '0' || isNaN(numVal);
-          if (isEmpty) {
-            if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
-            if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || 350}+` };
-            if (label.includes('speaker')) return { ...s, value: '30+' };
-          }
-          return s;
-        });
-        if (dynamicStats.length < 3) {
-          if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('registration')))
-            dynamicStats.push({ label: 'Registrations', value: `${totalRegs}+` });
-          if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('attendee')))
-            dynamicStats.push({ label: 'Attendees', value: `${totalApprovedRegs || 350}+` });
-          if (!dynamicStats.find((s: any) => s.label.toLowerCase().includes('speaker')))
-            dynamicStats.push({ label: 'Speakers', value: '30+' });
-        }
-        return {
-          ...ce,
-          stats: dynamicStats.slice(0, 3),
-          bgColor: bgColors[i % bgColors.length],
-          location: ce.location || 'Noida, India',
-        };
-      });
-  }, [contextEvents, totalRegs, totalApprovedRegs]);
+  const events: EventData[] = useMemo(() => {
+    if (!contextEvents) return [];
+    return contextEvents.map((e: any) => ({
+      ...e,
+      bgColor: e.bgColor || 'bg-white',
+    }));
+  }, [contextEvents]);
 
-  // ── Mobile carousel state ─────────────────────────────────────────────────
+  // ── Mobile carousel state ──────────────────────────────────────────────────
   const mobileCardsPerPage = 3;
   const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
 
-  // Auto-rotate mobile pages
   useEffect(() => {
     if (!isMobileView || events.length <= mobileCardsPerPage) return;
     const interval = setInterval(() => {
@@ -194,102 +163,11 @@ const FlagshipEvents = () => {
     return () => clearInterval(interval);
   }, [isMobileView, events.length, mobileNumPages]);
 
-  // Visible mobile events for current page
   const visibleMobileEvents = useMemo(() => {
     if (!events.length) return [];
-    if (events.length <= mobileCardsPerPage) return events;
     const start = mobileActiveIndex * mobileCardsPerPage;
-    let sliced = events.slice(start, start + mobileCardsPerPage);
-    if (sliced.length < mobileCardsPerPage)
-      sliced = [...sliced, ...events.slice(0, mobileCardsPerPage - sliced.length)];
-    return sliced;
+    return events.slice(start, start + mobileCardsPerPage);
   }, [events, mobileActiveIndex]);
-
-  // ── Mobile GSAP Scroll Stack ──────────────────────────────────────────────
-  const containerRef = useRef<HTMLDivElement>(null);
-  const gsapCtxRef = useRef<gsap.Context | null>(null);
-
-  useLayoutEffect(() => {
-    if (!isMobileView || !containerRef.current || visibleMobileEvents.length === 0) return;
-
-    // Kill old context before re-init
-    if (gsapCtxRef.current) {
-      gsapCtxRef.current.revert();
-      gsapCtxRef.current = null;
-    }
-
-    // Increased delay to allow AnimatePresence 'exit' animation (0.4s) to complete
-    // so that the new cards are actually mounted in the DOM before GSAP tries to find them.
-    const timeout = setTimeout(() => {
-      if (!containerRef.current) return;
-
-      gsapCtxRef.current = gsap.context(() => {
-        const cardsWrappers = gsap.utils.toArray<HTMLElement>('.card-wrapper');
-        const cards = gsap.utils.toArray<HTMLElement>('.card');
-
-        if (cardsWrappers.length === 0 || cards.length === 0) return;
-
-        // Pre-set visibility to avoid flash
-        gsap.set(cards, { opacity: 0, y: 30 });
-
-        cardsWrappers.forEach((wrapper, i) => {
-          const card = cards[i];
-          if (!card) return;
-
-          // Ensure later cards are visually above earlier ones
-          gsap.set(wrapper, { zIndex: i });
-
-          // Scaling logic: Cards scale down as they are covered
-          // We set the initial state and let ScrollTrigger handle the progress
-          let targetScale = 1;
-          let targetRotation = 0;
-          
-          if (i !== cards.length - 1) {
-            targetScale = 0.9 + (0.02 * i);
-            targetRotation = -10;
-          }
-
-          gsap.to(card, {
-            scale: targetScale,
-            rotationX: targetRotation,
-            transformOrigin: 'top center',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: wrapper,
-              // All cards pin at the same top position for perfect overlap
-              start: 'top 60', 
-              end: 'bottom bottom',
-              endTrigger: containerRef.current,
-              scrub: true,
-              pin: wrapper,
-              pinSpacing: false,
-              pinType: 'fixed',
-              id: String(i + 1),
-            },
-          });
-        });
-
-        // Fade in smoothly after GSAP is ready and refresh triggers
-        gsap.to(cards, { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.5, 
-          stagger: 0.1,
-          onComplete: () => {
-            ScrollTrigger.refresh(true);
-          }
-        });
-      }, containerRef.current);
-    }, 600); // 600ms > 400ms (exit duration) ensures new DOM is ready
-
-    return () => {
-      clearTimeout(timeout);
-      if (gsapCtxRef.current) {
-        gsapCtxRef.current.revert();
-        gsapCtxRef.current = null;
-      }
-    };
-  }, [isMobileView, visibleMobileEvents]);
 
   // ── Desktop carousel state ────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
@@ -306,96 +184,74 @@ const FlagshipEvents = () => {
 
   const visibleDesktopEvents = useMemo(() => {
     if (!events.length) return [];
-    if (events.length <= desktopCardsPerPage) return events;
     const start = desktopActiveIndex * desktopCardsPerPage;
-    let sliced = events.slice(start, start + desktopCardsPerPage);
-    if (sliced.length < desktopCardsPerPage)
-      sliced = [...sliced, ...events.slice(0, desktopCardsPerPage - sliced.length)];
-    return sliced;
+    return events.slice(start, start + desktopCardsPerPage);
   }, [events, desktopActiveIndex]);
 
-  // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
       <section className="py-20 px-4">
         <div className="max-w-[1400px] mx-auto">
           <Skeleton className="h-10 w-64 mx-auto mb-12" />
-          <div className="flex gap-8 overflow-hidden justify-center">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="w-[372px] h-[493px] rounded-[20px]" />
-            ))}
-          </div>
         </div>
       </section>
     );
   }
+
+  if (!events.length) return null;
 
   return (
     <section
       id="events"
       className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden"
     >
-      {/* ── Heading ── */}
-      <div className="max-w-[1400px] mx-auto mb-10 md:mb-12">
-        <div className="text-center">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
-            Our <span className="font-bold">Flagship Events</span>
-          </h2>
-          <p className="text-base md:text-2xl text-gray-600 mt-3">
-            Our signature experiences that define excellence
-          </p>
-        </div>
+      <div className="max-w-7xl mx-auto mb-12 text-center md:text-left">
+        <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight mb-4 uppercase">
+          Our Flagship <span className="text-[#4285F4]">Events</span>
+        </h2>
+        <p className="text-base md:text-lg text-gray-500 max-w-2xl font-medium">
+          Experience our biggest annual gatherings where technology, innovation, and community come
+          together.
+        </p>
       </div>
 
       {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
-
-        {/* GSAP Stacking Scroll Container */}
-        <div
-          className="wrapper relative w-full pt-6 pb-6"
-          style={{ minHeight: `${visibleMobileEvents.length * 300 + 100}px` }}
-          ref={containerRef}
-        >
-          <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mobileActiveIndex}
-                className="w-full flex flex-col items-center"
-              >
-                {visibleMobileEvents.map((event, index) => (
-                  <div
-                    key={`${mobileActiveIndex}-${event.id ?? index}`}
-                    className="card-wrapper w-full mb-[50px] last:mb-0 flex justify-center"
-                    style={{ perspective: '1000px' }}
-                  >
-                    <div
-                      className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${event.bgColor}`}
-                      style={{ backfaceVisibility: 'hidden', willChange: 'transform', transformStyle: 'preserve-3d' }}
-                    >
-                      <CardInner event={event} />
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+        <div className="relative w-full overflow-hidden px-5 py-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mobileActiveIndex}
+              initial={{ opacity: 0, x: 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -60 }}
+              transition={{ duration: 0.4, ease: 'easeInOut' }}
+              className="flex flex-col items-center gap-6"
+            >
+              {visibleMobileEvents.map((event, index) => (
+                <div
+                  key={`${mobileActiveIndex}-${event.id ?? index}`}
+                  className={`w-full max-w-[300px] mx-auto h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${event.bgColor}`}
+                >
+                  <CardInner event={event} />
+                </div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Dot indicators */}
         {events.length > mobileCardsPerPage && (
-          <div className="flex justify-center gap-3 mt-6 pb-6">
+          <div className="flex justify-center gap-3 mt-4 pb-6">
             {Array.from({ length: mobileNumPages }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setMobileActiveIndex(i)}
                 className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === mobileActiveIndex
-                    ? 'w-12 h-3'
-                    : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                  ? 'w-12 h-3'
+                  : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
                   }`}
               >
                 {i === mobileActiveIndex && (
                   <motion.div
-                    key={mobileActiveIndex}
                     className="absolute inset-0 bg-[#4285F4]"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -412,23 +268,24 @@ const FlagshipEvents = () => {
       {/* ══════════ DESKTOP (lg+) ══════════ */}
       <div className="hidden lg:block">
         <div className="relative w-full flex justify-center min-h-[583px]">
-          {/* AnimatePresence is fine on desktop — no GSAP conflict here */}
-          <motion.div
-            key={desktopActiveIndex}
-            className="flex flex-row gap-[80px] lg:gap-[120px] w-full justify-center"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 0.6 }}
-          >
-            {visibleDesktopEvents.map((event, index) => (
-              <DesktopEventCard
-                key={`${desktopActiveIndex}-${event.id ?? index}`}
-                event={event}
-                index={index}
-              />
-            ))}
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={desktopActiveIndex}
+              className="flex flex-row gap-[80px] lg:gap-[120px] w-full justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.6 }}
+            >
+              {visibleDesktopEvents.map((event, index) => (
+                <DesktopEventCard
+                  key={`${desktopActiveIndex}-${event.id ?? index}`}
+                  event={event}
+                  index={index}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {events.length > desktopCardsPerPage && (
