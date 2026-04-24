@@ -191,8 +191,6 @@ const FlagshipEvents = () => {
 
         if (cardsWrappers.length === 0 || cards.length === 0) return;
 
-        gsap.set(cards, { opacity: 0, y: 30 });
-
         cardsWrappers.forEach((wrapper, i) => {
           const card = cards[i];
           if (!card) return;
@@ -224,17 +222,11 @@ const FlagshipEvents = () => {
           });
         });
 
-        gsap.to(cards, { 
-          opacity: 1, 
-          y: 0, 
-          duration: 0.5, 
-          stagger: 0.1,
-          onComplete: () => {
-            ScrollTrigger.refresh(true);
-          }
-        });
+        // Fast reveal and layout refresh
+        gsap.to(cards, { opacity: 1, y: 0, duration: 0.3 });
+        ScrollTrigger.refresh(true);
       }, containerRef.current);
-    }, 600);
+    }, 100);
 
     return () => {
       clearTimeout(timeout);
