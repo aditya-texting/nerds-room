@@ -143,41 +143,33 @@ const FlagshipEvents = () => {
     }));
   }, [contextEvents]);
 
-  // ── Config ────────────────────────────────────────────────────────────────
-  const desktopCardsPerPage = 3;
-
-  // ── Mobile Progress Indicators ──────────────────────────────────────────────
+  // ── Mobile Carousel State ──────────────────────────────────────────────────
+  const mobileCardsPerPage = 3;
+  const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
-
-  // Sync active index with scroll position for dots
-  useEffect(() => {
-    if (!isMobileView) return;
-    const handleScroll = () => {
-      const scrollPos = window.scrollY;
-      const targetOffset = containerRef.current?.offsetTop || 0;
-      const cardHeight = 440; // Approx height per card trigger
-      const index = Math.max(0, Math.min(events.length - 1, Math.floor((scrollPos - targetOffset) / cardHeight)));
-      setMobileActiveIndex(index);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobileView, events.length]);
 
   const visibleMobileEvents = useMemo(() => {
     if (!events.length) return [];
-    if (isMobileView) return events;
-    return events.slice(0, desktopCardsPerPage);
-  }, [events, isMobileView]);
+    if (!isMobileView) return events.slice(0, 3);
+    const start = mobileActiveIndex * mobileCardsPerPage;
+    return events.slice(start, start + mobileCardsPerPage);
+  }, [events, mobileActiveIndex, isMobileView]);
 
-  // ── GSAP Scroll Stack Logic ─────────────────────────────────────────────────
+  // Auto-rotate mobile pages
+  useEffect(() => {
+    if (!isMobileView || events.length <= mobileCardsPerPage) return;
+    const interval = setInterval(() => {
+      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
+    }, 8000); 
+    return () => clearInterval(interval);
+  }, [isMobileView, events.length, mobileNumPages]);
+
+  // ── GSAP Scroll Stack Logic (Hybrid: Slide + Stack) ─────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
   const gsapCtxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => {
-    // Mobile specific ScrollTrigger config
-    ScrollTrigger.config({ 
-      ignoreMobileResize: true,
-    });
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     if (!isMobileView || visibleMobileEvents.length === 0) return;
 
@@ -194,17 +186,15 @@ const FlagshipEvents = () => {
         const cards = gsap.utils.toArray<HTMLElement>('.card');
         const overlay = document.querySelector('.section-overlay');
 
-        // 1. Pin the TITLE
+        // Pin the header only when section is active
         ScrollTrigger.create({
           trigger: containerRef.current,
           start: "top top",
           end: "bottom bottom",
           pin: ".section-header",
           pinSpacing: false,
-          id: "header-pin"
         });
 
-        // 2. Background Darkening Overlay
         if (overlay) {
           gsap.to(overlay, {
             opacity: 0.85,
@@ -222,7 +212,6 @@ const FlagshipEvents = () => {
           const card = cards[i];
           if (!card) return;
 
-          // Pin each card wrapper
           ScrollTrigger.create({
             trigger: wrapper,
             start: "top 120", 
@@ -231,11 +220,10 @@ const FlagshipEvents = () => {
             pin: true,
             pinSpacing: false,
             scrub: true,
-            id: `pin-${i}`,
-            anticipatePin: 1
+            anticipatePin: 1,
+            id: `pin-${mobileActiveIndex}-${i}`
           });
 
-          // Animation for the card underneath (Scale + Opacity + Blur)
           if (i < cards.length - 1) {
             const nextWrapper = cardsWrappers[i + 1];
             gsap.to(card, {
@@ -247,16 +235,15 @@ const FlagshipEvents = () => {
                 trigger: nextWrapper,
                 start: "top bottom",
                 end: "top 120",
-                scrub: true,
-                id: `transition-${i}`
+                scrub: true
               }
             });
           }
         });
 
-        setTimeout(() => ScrollTrigger.refresh(), 200);
+        setTimeout(() => ScrollTrigger.refresh(), 100);
       }, containerRef.current);
-    }, 400);
+    }, 300);
 
     return () => {
       clearTimeout(timeout);
@@ -265,9 +252,10 @@ const FlagshipEvents = () => {
         gsapCtxRef.current = null;
       }
     };
-  }, [isMobileView, events.length]);
+  }, [isMobileView, mobileActiveIndex, visibleMobileEvents.length]);
 
   // ── Desktop carousel ──────────────────────────────────────────────────────
+  const desktopCardsPerPage = 3;
   const desktopNumPages = Math.ceil(events.length / desktopCardsPerPage);
   const [desktopActiveIndex, setDesktopActiveIndex] = useState(0);
 
@@ -297,7 +285,7 @@ const FlagshipEvents = () => {
       {/* Background Overlay (GDG Style) */}
       <div className="section-overlay absolute inset-0 bg-black opacity-0 pointer-events-none z-[5] lg:hidden" />
 
-      <div className="section-header max-w-7xl mx-auto mb-10 md:mb-12 text-center relative z-20">
+      <div className="section-header max-w-7xl mx-auto mb-10 md:mb-12 text-center relative z-20 bg-white/80 backdrop-blur-sm py-4 rounded-xl">
         <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
           Our <span className="font-bold">Flagship Events</span>
         </h2>
@@ -306,47 +294,54 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — GDG Noida Style Stack ══════════ */}
+      {/* ══════════ MOBILE (< lg) — Slides + GDG Stacking ══════════ */}
       <div className="block lg:hidden relative z-10">
-        <div className="wrapper relative w-full pt-[20px] pb-[400px] flex justify-center">
+        <div 
+          className="wrapper relative w-full pt-[10px] pb-[400px] flex justify-center"
+          key={mobileActiveIndex}
+        >
           <div className="cards w-full max-w-[450px] flex flex-col items-center px-4">
-            {events.map((event, i) => (
-              <div 
-                key={event.id ?? i} 
-                className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[420px]"
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mobileActiveIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.5 }}
+                className="w-full flex flex-col items-center"
               >
-                <div 
-                  className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[28px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
-                  style={{ 
-                    willChange: 'transform, opacity, filter',
-                    backfaceVisibility: 'hidden',
-                    zIndex: i + 10
-                  }}
-                >
-                  <CardInner event={event} />
-                </div>
-              </div>
-            ))}
+                {visibleMobileEvents.map((event, i) => (
+                  <div 
+                    key={event.id ?? i} 
+                    className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[420px]"
+                  >
+                    <div 
+                      className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[28px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
+                      style={{ 
+                        willChange: 'transform, opacity, filter',
+                        backfaceVisibility: 'hidden',
+                        zIndex: i + 10
+                      }}
+                    >
+                      <CardInner event={event} />
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Indicators for scroll progress (Premium Pill Style) */}
-        <div className="fixed bottom-12 left-0 right-0 z-[60] flex justify-center pointer-events-none">
-          <div className="flex gap-2.5 p-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
-            {events.map((_, i) => (
+        {/* Indicators for carousel progress (Stable positioning) */}
+        <div className="absolute bottom-10 left-0 right-0 z-[60] flex justify-center px-4">
+          <div className="flex gap-2.5 p-2 rounded-full bg-black/5 backdrop-blur-md border border-black/10">
+            {Array.from({ length: mobileNumPages }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  const targetHeader = document.querySelector('.section-header');
-                  const headerHeight = targetHeader?.clientHeight || 0;
-                  window.scrollTo({ 
-                    top: (containerRef.current?.offsetTop || 0) + i * 500 + headerHeight, 
-                    behavior: 'smooth' 
-                  });
-                }}
+                onClick={() => setMobileActiveIndex(i)}
                 className={`h-2 rounded-full transition-all duration-500 ease-out ${i === mobileActiveIndex
                   ? 'bg-[#4285F4] w-9 shadow-[0_0_12px_rgba(66,133,244,0.4)]'
-                  : 'bg-white/40 w-2 hover:bg-white/60'
+                  : 'bg-black/20 w-2 hover:bg-black/40'
                   }`}
               />
             ))}
