@@ -81,16 +81,16 @@ const CardInner = ({ event }: { event: EventData }) => (
           className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
-      <div className="absolute bottom-2 left-[30%] space-y-1.5">
+      <div className="absolute bottom-3 left-4 md:left-6 lg:left-8 space-y-2 max-w-[90%]">
         {event.stats.map((stat, sIndex) => (
           <div
             key={sIndex}
-            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
+            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
           >
-            <span className="text-[24px] font-normal text-[#34A853]">
+            <span className="text-[18px] md:text-[24px] font-normal text-[#34A853]">
               <CountUp value={stat.value} />
             </span>
-            <span className="text-[16px] font-normal text-black truncate">{stat.label}</span>
+            <span className="text-[14px] md:text-[16px] font-normal text-black truncate">{stat.label}</span>
           </div>
         ))}
       </div>
@@ -107,19 +107,13 @@ const CardInner = ({ event }: { event: EventData }) => (
 const DesktopEventCard = ({ event, index }: { event: EventData; index: number }) => {
   const isLower = index % 2 !== 0;
   return (
-    <div className="flex-shrink-0">
+    <div className="flex-shrink-0 w-[280px] md:w-[320px] lg:w-[372px]">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: index * 0.1 }}
         viewport={{ once: true, margin: '-100px' }}
-        className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
-          md:max-w-[320px] lg:max-w-[372px]
-          md:h-[430px] lg:h-[493px]
-          ${event.bgColor}
-          ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}
-          mx-auto
-        `}
+        className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center w-full h-[380px] md:h-[430px] lg:h-[493px] ${event.bgColor} ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'} mx-auto`}
       >
         <CardInner event={event} />
       </motion.div>
@@ -246,7 +240,7 @@ const FlagshipEvents = () => {
               trigger: wrapper,
               start: 'top ' + (60 + 10 * i),
               end: 'bottom 550',
-              endTrigger: '.wrapper',
+              endTrigger: containerRef.current,
               scrub: true,
               pin: wrapper,
               pinSpacing: false,
@@ -350,7 +344,7 @@ const FlagshipEvents = () => {
                   style={{ perspective: '500px' }}
                 >
                   <div
-                    className={`card w-[300px] h-[400px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
+                    className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
                   >
                     <CardInner event={event} />
                   </div>
