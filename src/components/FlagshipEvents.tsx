@@ -75,7 +75,7 @@ const CardInner = ({ event }: { event: EventData }) => (
     </div>
 
     {/* Image container */}
-    <div className="relative w-[240px] md:w-[290px] lg:w-[334px] h-[250px] md:h-[295px] lg:h-[347px] shrink-0">
+    <div className="relative w-[240px] md:w-[290px] lg:w-[334px] h-[230px] sm:h-[250px] md:h-[295px] lg:h-[347px] shrink-0">
       <div className="relative w-full h-full rounded-[16px] overflow-hidden shadow-md border border-[#00000012]">
         <img
           src={event.image}
@@ -236,11 +236,14 @@ const FlagshipEvents = () => {
           const card = cards[i];
           if (!card) return;
 
+          // Ensure later cards are visually above earlier ones
+          gsap.set(wrapper, { zIndex: i });
+
           // Scaling logic for the stack effect
           let scale = 1;
           let rotation = 0;
           if (i !== cards.length - 1) {
-            scale = 0.9 + 0.025 * i;
+            scale = 0.9 + 0.02 * i;
             rotation = -10;
           }
 
@@ -270,7 +273,7 @@ const FlagshipEvents = () => {
           duration: 0.5, 
           stagger: 0.1,
           onComplete: () => {
-            ScrollTrigger.refresh();
+            ScrollTrigger.refresh(true);
           }
         });
       }, containerRef.current);
