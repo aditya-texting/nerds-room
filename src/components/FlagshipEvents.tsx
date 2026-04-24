@@ -239,11 +239,12 @@ const FlagshipEvents = () => {
             scrollTrigger: {
               trigger: wrapper,
               start: 'top ' + (60 + 10 * i),
-              end: 'bottom 550',
+              end: 'bottom bottom',
               endTrigger: containerRef.current,
               scrub: true,
               pin: wrapper,
               pinSpacing: false,
+              pinType: 'fixed', // Force fixed to avoid jitter if parent has transform
               id: String(i + 1),
             },
           });
@@ -332,19 +333,20 @@ const FlagshipEvents = () => {
               <motion.div
                 key={mobileActiveIndex}
                 className="w-full flex flex-col items-center"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
               >
                 {visibleMobileEvents.map((event, index) => (
                   <div
                     key={`${mobileActiveIndex}-${event.id ?? index}`}
-                    className="card-wrapper w-full mb-[50px] last:mb-0"
-                    style={{ perspective: '500px' }}
+                    className="card-wrapper w-full mb-[50px] last:mb-0 flex justify-center"
+                    style={{ perspective: '1000px' }}
                   >
                     <div
-                      className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
+                      className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${event.bgColor}`}
+                      style={{ backfaceVisibility: 'hidden', willChange: 'transform', transformStyle: 'preserve-3d' }}
                     >
                       <CardInner event={event} />
                     </div>
