@@ -187,7 +187,7 @@ const FlagshipEvents = () => {
               scrub: true,
               pin: wrapper,
               pinSpacing: false,
-              id: i + 1
+              id: String(i + 1)
             }
           });
         });
