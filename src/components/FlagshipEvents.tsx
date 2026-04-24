@@ -214,10 +214,10 @@ const FlagshipEvents = () => {
             scrollTrigger: {
               trigger: wrapper,
               start: 'top 60', 
-              end: '+=400', // Duration for each card stay pinned
+              end: '+=600', // All cards pin for the same relative duration
               scrub: true,
               pin: wrapper,
-              pinSpacing: i === cards.length - 1, // Only last card pushes subsequent content
+              pinSpacing: i === cards.length - 1, // Only the last card pushes the content below
               pinType: 'fixed',
               id: String(i + 1),
             },
