@@ -214,11 +214,10 @@ const FlagshipEvents = () => {
             scrollTrigger: {
               trigger: wrapper,
               start: 'top 60', 
-              end: 'bottom bottom',
-              endTrigger: containerRef.current,
+              end: '+=400', // Duration for each card stay pinned
               scrub: true,
               pin: wrapper,
-              pinSpacing: false,
+              pinSpacing: i === cards.length - 1, // Only last card pushes subsequent content
               pinType: 'fixed',
               id: String(i + 1),
             },
@@ -284,7 +283,6 @@ const FlagshipEvents = () => {
         <div 
           className="wrapper relative w-full pt-4"
           ref={containerRef}
-          style={{ minHeight: `${visibleMobileEvents.length * 500}px` }}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
             <AnimatePresence mode="wait">
