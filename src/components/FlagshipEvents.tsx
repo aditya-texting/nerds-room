@@ -9,6 +9,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 interface EventData {
+  id?: string | number;
   title: string;
   logo?: string;
   image: string;
@@ -120,12 +121,13 @@ const DesktopCard = ({ event, index }: { event: EventData; index: number }) => {
 // ─── Mobile card — plain div, GSAP owns the transform ────────────────────────
 const MobileCard = ({ event }: { event: EventData }) => (
   <div
-    className="f-card-wrapper w-full mb-12 last:mb-0"
+    className="f-card-wrapper w-full mb-10 sm:mb-12 last:mb-0"
     style={{ perspective: '500px' }}
   >
     <div
       className={`f-card rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
-        w-full max-w-[320px] h-[420px] mx-auto
+        w-full max-w-[330px] min-[390px]:max-w-[350px] h-[420px] min-[390px]:h-[445px] mx-auto
+        will-change-transform
         ${event.bgColor}
       `}
     >
@@ -209,6 +211,11 @@ const FlagshipEvents = () => {
       if (!wrappers.length) return;
 
       const ctx = gsap.context(() => {
+        gsap.set(cards, {
+          clearProps: 'transform',
+          transformOrigin: 'top center',
+        });
+
         wrappers.forEach((wrapper, i) => {
           const card    = cards[i];
           if (!card) return;
@@ -216,6 +223,7 @@ const FlagshipEvents = () => {
           const isLast  = i === wrappers.length - 1;
           const scale   = isLast ? 1 : 0.9 + 0.025 * i;
           const rotX    = isLast ? 0 : -10;
+          const pinStart = 62 + 10 * i;
 
           gsap.to(card, {
             scale,
@@ -224,12 +232,13 @@ const FlagshipEvents = () => {
             ease: 'none',
             scrollTrigger: {
               trigger:     wrapper,
-              start:       `top ${60 + 10 * i}`,   // stagger pin point per card
-              end:         'bottom 550',
+              start:       `top ${pinStart}px`,
+              end:         () => `bottom ${Math.min(window.innerHeight * 0.78, 560)}px`,
               endTrigger:  container,               // use the ref directly
               scrub:       true,
               pin:         wrapper,                 // pin the ELEMENT, never `true`
               pinSpacing:  false,
+              anticipatePin: 1,
               invalidateOnRefresh: true,
             },
           });
@@ -239,7 +248,7 @@ const FlagshipEvents = () => {
       });
 
       gsapCtxRef.current = ctx;
-    }, 300);
+    }, 150);
 
     return () => {
       clearTimeout(tid);
@@ -313,7 +322,7 @@ const FlagshipEvents = () => {
           // ── Mobile: GSAP pin-stacking ──────────────────────────────────
           <div
             ref={containerRef}
-            className="f-cards-container block w-full max-w-sm mx-auto pt-6 pb-[200px]"
+            className="f-cards-container block w-full max-w-sm mx-auto pt-6 pb-[190px] sm:pb-[220px]"
           >
             {visibleEvents.map((event, index) => (
               <MobileCard key={event.id ?? index} event={event} />
