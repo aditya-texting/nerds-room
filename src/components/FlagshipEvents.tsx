@@ -13,20 +13,17 @@ interface EventData {
   title: string;
   logo?: string;
   image: string;
-  stats: {
-    label: string;
-    value: string;
-  }[];
+  stats: { label: string; value: string }[];
   description: string;
   location: string;
   bgColor: string;
 }
 
+// ─── CountUp ─────────────────────────────────────────────────────────────────
 const CountUp = ({ value }: { value: string }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.5 });
-
   const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
   const suffix = value.replace(/[0-9]/g, '');
 
@@ -37,12 +34,8 @@ const CountUp = ({ value }: { value: string }) => {
     const increment = target / (duration / 16);
     const timer = setInterval(() => {
       start += increment;
-      if (start >= target) {
-        setDisplayValue(target);
-        clearInterval(timer);
-      } else {
-        setDisplayValue(Math.floor(start));
-      }
+      if (start >= target) { setDisplayValue(target); clearInterval(timer); }
+      else setDisplayValue(Math.floor(start));
     }, 16);
     return () => clearInterval(timer);
   }, [target, isInView]);
@@ -50,7 +43,7 @@ const CountUp = ({ value }: { value: string }) => {
   return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
 };
 
-// ─── Shared inner card content ────────────────────────────────────────────────
+// ─── Shared card content ──────────────────────────────────────────────────────
 const CardInner = ({ event }: { event: EventData }) => (
   <>
     <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
@@ -67,21 +60,12 @@ const CardInner = ({ event }: { event: EventData }) => (
 
     <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
       <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#0000001a]">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
       </div>
       <div className="absolute bottom-2 left-[30%] space-y-1.5">
-        {event.stats.map((stat: any, sIndex: number) => (
-          <div
-            key={sIndex}
-            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
-          >
-            <span className="text-[24px] font-normal text-[#34A853]">
-              <CountUp value={stat.value} />
-            </span>
+        {event.stats.map((stat, sIndex) => (
+          <div key={sIndex} className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit">
+            <span className="text-[24px] font-normal text-[#34A853]"><CountUp value={stat.value} /></span>
             <span className="text-[16px] font-normal text-black truncate">{stat.label}</span>
           </div>
         ))}
@@ -95,7 +79,7 @@ const CardInner = ({ event }: { event: EventData }) => (
   </>
 );
 
-// ─── Desktop card — Framer Motion allowed here ────────────────────────────────
+// ─── Desktop card ─────────────────────────────────────────────────────────────
 const DesktopCard = ({ event, index }: { event: EventData; index: number }) => {
   const isLower = index % 2 !== 0;
   return (
@@ -118,26 +102,43 @@ const DesktopCard = ({ event, index }: { event: EventData; index: number }) => {
   );
 };
 
-// ─── Mobile card — plain div, GSAP owns the transform ────────────────────────
-const MobileCard = ({ event }: { event: EventData }) => (
-  <div
-    className="f-card-wrapper w-full mb-10 sm:mb-12 last:mb-0"
-    style={{ perspective: '500px' }}
-  >
+// ─── Mobile card — GSAP owns all transforms, no Framer Motion here ────────────
+const MobileCard = ({ event, index, total }: { event: EventData; index: number; total: number }) => {
+  // Each card sits slightly lower than the previous to create a visible deck peek
+  const topOffset = 80 + index * 14; // px from top of viewport when pinned
+
+  return (
     <div
-      className={`f-card rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
-        w-full max-w-[330px] min-[390px]:max-w-[350px] h-[420px] min-[390px]:h-[445px] mx-auto
-        will-change-transform
-        ${event.bgColor}
-      `}
+      className="f-card-wrapper"
+      style={{
+        /*
+         * Height = card height + gap so the next card's peek is visible
+         * before the pin kicks in. pb creates scroll distance per card.
+         */
+        paddingBottom: index < total - 1 ? '180px' : '0px',
+      }}
     >
-      <CardInner event={event} />
+      <div
+        className={`f-card rounded-[20px] shadow-2xl border border-[#0000001a]
+          flex flex-col items-center
+          w-full max-w-[330px] min-[390px]:max-w-[360px]
+          h-[430px] min-[390px]:h-[450px]
+          mx-auto will-change-transform
+          ${event.bgColor}
+        `}
+        style={{
+          // Slight initial top offset so cards look like a stacked deck
+          position: 'relative',
+          zIndex: index + 1,
+        }}
+      >
+        <CardInner event={event} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-// ─────────────────────────────────────────────────────────────────────────────
-
+// ─── Main component ───────────────────────────────────────────────────────────
 const FlagshipEvents = () => {
   const { flagshipEvents: contextEvents, totalRegs, totalApprovedRegs, loading } = useAppData();
 
@@ -145,8 +146,9 @@ const FlagshipEvents = () => {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const gsapCtxRef = useRef<gsap.Context | null>(null);
+  const gsapCtxRef   = useRef<gsap.Context | null>(null);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -156,6 +158,7 @@ const FlagshipEvents = () => {
 
   const isMobileView = windowWidth < 1024;
 
+  // ── Build events list ──────────────────────────────────────────────────────
   const events = useMemo(() => {
     return contextEvents
       .filter((ce: any) => ce.is_public !== false)
@@ -190,9 +193,9 @@ const FlagshipEvents = () => {
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // ── GSAP stacking scroll — mobile only ───────────────────────────────────
+  // ── GSAP stacking scroll — mobile only ────────────────────────────────────
   useLayoutEffect(() => {
-    // Clean up any previous GSAP context
+    // Always kill previous context first
     if (gsapCtxRef.current) {
       gsapCtxRef.current.revert();
       gsapCtxRef.current = null;
@@ -200,55 +203,99 @@ const FlagshipEvents = () => {
 
     if (!isMobileView || events.length === 0 || !containerRef.current) return;
 
+    /*
+     * Small delay ensures React has committed all DOM nodes before
+     * GSAP queries them, avoiding stale/empty NodeLists.
+     */
     const tid = setTimeout(() => {
       const container = containerRef.current;
       if (!container) return;
 
-      // Query elements directly from the container — avoids stale selectors
       const wrappers = Array.from(container.querySelectorAll<HTMLElement>('.f-card-wrapper'));
       const cards    = Array.from(container.querySelectorAll<HTMLElement>('.f-card'));
 
-      if (!wrappers.length) return;
+      if (!wrappers.length || !cards.length) return;
+
+      const CARD_HEIGHT   = cards[0].offsetHeight || 430;   // px
+      const TOP_PADDING   = 80;                             // how far from viewport top each pin snaps
+      const SCALE_STEP    = 0.04;                           // scale reduction per card behind
+      const MAX_ROTX      = -8;                             // max 3-D tilt in degrees
 
       const ctx = gsap.context(() => {
+        // ── Initial state: flat, full-size, no tilt ──────────────────────
         gsap.set(cards, {
-          clearProps: 'transform',
+          clearProps: 'all',
           transformOrigin: 'top center',
+          transformPerspective: 600,
         });
 
         wrappers.forEach((wrapper, i) => {
-          const card    = cards[i];
+          const card   = cards[i];
           if (!card) return;
 
-          const isLast  = i === wrappers.length - 1;
-          const scale   = isLast ? 1 : 0.9 + 0.025 * i;
-          const rotX    = isLast ? 0 : -10;
-          const pinStart = 62 + 10 * i;
+          const isLast = i === wrappers.length - 1;
 
-          gsap.to(card, {
-            scale,
-            rotationX: rotX,
-            transformOrigin: 'top center',
-            ease: 'none',
-            scrollTrigger: {
-              trigger:     wrapper,
-              start:       `top ${pinStart}px`,
-              end:         () => `bottom ${Math.min(window.innerHeight * 0.78, 560)}px`,
-              endTrigger:  container,               // use the ref directly
-              scrub:       true,
-              pin:         wrapper,                 // pin the ELEMENT, never `true`
-              pinSpacing:  false,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-            },
-          });
+          /*
+           * Pin start: each successive card pins a bit lower so there's
+           * a visual "stagger" — the deck fan-out effect.
+           */
+          const pinTopPx = TOP_PADDING + i * 14;
+
+          /*
+           * Cards BEHIND the current one should shrink + tilt
+           * as the NEXT card scrolls over them.
+           * We animate each card EXCEPT the last one.
+           */
+          if (!isLast) {
+            const cardsAhead = wrappers.length - 1 - i;
+            const targetScale = Math.max(0.78, 1 - SCALE_STEP * cardsAhead);
+            const targetRotX  = MAX_ROTX;
+
+            gsap.to(card, {
+              scale:      targetScale,
+              rotationX:  targetRotX,
+              ease:       'none',
+              scrollTrigger: {
+                trigger:          wrapper,
+                start:            `top ${pinTopPx}px`,         // card hits its pin position
+                end:              `+=${CARD_HEIGHT * 0.9}`,    // scroll window per card
+                endTrigger:       container,
+                scrub:            0.6,                         // slight smoothing
+                pin:              wrapper,
+                pinSpacing:       false,
+                anticipatePin:    1,
+                invalidateOnRefresh: true,
+              },
+            });
+          } else {
+            /*
+             * Last card: just pin it with no transform — it's the "top" card.
+             * Give it a slight entrance scale for polish.
+             */
+            gsap.fromTo(
+              card,
+              { scale: 0.93, opacity: 0.6 },
+              {
+                scale:   1,
+                opacity: 1,
+                ease:    'none',
+                scrollTrigger: {
+                  trigger:          wrapper,
+                  start:            `top ${pinTopPx + 60}px`,
+                  end:              `top ${pinTopPx}px`,
+                  scrub:            true,
+                  invalidateOnRefresh: true,
+                },
+              }
+            );
+          }
         });
 
         ScrollTrigger.refresh();
-      });
+      }, container); // scoped to container — safe cleanup
 
       gsapCtxRef.current = ctx;
-    }, 150);
+    }, 200);
 
     return () => {
       clearTimeout(tid);
@@ -258,8 +305,8 @@ const FlagshipEvents = () => {
       }
     };
   }, [isMobileView, events.length]);
-  // ─────────────────────────────────────────────────────────────────────────
 
+  // ── Desktop auto-carousel ──────────────────────────────────────────────────
   const numPages = Math.ceil(events.length / 3);
 
   useEffect(() => {
@@ -280,6 +327,7 @@ const FlagshipEvents = () => {
     return sliced;
   }, [events, activeIndex, isMobileView]);
 
+  // ── Loading skeleton ───────────────────────────────────────────────────────
   if (loading) {
     return (
       <section className="py-20 px-4">
@@ -295,17 +343,18 @@ const FlagshipEvents = () => {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     /*
-     * ⚠️  overflow-hidden on any ancestor BREAKS GSAP pin.
-     *     Use overflow-x-hidden on mobile so pinned cards can
-     *     escape the section vertically, but horizontal clips still apply.
-     *     On lg+ screens overflow-hidden is fine (no pinning there).
+     * overflow-x-hidden on mobile: clips horizontal bleed from 3-D transforms
+     * WITHOUT blocking vertical pin escape. lg:overflow-hidden is safe since
+     * GSAP pinning is disabled on desktop.
      */
     <section
       id="events"
       className="relative py-20 px-4 md:px-8 lg:px-16 bg-white overflow-x-hidden lg:overflow-hidden"
     >
+      {/* ── Section heading ────────────────────────────────────────────── */}
       <div className="max-w-[1400px] mx-auto mb-12">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
@@ -317,19 +366,34 @@ const FlagshipEvents = () => {
         </div>
       </div>
 
+      {/* ── Card area ──────────────────────────────────────────────────── */}
       <div className="relative w-full flex justify-center min-h-[583px]">
         {isMobileView ? (
-          // ── Mobile: GSAP pin-stacking ──────────────────────────────────
+          /*
+           * MOBILE — GSAP stacking
+           *
+           * pb-[...] = total scroll room for all cards to pin + animate.
+           * Formula: (n - 1) × 180px gives enough scroll distance so that
+           * every card except the last can fully pin before the section ends.
+           */
           <div
             ref={containerRef}
-            className="f-cards-container block w-full max-w-sm mx-auto pt-6 pb-[190px] sm:pb-[220px]"
+            className="f-cards-container block w-full max-w-[380px] mx-auto pt-4"
+            style={{
+              paddingBottom: `${Math.max((events.length - 1) * 180, 60)}px`,
+            }}
           >
             {visibleEvents.map((event, index) => (
-              <MobileCard key={event.id ?? index} event={event} />
+              <MobileCard
+                key={event.id ?? index}
+                event={event}
+                index={index}
+                total={visibleEvents.length}
+              />
             ))}
           </div>
         ) : (
-          // ── Desktop: animated carousel ─────────────────────────────────
+          /* DESKTOP — Framer Motion carousel */
           <div className="flex flex-row items-start justify-center gap-[120px] w-full max-w-7xl">
             <AnimatePresence mode="wait">
               <motion.div
@@ -349,6 +413,7 @@ const FlagshipEvents = () => {
         )}
       </div>
 
+      {/* ── Desktop pagination dots ─────────────────────────────────────── */}
       {!isMobileView && events.length > 3 && (
         <div className="flex justify-center gap-3 mt-12 lg:mt-16">
           {Array.from({ length: numPages }).map((_, i) => (
