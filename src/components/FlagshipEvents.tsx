@@ -192,17 +192,40 @@ const FlagshipEvents = () => {
       gsapCtxRef.current = gsap.context(() => {
         const cardsWrappers = gsap.utils.toArray<HTMLElement>('.card-wrapper');
         const cards = gsap.utils.toArray<HTMLElement>('.card');
+        const overlay = document.querySelector('.section-overlay');
 
-        if (cardsWrappers.length === 0 || cards.length === 0) return;
+        // 1. Pin the TITLE
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: "top top",
+          end: "bottom bottom",
+          pin: ".section-header",
+          pinSpacing: false,
+          id: "header-pin"
+        });
+
+        // 2. Background Darkening Overlay
+        if (overlay) {
+          gsap.to(overlay, {
+            opacity: 0.85,
+            ease: "none",
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: true
+            }
+          });
+        }
 
         cardsWrappers.forEach((wrapper, i) => {
           const card = cards[i];
           if (!card) return;
 
-          // Pin the current card
+          // Pin each card wrapper
           ScrollTrigger.create({
             trigger: wrapper,
-            start: "top 80",
+            start: "top 120", 
             endTrigger: containerRef.current,
             end: "bottom 550",
             pin: true,
@@ -212,21 +235,20 @@ const FlagshipEvents = () => {
             anticipatePin: 1
           });
 
-          // Animation for the card: 
-          // As the NEXT card starts to enter, this card scales down and fades out
+          // Animation for the card underneath (Scale + Opacity + Blur)
           if (i < cards.length - 1) {
             const nextWrapper = cardsWrappers[i + 1];
             gsap.to(card, {
-              scale: 0.92,
-              opacity: 0.6,
-              filter: "blur(1px)",
-              ease: "none",
+              scale: 0.9,
+              opacity: 0.4,
+              filter: "blur(6px)",
+              ease: "power1.inOut",
               scrollTrigger: {
                 trigger: nextWrapper,
                 start: "top bottom",
-                end: "top 80",
+                end: "top 120",
                 scrub: true,
-                id: `scale-${i}`
+                id: `transition-${i}`
               }
             });
           }
@@ -269,9 +291,13 @@ const FlagshipEvents = () => {
   return (
     <section
       id="events"
-      className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden"
+      ref={containerRef}
+      className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden min-h-screen"
     >
-      <div className="max-w-7xl mx-auto mb-10 md:mb-12 text-center">
+      {/* Background Overlay (GDG Style) */}
+      <div className="section-overlay absolute inset-0 bg-black opacity-0 pointer-events-none z-[5] lg:hidden" />
+
+      <div className="section-header max-w-7xl mx-auto mb-10 md:mb-12 text-center relative z-20">
         <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
           Our <span className="font-bold">Flagship Events</span>
         </h2>
@@ -281,23 +307,20 @@ const FlagshipEvents = () => {
       </div>
 
       {/* ══════════ MOBILE (< lg) — GDG Noida Style Stack ══════════ */}
-      <div className="block lg:hidden">
-        <div 
-          className="wrapper relative w-full pt-[40px] pb-[400px] flex justify-center"
-          ref={containerRef}
-        >
+      <div className="block lg:hidden relative z-10">
+        <div className="wrapper relative w-full pt-[20px] pb-[400px] flex justify-center">
           <div className="cards w-full max-w-[450px] flex flex-col items-center px-4">
             {events.map((event, i) => (
               <div 
                 key={event.id ?? i} 
-                className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[400px]"
+                className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[420px]"
               >
                 <div 
-                  className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[24px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
+                  className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[28px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
                   style={{ 
-                    willChange: 'transform, opacity',
+                    willChange: 'transform, opacity, filter',
                     backfaceVisibility: 'hidden',
-                    zIndex: i + 1
+                    zIndex: i + 10
                   }}
                 >
                   <CardInner event={event} />
@@ -307,19 +330,23 @@ const FlagshipEvents = () => {
           </div>
         </div>
 
-        {/* Indicators for scroll progress */}
-        <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center gap-3 px-4 py-2 pointer-events-none">
-          <div className="flex gap-2 p-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 pointer-events-auto shadow-lg">
+        {/* Indicators for scroll progress (Premium Pill Style) */}
+        <div className="fixed bottom-12 left-0 right-0 z-[60] flex justify-center pointer-events-none">
+          <div className="flex gap-2.5 p-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
             {events.map((_, i) => (
               <button
                 key={i}
                 onClick={() => {
-                  const targetScroll = containerRef.current?.offsetTop || 0;
-                  window.scrollTo({ top: targetScroll + i * 440, behavior: 'smooth' });
+                  const targetHeader = document.querySelector('.section-header');
+                  const headerHeight = targetHeader?.clientHeight || 0;
+                  window.scrollTo({ 
+                    top: (containerRef.current?.offsetTop || 0) + i * 500 + headerHeight, 
+                    behavior: 'smooth' 
+                  });
                 }}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${i === mobileActiveIndex
-                  ? 'bg-[#4285F4] w-8'
-                  : 'bg-gray-400 opacity-50 hover:opacity-100'
+                className={`h-2 rounded-full transition-all duration-500 ease-out ${i === mobileActiveIndex
+                  ? 'bg-[#4285F4] w-9 shadow-[0_0_12px_rgba(66,133,244,0.4)]'
+                  : 'bg-white/40 w-2 hover:bg-white/60'
                   }`}
               />
             ))}
