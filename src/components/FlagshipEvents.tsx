@@ -267,8 +267,8 @@ const FlagshipEvents = () => {
                 key={i}
                 onClick={() => setDesktopActiveIndex(i)}
                 className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === desktopActiveIndex
-                    ? 'w-12 h-3'
-                    : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                  ? 'w-12 h-3'
+                  : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
                   }`}
               >
                 {i === desktopActiveIndex && (
