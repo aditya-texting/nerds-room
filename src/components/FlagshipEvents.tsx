@@ -337,8 +337,8 @@ const FlagshipEvents = () => {
 
         {/* GSAP Stacking Scroll Container */}
         <div
-          className="wrapper relative w-full pt-10 pb-[50px]"
-          style={{ minHeight: `${visibleMobileEvents.length * 450 + 200}px` }}
+          className="wrapper relative w-full pt-6 pb-6"
+          style={{ minHeight: `${visibleMobileEvents.length * 300 + 100}px` }}
           ref={containerRef}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
