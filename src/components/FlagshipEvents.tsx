@@ -1,8 +1,12 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface EventData {
   id?: string | number;
@@ -98,7 +102,7 @@ const CardInner = ({ event }: { event: EventData }) => (
   </>
 );
 
-// ─── Desktop Card ─────────────────────────────────────────────────────────────
+// ─── Desktop Event Card ───────────────────────────────────────────────────────
 const DesktopEventCard = ({ event, index }: { event: EventData; index: number }) => {
   const isLower = index % 2 !== 0;
   return (
@@ -112,63 +116,6 @@ const DesktopEventCard = ({ event, index }: { event: EventData; index: number })
       >
         <CardInner event={event} />
       </motion.div>
-    </div>
-  );
-};
-
-// ─── Mobile Sticky Stack Card ─────────────────────────────────────────────────
-// GDG Noida style: cards stick to top one by one as you scroll,
-// each card pinned with a slight scale-down + vertical offset to show stack depth.
-const MobileStickyStack = ({ events }: { events: EventData[] }) => {
-  return (
-    <div className="relative w-full">
-      {/*
-        Each card gets:
-          - position: sticky, top: calculated offset so cards stack visually
-          - A subtle transform to show depth (earlier cards scale down when pinned)
-        The scroll container height = enough space to "scroll through" each card
-      */}
-      {events.map((event, index) => {
-        // top offset: first card sticks at ~80px, each subsequent 16px lower
-        // so cards fan out slightly at the top
-        const stickyTop = 80 + index * 16;
-
-        return (
-          <div
-            key={event.id ?? index}
-            className="sticky w-full flex justify-center"
-            style={{
-              top: `${stickyTop}px`,
-              // Enough height per card so the next one pushes it up
-              marginBottom: index < events.length - 1 ? '24px' : '0',
-              zIndex: index + 1,
-            }}
-          >
-            <div
-              className={`relative w-full max-w-[300px] sm:max-w-[340px] h-[400px] sm:h-[430px] rounded-[20px] shadow-2xl border border-[#0000001a] flex flex-col items-center ${event.bgColor}`}
-              style={{
-                // Subtle shadow that deepens per card level for depth
-                boxShadow: `0 ${8 + index * 4}px ${24 + index * 8}px rgba(0,0,0,${0.08 + index * 0.03})`,
-              }}
-            >
-              {/* Stack indicator dots at top for visual depth cue */}
-              {index < events.length - 1 && (
-                <div
-                  className="absolute -bottom-[10px] left-1/2 -translate-x-1/2 w-[92%] h-[14px] rounded-b-[16px] opacity-30"
-                  style={{
-                    background: 'rgba(0,0,0,0.12)',
-                    filter: 'blur(2px)',
-                  }}
-                />
-              )}
-              <CardInner event={event} />
-            </div>
-          </div>
-        );
-      })}
-
-      {/* Scroll spacer: gives enough room to scroll through all cards */}
-      <div style={{ height: `${events.length * 60}px` }} />
     </div>
   );
 };
@@ -195,6 +142,68 @@ const FlagshipEvents = () => {
       bgColor: e.bgColor || 'bg-white',
     }));
   }, [contextEvents]);
+
+  // ── GSAP Scroll Stack Logic (User Request) ─────────────────────────────────
+  const containerRef = useRef<HTMLDivElement>(null);
+  const gsapCtxRef = useRef<gsap.Context | null>(null);
+
+  useLayoutEffect(() => {
+    if (!isMobileView || events.length === 0) return;
+
+    if (gsapCtxRef.current) {
+      gsapCtxRef.current.revert();
+      gsapCtxRef.current = null;
+    }
+
+    const timeout = setTimeout(() => {
+      if (!containerRef.current) return;
+
+      gsapCtxRef.current = gsap.context(() => {
+        const cardsWrappers = gsap.utils.toArray<HTMLElement>('.card-wrapper');
+        const cards = gsap.utils.toArray<HTMLElement>('.card');
+
+        if (cardsWrappers.length === 0 || cards.length === 0) return;
+
+        cardsWrappers.forEach((wrapper, i) => {
+          const card = cards[i];
+          if (!card) return;
+
+          let scale = 1, rotation = 0;
+          if (i !== cards.length - 1) {
+            scale = 0.9 + 0.025 * i;
+            rotation = -10;
+          }
+
+          gsap.to(card, {
+            scale: scale,
+            rotationX: rotation,
+            transformOrigin: "top center",
+            ease: "none",
+            scrollTrigger: {
+              trigger: wrapper,
+              start: "top " + (60 + 10 * i),
+              end: "bottom 550",
+              endTrigger: ".wrapper",
+              scrub: true,
+              pin: wrapper,
+              pinSpacing: false,
+              id: i + 1
+            }
+          });
+        });
+
+        ScrollTrigger.refresh(true);
+      }, containerRef.current);
+    }, 200);
+
+    return () => {
+      clearTimeout(timeout);
+      if (gsapCtxRef.current) {
+        gsapCtxRef.current.revert();
+        gsapCtxRef.current = null;
+      }
+    };
+  }, [isMobileView, events.length]);
 
   // ── Desktop carousel ──────────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
@@ -232,9 +241,26 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — GDG Noida Sticky Stack ══════════ */}
+      {/* ══════════ MOBILE (< lg) — User Requested GSAP Stack ══════════ */}
       <div className="block lg:hidden">
-        <MobileStickyStack events={events} />
+        <div 
+          className="wrapper relative w-full pt-[100px] pb-[50px]"
+          ref={containerRef}
+          style={{ minHeight: `${events.length * 400 + 300}px` }}
+        >
+          <div className="cards w-full max-w-[750px] mx-auto px-5">
+            {events.map((event, i) => (
+              <div key={event.id ?? i} className="card-wrapper w-full perspective-[500px] mb-[50px] last:mb-0">
+                <div 
+                  className={`card w-full h-[400px] flex flex-col items-center rounded-[10px] shadow-xl border border-[#0000001a] ${event.bgColor}`}
+                  style={{ backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'top center' }}
+                >
+                  <CardInner event={event} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ══════════ DESKTOP (lg+) ══════════ */}
