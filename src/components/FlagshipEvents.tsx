@@ -205,10 +205,11 @@ const FlagshipEvents = () => {
             ease: 'none',
             scrollTrigger: {
               trigger: wrapper,
-              start: 'top center', 
-              end: '+=200',
+              start: 'top 80', 
+              end: 'bottom bottom',
+              endTrigger: containerRef.current,
               scrub: true,
-              pin: true,
+              pin: wrapper,
               pinSpacing: false,
               id: `card-${i}`,
             },
@@ -265,15 +266,16 @@ const FlagshipEvents = () => {
 
       {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
-        <div
+        <div 
           className="wrapper relative w-full pt-4"
           ref={containerRef}
+          style={{ minHeight: `${visibleMobileEvents.length * 400 + 200}px` }}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5">
               {visibleMobileEvents.map((event, index) => (
                 <div
                   key={event.id ?? index}
-                  className="card-wrapper w-full mb-[50px] last:mb-0 flex justify-center"
+                  className="card-wrapper w-full mb-[40px] last:mb-0 flex justify-center"
                   style={{ perspective: '1000px' }}
                 >
                   <div
