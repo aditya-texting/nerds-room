@@ -30,8 +30,12 @@ const CountUp = ({ value }: { value: string }) => {
     const increment = target / (duration / 16);
     const timer = setInterval(() => {
       start += increment;
-      if (start >= target) { setDisplayValue(target); clearInterval(timer); }
-      else setDisplayValue(Math.floor(start));
+      if (start >= target) {
+        setDisplayValue(target);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(Math.floor(start));
+      }
     }, 16);
     return () => clearInterval(timer);
   }, [target, isInView]);
@@ -39,7 +43,7 @@ const CountUp = ({ value }: { value: string }) => {
   return <span ref={ref}>{displayValue.toLocaleString()}{suffix}</span>;
 };
 
-// ─── Shared card content ──────────────────────────────────────────────────────
+// ─── Shared card content ───────────────────────────────────────────────────────
 const CardInner = ({ event }: { event: EventData }) => (
   <>
     <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
@@ -56,7 +60,11 @@ const CardInner = ({ event }: { event: EventData }) => (
 
     <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
       <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#0000001a]">
-        <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+        <img
+          src={event.image}
+          alt={event.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       </div>
       <div className="absolute bottom-2 left-[30%] space-y-1.5">
         {event.stats.map((stat, sIndex) => (
@@ -80,9 +88,44 @@ const CardInner = ({ event }: { event: EventData }) => (
   </>
 );
 
-// ─── Event card ─────────────────────────────────────────────────────────────
-const EventCard = ({ event, index, isMobileView }: { event: EventData; index: number, isMobileView: boolean }) => {
-  const isLower = index % 2 !== 0 && !isMobileView;
+// ─── Mobile Card — scroll-triggered vertical entrance ──────────────────────────
+const MobileEventCard = ({ event, index }: { event: EventData; index: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.25 });
+
+  return (
+    <div
+      ref={ref}
+      className="flex-shrink-0 w-full flex justify-center"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 70, scale: 0.95 }}
+        animate={
+          isInView
+            ? { opacity: 1, y: 0, scale: 1 }
+            : { opacity: 0, y: 70, scale: 0.95 }
+        }
+        transition={{
+          duration: 0.65,
+          delay: index * 0.12,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
+          w-[300px] h-[430px]
+          ${event.bgColor}
+          mx-auto
+        `}
+      >
+        <CardInner event={event} />
+      </motion.div>
+    </div>
+  );
+};
+
+// ─── Desktop Card ─────────────────────────────────────────────────────────────
+const DesktopEventCard = ({ event, index }: { event: EventData; index: number }) => {
+  const isLower = index % 2 !== 0;
+
   return (
     <div className="flex-shrink-0">
       <motion.div
@@ -91,8 +134,8 @@ const EventCard = ({ event, index, isMobileView }: { event: EventData; index: nu
         transition={{ duration: 0.6 }}
         viewport={{ once: true, margin: '-100px' }}
         className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
-          w-[320px] sm:w-[360px] md:max-w-[320px] lg:max-w-[372px]
-          h-[420px] sm:h-[450px] md:h-[430px] lg:h-[493px]
+          md:max-w-[320px] lg:max-w-[372px]
+          md:h-[430px] lg:h-[493px]
           ${event.bgColor}
           ${isLower ? 'lg:mt-[90px]' : 'lg:mt-[39px]'}
           mx-auto
@@ -120,23 +163,22 @@ const FlagshipEvents = () => {
   }, []);
 
   const isMobileView = windowWidth < 1024;
-  const cardsPerPage = isMobileView ? 1 : 3;
 
-  // ── Build events list ──────────────────────────────────────────────────────
+  // ── Build events list ─────────────────────────────────────────────────────
   const events = useMemo(() => {
     return contextEvents
       .filter((ce: any) => ce.is_public !== false)
       .map((ce: any, i: number) => {
         const bgColors = ['bg-[#e8f5e9]', 'bg-[#fce4ec]', 'bg-[#eceff1]', 'bg-[#fff9c4]'];
         const dynamicStats = (ce.stats || []).map((s: any) => {
-          const label   = (s.label || '').toLowerCase();
-          const rawVal  = String(s.value || '').trim();
-          const numVal  = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
+          const label = (s.label || '').toLowerCase();
+          const rawVal = String(s.value || '').trim();
+          const numVal = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
           const isEmpty = !rawVal || rawVal === '0' || isNaN(numVal);
           if (isEmpty) {
             if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
-            if (label.includes('attendee'))     return { ...s, value: `${totalApprovedRegs || 350}+` };
-            if (label.includes('speaker'))      return { ...s, value: '30+' };
+            if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || 350}+` };
+            if (label.includes('speaker')) return { ...s, value: '30+' };
           }
           return s;
         });
@@ -150,32 +192,48 @@ const FlagshipEvents = () => {
         }
         return {
           ...ce,
-          stats:    dynamicStats.slice(0, 3),
-          bgColor:  bgColors[i % bgColors.length],
+          stats: dynamicStats.slice(0, 3),
+          bgColor: bgColors[i % bgColors.length],
           location: ce.location || 'Noida, India',
         };
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // ── Auto-carousel ──────────────────────────────────────────────────
-  const numPages = Math.ceil(events.length / cardsPerPage);
-
+  // ── Mobile auto-carousel (1 card at a time) ───────────────────────────────
   useEffect(() => {
-    if (events.length <= cardsPerPage) return;
+    if (!isMobileView || events.length <= 1) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % numPages);
+      setActiveIndex((prev) => (prev + 1) % events.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [events.length, numPages, cardsPerPage]);
+  }, [isMobileView, events.length]);
 
-  const visibleEvents = useMemo(() => {
+  // ── Desktop visible events (3 at a time with auto-rotate) ────────────────
+  const desktopCardsPerPage = 3;
+  const desktopNumPages = Math.ceil(events.length / desktopCardsPerPage);
+
+  const [desktopActiveIndex, setDesktopActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (isMobileView || events.length <= desktopCardsPerPage) return;
+    const interval = setInterval(() => {
+      setDesktopActiveIndex((prev) => (prev + 1) % desktopNumPages);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isMobileView, events.length, desktopNumPages]);
+
+  const visibleDesktopEvents = useMemo(() => {
     if (!events.length) return [];
-    if (events.length <= cardsPerPage) return events;
-    const start = activeIndex * cardsPerPage;
-    let sliced  = events.slice(start, start + cardsPerPage);
-    if (sliced.length < cardsPerPage) sliced = [...sliced, ...events.slice(0, cardsPerPage - sliced.length)];
+    if (events.length <= desktopCardsPerPage) return events;
+    const start = desktopActiveIndex * desktopCardsPerPage;
+    let sliced = events.slice(start, start + desktopCardsPerPage);
+    if (sliced.length < desktopCardsPerPage)
+      sliced = [...sliced, ...events.slice(0, desktopCardsPerPage - sliced.length)];
     return sliced;
-  }, [events, activeIndex, cardsPerPage]);
+  }, [events, desktopActiveIndex]);
+
+  // Current mobile card
+  const currentMobileEvent = events[activeIndex] ?? null;
 
   if (loading) {
     return (
@@ -183,7 +241,9 @@ const FlagshipEvents = () => {
         <div className="max-w-[1400px] mx-auto">
           <Skeleton className="h-10 w-64 mx-auto mb-12" />
           <div className="flex gap-8 overflow-hidden justify-center">
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="w-[372px] h-[493px] rounded-[20px]" />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="w-[372px] h-[493px] rounded-[20px]" />
+            ))}
           </div>
         </div>
       </section>
@@ -195,7 +255,8 @@ const FlagshipEvents = () => {
       id="events"
       className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden"
     >
-      <div className="max-w-[1400px] mx-auto mb-12">
+      {/* ── Heading ── */}
+      <div className="max-w-[1400px] mx-auto mb-10 md:mb-12">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
             Our <span className="font-bold">Flagship Events</span>
@@ -206,48 +267,111 @@ const FlagshipEvents = () => {
         </div>
       </div>
 
-      <div className="relative w-full flex justify-center min-h-[450px] md:min-h-[583px]">
-        <div className="flex flex-row items-start justify-center gap-6 md:gap-[80px] lg:gap-[120px] w-full max-w-7xl">
+      {/* ══════════════════════════ MOBILE VIEW (< lg) ══════════════════════════ */}
+      <div className="block lg:hidden">
+        {/* Single card carousel with vertical scroll-triggered animation */}
+        <div className="relative w-full flex justify-center min-h-[450px]">
+          <AnimatePresence mode="wait">
+            {currentMobileEvent && (
+              <motion.div
+                key={activeIndex}
+                initial={{ opacity: 0, y: 60, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -40, scale: 0.96 }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full flex justify-center"
+              >
+                <MobileEventCard event={currentMobileEvent} index={0} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Dots */}
+        {events.length > 1 && (
+          <div className="flex justify-center gap-3 mt-6">
+            {events.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                  }`}
+              >
+                {i === activeIndex && (
+                  <motion.div
+                    className="absolute inset-0 bg-[#4285F4]"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 5, ease: 'linear' }}
+                    style={{ originX: 0 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Scroll strip: all 3 cards visible below with scroll-triggered animation ── */}
+        {events.length > 1 && (
+          <div className="mt-10 flex flex-col gap-6 items-center">
+            <p className="text-sm text-gray-400 font-medium tracking-wide uppercase">
+              All Events
+            </p>
+            {events.map((event, index) => (
+              <MobileEventCard key={event.id ?? index} event={event} index={index} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ══════════════════════════ DESKTOP VIEW (lg+) ══════════════════════════ */}
+      <div className="hidden lg:block">
+        <div className="relative w-full flex justify-center min-h-[583px]">
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeIndex}
-              className="flex flex-row gap-6 md:gap-[80px] lg:gap-[120px] w-full justify-center"
+              key={desktopActiveIndex}
+              className="flex flex-row gap-[80px] lg:gap-[120px] w-full justify-center"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               transition={{ duration: 0.6 }}
             >
-              {visibleEvents.map((event, index) => (
-                <EventCard key={`${activeIndex}-${event.id || index}`} index={index} event={event} isMobileView={isMobileView} />
+              {visibleDesktopEvents.map((event, index) => (
+                <DesktopEventCard
+                  key={`${desktopActiveIndex}-${event.id ?? index}`}
+                  event={event}
+                  index={index}
+                />
               ))}
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
 
-      {events.length > cardsPerPage && (
-        <div className="flex justify-center gap-3 mt-8 md:mt-12 lg:mt-16">
-          {Array.from({ length: numPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveIndex(i)}
-              className={`relative rounded-full overflow-hidden transition-all duration-300 ${
-                i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
-              }`}
-            >
-              {i === activeIndex && (
-                <motion.div
-                  className="absolute inset-0 bg-nerdBlue"
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 5, ease: 'linear' }}
-                  style={{ originX: 0 }}
-                />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+        {events.length > desktopCardsPerPage && (
+          <div className="flex justify-center gap-3 mt-16">
+            {Array.from({ length: desktopNumPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setDesktopActiveIndex(i)}
+                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === desktopActiveIndex
+                    ? 'w-12 h-3'
+                    : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                  }`}
+              >
+                {i === desktopActiveIndex && (
+                  <motion.div
+                    className="absolute inset-0 bg-[#4285F4]"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 5, ease: 'linear' }}
+                    style={{ originX: 0 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   );
 };
