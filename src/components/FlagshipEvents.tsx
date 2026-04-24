@@ -209,14 +209,15 @@ const FlagshipEvents = () => {
               scrub: true,
               pin: wrapper,
               pinSpacing: false,
-              id: String(i + 1)
+              id: `mobile-p${mobileActiveIndex}-c${i}`
             }
           });
         });
 
-        ScrollTrigger.refresh(true);
+        // Forced refresh after tiny delay to ensure DOM is ready
+        setTimeout(() => ScrollTrigger.refresh(), 50);
       }, containerRef.current);
-    }, 100);
+    }, 150);
 
     return () => {
       clearTimeout(timeout);
@@ -265,39 +266,37 @@ const FlagshipEvents = () => {
       {/* ══════════ MOBILE (< lg) — Carousel with GSAP Stack ══════════ */}
       <div className="block lg:hidden">
         <div 
-          className="wrapper relative w-full pt-[100px] pb-[50px]"
+          className="wrapper relative w-full pt-[80px] pb-[50px] flex justify-center"
           ref={containerRef}
           key={mobileActiveIndex}
-          style={{ minHeight: `${visibleMobileEvents.length * 400 + 300}px` }}
+          style={{ minHeight: '1400px' }} // Fixed height to prevent layout jumps
         >
-          <div className="cards w-full max-w-[750px] mx-auto px-5">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mobileActiveIndex}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5 }}
-                className="w-full flex flex-col items-center"
+          <div className="cards w-full max-w-[500px] flex flex-col items-center px-4">
+            {visibleMobileEvents.map((event, i) => (
+              <div 
+                key={event.id ?? i} 
+                className="card-wrapper w-full perspective-[1000px] mb-[40px] last:mb-0 flex justify-center"
               >
-                {visibleMobileEvents.map((event, i) => (
-                  <div key={event.id ?? i} className="card-wrapper w-full perspective-[500px] mb-[50px] last:mb-0">
-                    <div 
-                      className={`card w-full h-[400px] flex flex-col items-center rounded-[10px] shadow-xl border border-[#0000001a] ${event.bgColor}`}
-                      style={{ backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'top center' }}
-                    >
-                      <CardInner event={event} />
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                <div 
+                  className={`card w-full max-w-[300px] h-[400px] flex flex-col items-center rounded-[15px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
+                  style={{ 
+                    backgroundSize: 'cover', 
+                    backgroundRepeat: 'no-repeat', 
+                    backgroundPosition: 'top center',
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden'
+                  }}
+                >
+                  <CardInner event={event} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Indicators for mobile carousel */}
         {events.length > mobileCardsPerPage && (
-          <div className="flex justify-center gap-3 mt-4 pb-6">
+          <div className="flex justify-center gap-3 mt-4 pb-12">
             {Array.from({ length: mobileNumPages }).map((_, i) => (
               <button
                 key={i}
