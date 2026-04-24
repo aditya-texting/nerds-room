@@ -104,8 +104,6 @@ const DesktopCard = ({ event, index }: { event: EventData; index: number }) => {
 
 // ─── Mobile card — GSAP owns all transforms, no Framer Motion here ────────────
 const MobileCard = ({ event, index, total }: { event: EventData; index: number; total: number }) => {
-  // Each card sits slightly lower than the previous to create a visible deck peek
-  const topOffset = 80 + index * 14; // px from top of viewport when pinned
 
   return (
     <div
