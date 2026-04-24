@@ -228,6 +228,9 @@ const FlagshipEvents = () => {
 
         if (cardsWrappers.length === 0 || cards.length === 0) return;
 
+        // Pre-set visibility to avoid flash
+        gsap.set(cards, { opacity: 0, y: 20 });
+
         cardsWrappers.forEach((wrapper, i) => {
           const card = cards[i];
           if (!card) return;
@@ -252,15 +255,17 @@ const FlagshipEvents = () => {
               scrub: true,
               pin: wrapper,
               pinSpacing: false,
-              pinType: 'fixed', // Force fixed to avoid jitter if parent has transform
+              pinType: 'fixed',
               id: String(i + 1),
             },
           });
         });
 
+        // Fade in smoothly after GSAP is ready
+        gsap.to(cards, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 });
         ScrollTrigger.refresh();
       }, containerRef.current);
-    }, 500);
+    }, 100); // Reduced delay for faster snap-in, but still allows DOM to settle
 
     return () => {
       clearTimeout(timeout);
@@ -341,10 +346,6 @@ const FlagshipEvents = () => {
               <motion.div
                 key={mobileActiveIndex}
                 className="w-full flex flex-col items-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
               >
                 {visibleMobileEvents.map((event, index) => (
                   <div
