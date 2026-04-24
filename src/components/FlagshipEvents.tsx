@@ -165,6 +165,15 @@ const FlagshipEvents = () => {
     return events.slice(start, start + mobileCardsPerPage);
   }, [events, mobileActiveIndex, mobileCardsPerPage]);
 
+  // Auto-rotate mobile pages
+  useEffect(() => {
+    if (!isMobileView || events.length <= mobileCardsPerPage) return;
+    const interval = setInterval(() => {
+      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
+    }, 6000); // Matches the dot progress duration (6s)
+    return () => clearInterval(interval);
+  }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage]);
+
   useLayoutEffect(() => {
     if (!isMobileView || events.length === 0) return;
 
