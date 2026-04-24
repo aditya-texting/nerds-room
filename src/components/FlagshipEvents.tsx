@@ -218,7 +218,7 @@ const FlagshipEvents = () => {
       gsapCtxRef.current = null;
     }
 
-    // Increase delay so React + AnimatePresence (exit/enter) finishes
+    // Increased delay to ensure DOM is fully painted and images have started loading
     const timeout = setTimeout(() => {
       if (!containerRef.current) return;
 
@@ -229,7 +229,7 @@ const FlagshipEvents = () => {
         if (cardsWrappers.length === 0 || cards.length === 0) return;
 
         // Pre-set visibility to avoid flash
-        gsap.set(cards, { opacity: 0, y: 20 });
+        gsap.set(cards, { opacity: 0, y: 30 });
 
         cardsWrappers.forEach((wrapper, i) => {
           const card = cards[i];
@@ -261,11 +261,18 @@ const FlagshipEvents = () => {
           });
         });
 
-        // Fade in smoothly after GSAP is ready
-        gsap.to(cards, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 });
-        ScrollTrigger.refresh();
+        // Fade in smoothly after GSAP is ready and refresh triggers
+        gsap.to(cards, { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.5, 
+          stagger: 0.1,
+          onComplete: () => {
+            ScrollTrigger.refresh();
+          }
+        });
       }, containerRef.current);
-    }, 100); // Reduced delay for faster snap-in, but still allows DOM to settle
+    }, 250); // Slightly longer delay for better reliability on reload
 
     return () => {
       clearTimeout(timeout);
