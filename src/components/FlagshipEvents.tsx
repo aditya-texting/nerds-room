@@ -186,24 +186,25 @@ const FlagshipEvents = () => {
         const cards = gsap.utils.toArray<HTMLElement>('.card');
         const overlay = document.querySelector('.section-overlay');
 
-        // Pin the header only when section is active
+        // Pin the header with proper clearance for Navbar
         ScrollTrigger.create({
           trigger: containerRef.current,
-          start: "top top",
+          start: "top 80", // Navbar height
           end: "bottom bottom",
           pin: ".section-header",
           pinSpacing: false,
         });
 
+        // Background Curtain Effect
         if (overlay) {
           gsap.to(overlay, {
-            opacity: 0.85,
+            opacity: 0.8,
             ease: "none",
             scrollTrigger: {
               trigger: containerRef.current,
               start: "top top",
               end: "bottom bottom",
-              scrub: true
+              scrub: 1
             }
           });
         }
@@ -212,30 +213,33 @@ const FlagshipEvents = () => {
           const card = cards[i];
           if (!card) return;
 
+          // Card Pinning
           ScrollTrigger.create({
             trigger: wrapper,
-            start: "top 120", 
+            start: "top 180", // Below pinned header
             endTrigger: containerRef.current,
             end: "bottom 550",
             pin: true,
             pinSpacing: false,
-            scrub: true,
+            scrub: 1, // Buttery smooth follow
             anticipatePin: 1,
-            id: `pin-${mobileActiveIndex}-${i}`
+            id: `final-pin-${mobileActiveIndex}-${i}`
           });
 
+          // Premium Exit Transition (Next card covers this one)
           if (i < cards.length - 1) {
             const nextWrapper = cardsWrappers[i + 1];
             gsap.to(card, {
               scale: 0.9,
-              opacity: 0.4,
-              filter: "blur(6px)",
+              opacity: 0.35,
+              filter: "blur(10px)",
+              transformOrigin: "top center",
               ease: "power1.inOut",
               scrollTrigger: {
                 trigger: nextWrapper,
                 start: "top bottom",
-                end: "top 120",
-                scrub: true
+                end: "top 180",
+                scrub: 1
               }
             });
           }
@@ -243,7 +247,7 @@ const FlagshipEvents = () => {
 
         setTimeout(() => ScrollTrigger.refresh(), 100);
       }, containerRef.current);
-    }, 300);
+    }, 400);
 
     return () => {
       clearTimeout(timeout);
@@ -285,7 +289,8 @@ const FlagshipEvents = () => {
       {/* Background Overlay (GDG Style) */}
       <div className="section-overlay absolute inset-0 bg-black opacity-0 pointer-events-none z-[5] lg:hidden" />
 
-      <div className="section-header max-w-7xl mx-auto mb-10 md:mb-12 text-center relative z-20 bg-white/80 backdrop-blur-sm py-4 rounded-xl">
+      {/* Section Header with clearance */}
+      <div className="section-header max-w-7xl mx-auto mb-10 md:mb-12 text-center relative z-20 bg-white/90 backdrop-blur-md py-6 px-4 rounded-b-2xl shadow-sm">
         <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
           Our <span className="font-bold">Flagship Events</span>
         </h2>
@@ -294,10 +299,10 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — Slides + GDG Stacking ══════════ */}
+      {/* ══════════ MOBILE (< lg) — Final Rebuild (Slide + GDG Stack) ══════════ */}
       <div className="block lg:hidden relative z-10">
         <div 
-          className="wrapper relative w-full pt-[10px] pb-[400px] flex justify-center"
+          className="wrapper relative w-full pt-[40px] pb-[400px] flex justify-center"
           key={mobileActiveIndex}
         >
           <div className="cards w-full max-w-[450px] flex flex-col items-center px-4">
@@ -307,7 +312,7 @@ const FlagshipEvents = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
                 className="w-full flex flex-col items-center"
               >
                 {visibleMobileEvents.map((event, i) => (
@@ -316,7 +321,7 @@ const FlagshipEvents = () => {
                     className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[420px]"
                   >
                     <div 
-                      className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[28px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
+                      className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#0000001a] ${event.bgColor}`}
                       style={{ 
                         willChange: 'transform, opacity, filter',
                         backfaceVisibility: 'hidden',
@@ -332,16 +337,16 @@ const FlagshipEvents = () => {
           </div>
         </div>
 
-        {/* Indicators for carousel progress (Stable positioning) */}
-        <div className="absolute bottom-10 left-0 right-0 z-[60] flex justify-center px-4">
-          <div className="flex gap-2.5 p-2 rounded-full bg-black/5 backdrop-blur-md border border-black/10">
+        {/* Indicators for carousel progress (Premium Pill Navigation) */}
+        <div className="fixed bottom-10 left-0 right-0 z-[100] flex justify-center px-4 pointer-events-none">
+          <div className="flex gap-3 p-3 rounded-full bg-white/20 backdrop-blur-2xl border border-white/30 pointer-events-auto shadow-2xl">
             {Array.from({ length: mobileNumPages }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setMobileActiveIndex(i)}
-                className={`h-2 rounded-full transition-all duration-500 ease-out ${i === mobileActiveIndex
-                  ? 'bg-[#4285F4] w-9 shadow-[0_0_12px_rgba(66,133,244,0.4)]'
-                  : 'bg-black/20 w-2 hover:bg-black/40'
+                className={`h-2.5 rounded-full transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${i === mobileActiveIndex
+                  ? 'bg-[#4285F4] w-12'
+                  : 'bg-white/40 w-2.5 hover:bg-white/60'
                   }`}
               />
             ))}
