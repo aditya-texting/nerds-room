@@ -1,12 +1,8 @@
-import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface EventData {
   id?: string | number;
@@ -120,6 +116,142 @@ const DesktopEventCard = ({ event, index }: { event: EventData; index: number })
   );
 };
 
+// ─── Mobile Scroll Stack ──────────────────────────────────────────────────────
+// Pure CSS sticky stack — no GSAP needed.
+// Each "page" shows 3 cards that stack on scroll, then auto-advances.
+const CARD_HEIGHT = 420;   // px  — visible card height
+const STACK_OFFSET = 14;   // px  — vertical peek of card below
+
+const MobileScrollStack = ({
+  events,
+  pageIndex,
+  onPageEnd,
+}: {
+  events: EventData[];
+  pageIndex: number;
+  onPageEnd: () => void;
+}) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [activeCard, setActiveCard] = useState(0);
+  const notifiedRef = useRef(false);
+
+  // Reset when page changes
+  useEffect(() => {
+    setActiveCard(0);
+    notifiedRef.current = false;
+  }, [pageIndex]);
+
+  // Scroll observer — watch which card's sentinel is visible
+  useEffect(() => {
+    const sentinels = Array.from(
+      sectionRef.current?.querySelectorAll('.scroll-sentinel') ?? []
+    ) as HTMLElement[];
+
+    if (!sentinels.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number((entry.target as HTMLElement).dataset.index);
+            setActiveCard(idx);
+
+            // Last card reached → trigger page change
+            if (idx === events.length - 1 && !notifiedRef.current) {
+              notifiedRef.current = true;
+              // Small delay so user sees the last card before flip
+              setTimeout(onPageEnd, 2200);
+            }
+          }
+        });
+      },
+      {
+        root: null,
+        // Fire when sentinel hits the middle of the viewport
+        rootMargin: '-40% 0px -40% 0px',
+        threshold: 0,
+      }
+    );
+
+    sentinels.forEach((s) => io.observe(s));
+    return () => io.disconnect();
+  }, [events, onPageEnd]);
+
+  return (
+    <div ref={sectionRef} className="relative w-full">
+      {/*
+        Total scroll height = 1 card visible + (n-1) scrollable steps
+        Each step = CARD_HEIGHT so the next card's sentinel enters viewport
+      */}
+      <div
+        style={{ height: CARD_HEIGHT + (events.length - 1) * CARD_HEIGHT + 120 }}
+        className="relative"
+      >
+        {/* Sticky container that holds all cards */}
+        <div
+          className="sticky flex flex-col items-center"
+          style={{
+            top: 80, // below navbar
+            height: CARD_HEIGHT + (events.length - 1) * STACK_OFFSET,
+          }}
+        >
+          {events.map((event, i) => {
+            const isBehind = i < activeCard;
+            const isActive = i === activeCard;
+            const isAbove = i > activeCard;
+
+            // z-order: active card on top, cards above are "incoming" (lower z)
+            const zIndex = isAbove ? 10 + i : events.length - i + 10;
+
+            // Visual offsets for stack effect
+            const scale = isActive ? 1 : isBehind ? 0.92 - (activeCard - i) * 0.02 : 1;
+            const yOffset = isActive
+              ? 0
+              : isBehind
+                ? -(activeCard - i) * STACK_OFFSET * 0.5
+                : (i - activeCard) * STACK_OFFSET;
+            const blurVal = isBehind ? Math.min((activeCard - i) * 4, 10) : 0;
+            const opacityVal = isBehind ? Math.max(1 - (activeCard - i) * 0.25, 0.35) : 1;
+
+            return (
+              <motion.div
+                key={event.id ?? i}
+                animate={{
+                  scale,
+                  y: yOffset,
+                  opacity: opacityVal,
+                  filter: `blur(${blurVal}px)`,
+                }}
+                transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+                className="absolute top-0 w-full flex justify-center"
+                style={{ zIndex }}
+              >
+                <div
+                  className={`w-full max-w-[320px] flex flex-col items-center rounded-[32px]
+                    shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#0000001a] ${event.bgColor}`}
+                  style={{ height: CARD_HEIGHT, willChange: 'transform, opacity' }}
+                >
+                  <CardInner event={event} />
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Invisible sentinels — drive the scroll progress */}
+        {events.map((_, i) => (
+          <div
+            key={i}
+            className="scroll-sentinel absolute w-full"
+            data-index={i}
+            style={{ top: i * CARD_HEIGHT }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const FlagshipEvents = () => {
   const { flagshipEvents: contextEvents, loading } = useAppData();
@@ -143,120 +275,24 @@ const FlagshipEvents = () => {
     }));
   }, [contextEvents]);
 
-  // ── Mobile Carousel State ──────────────────────────────────────────────────
-  const mobileCardsPerPage = 3;
-  const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+  // ── Mobile page state ──────────────────────────────────────────────────────
+  const CARDS_PER_PAGE = 3;
+  const mobileNumPages = Math.ceil(events.length / CARDS_PER_PAGE);
+  const [mobilePageIndex, setMobilePageIndex] = useState(0);
 
   const visibleMobileEvents = useMemo(() => {
-    if (!events.length) return [];
-    if (!isMobileView) return events.slice(0, 3);
-    const start = mobileActiveIndex * mobileCardsPerPage;
-    return events.slice(start, start + mobileCardsPerPage);
-  }, [events, mobileActiveIndex, isMobileView]);
+    const start = mobilePageIndex * CARDS_PER_PAGE;
+    return events.slice(start, start + CARDS_PER_PAGE);
+  }, [events, mobilePageIndex]);
 
-  // Auto-rotate mobile pages
-  useEffect(() => {
-    if (!isMobileView || events.length <= mobileCardsPerPage) return;
-    const interval = setInterval(() => {
-      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
-    }, 8000); 
-    return () => clearInterval(interval);
-  }, [isMobileView, events.length, mobileNumPages]);
-
-  // ── GSAP Scroll Stack Logic (Hybrid: Slide + Stack) ─────────────────────────
-  const containerRef = useRef<HTMLDivElement>(null);
-  const gsapCtxRef = useRef<gsap.Context | null>(null);
-
-  useLayoutEffect(() => {
-    ScrollTrigger.config({ ignoreMobileResize: true });
-
-    if (!isMobileView || visibleMobileEvents.length === 0) return;
-
-    if (gsapCtxRef.current) {
-      gsapCtxRef.current.revert();
-      gsapCtxRef.current = null;
+  const goNextMobilePage = () => {
+    setMobilePageIndex((prev) => (prev + 1) % mobileNumPages);
+    // Scroll back up to the section top so the new page starts fresh
+    const section = document.getElementById('events');
+    if (section) {
+      window.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
     }
-
-    const timeout = setTimeout(() => {
-      if (!containerRef.current) return;
-
-      gsapCtxRef.current = gsap.context(() => {
-        const cardsWrappers = gsap.utils.toArray<HTMLElement>('.card-wrapper');
-        const cards = gsap.utils.toArray<HTMLElement>('.card');
-        const overlay = document.querySelector('.section-overlay');
-
-        // Pin the header with proper clearance for Navbar
-        ScrollTrigger.create({
-          trigger: containerRef.current,
-          start: "top 80", // Navbar height
-          end: "bottom bottom",
-          pin: ".section-header",
-          pinSpacing: false,
-        });
-
-        // Background Curtain Effect
-        if (overlay) {
-          gsap.to(overlay, {
-            opacity: 0.8,
-            ease: "none",
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 1
-            }
-          });
-        }
-
-        cardsWrappers.forEach((wrapper, i) => {
-          const card = cards[i];
-          if (!card) return;
-
-          // Card Pinning
-          ScrollTrigger.create({
-            trigger: wrapper,
-            start: "top 180", // Below pinned header
-            endTrigger: containerRef.current,
-            end: "bottom 550",
-            pin: true,
-            pinSpacing: false,
-            scrub: 1, // Buttery smooth follow
-            anticipatePin: 1,
-            id: `final-pin-${mobileActiveIndex}-${i}`
-          });
-
-          // Premium Exit Transition (Next card covers this one)
-          if (i < cards.length - 1) {
-            const nextWrapper = cardsWrappers[i + 1];
-            gsap.to(card, {
-              scale: 0.9,
-              opacity: 0.35,
-              filter: "blur(10px)",
-              transformOrigin: "top center",
-              ease: "power1.inOut",
-              scrollTrigger: {
-                trigger: nextWrapper,
-                start: "top bottom",
-                end: "top 180",
-                scrub: 1
-              }
-            });
-          }
-        });
-
-        setTimeout(() => ScrollTrigger.refresh(), 100);
-      }, containerRef.current);
-    }, 400);
-
-    return () => {
-      clearTimeout(timeout);
-      if (gsapCtxRef.current) {
-        gsapCtxRef.current.revert();
-        gsapCtxRef.current = null;
-      }
-    };
-  }, [isMobileView, mobileActiveIndex, visibleMobileEvents.length]);
+  };
 
   // ── Desktop carousel ──────────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
@@ -283,14 +319,10 @@ const FlagshipEvents = () => {
   return (
     <section
       id="events"
-      ref={containerRef}
-      className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden min-h-screen"
+      className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-x-hidden"
     >
-      {/* Background Overlay (GDG Style) */}
-      <div className="section-overlay absolute inset-0 bg-black opacity-0 pointer-events-none z-[5] lg:hidden" />
-
-      {/* Section Header with clearance */}
-      <div className="section-header max-w-7xl mx-auto mb-10 md:mb-12 text-center relative z-20 bg-white/90 backdrop-blur-md py-6 px-4 rounded-b-2xl shadow-sm">
+      {/* Section Header */}
+      <div className="max-w-7xl mx-auto mb-10 md:mb-12 text-center">
         <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
           Our <span className="font-bold">Flagship Events</span>
         </h2>
@@ -299,59 +331,46 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — Final Rebuild (Slide + GDG Stack) ══════════ */}
-      <div className="block lg:hidden relative z-10">
-        <div 
-          className="wrapper relative w-full pt-[40px] pb-[400px] flex justify-center"
-          key={mobileActiveIndex}
-        >
-          <div className="cards w-full max-w-[450px] flex flex-col items-center px-4">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mobileActiveIndex}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="w-full flex flex-col items-center"
-              >
-                {visibleMobileEvents.map((event, i) => (
-                  <div 
-                    key={event.id ?? i} 
-                    className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[420px]"
-                  >
-                    <div 
-                      className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-[#0000001a] ${event.bgColor}`}
-                      style={{ 
-                        willChange: 'transform, opacity, filter',
-                        backfaceVisibility: 'hidden',
-                        zIndex: i + 10
-                      }}
-                    >
-                      <CardInner event={event} />
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
+      {/* ══════════ MOBILE (< lg) ══════════ */}
+      <div className="block lg:hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mobilePageIndex}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -40 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+          >
+            <MobileScrollStack
+              events={visibleMobileEvents}
+              pageIndex={mobilePageIndex}
+              onPageEnd={goNextMobilePage}
+            />
+          </motion.div>
+        </AnimatePresence>
 
-        {/* Indicators for carousel progress (Premium Pill Navigation) */}
-        <div className="fixed bottom-10 left-0 right-0 z-[100] flex justify-center px-4 pointer-events-none">
-          <div className="flex gap-3 p-3 rounded-full bg-white/20 backdrop-blur-2xl border border-white/30 pointer-events-auto shadow-2xl">
-            {Array.from({ length: mobileNumPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setMobileActiveIndex(i)}
-                className={`h-2.5 rounded-full transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${i === mobileActiveIndex
-                  ? 'bg-[#4285F4] w-12'
-                  : 'bg-white/40 w-2.5 hover:bg-white/60'
-                  }`}
-              />
-            ))}
+        {/* Page indicator pills */}
+        {mobileNumPages > 1 && (
+          <div className="flex justify-center gap-3 mt-8 pb-6">
+            <div className="flex gap-3 p-3 rounded-full bg-black/5 backdrop-blur-md border border-black/10">
+              {Array.from({ length: mobileNumPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setMobilePageIndex(i);
+                    const section = document.getElementById('events');
+                    if (section)
+                      window.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
+                  }}
+                  className={`h-2.5 rounded-full transition-all duration-500 ease-out ${i === mobilePageIndex
+                      ? 'bg-[#4285F4] w-10'
+                      : 'bg-gray-300 w-2.5 hover:bg-gray-400'
+                    }`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ══════════ DESKTOP (lg+) ══════════ */}
@@ -384,8 +403,8 @@ const FlagshipEvents = () => {
                 key={i}
                 onClick={() => setDesktopActiveIndex(i)}
                 className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === desktopActiveIndex
-                  ? 'w-12 h-3'
-                  : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                    ? 'w-12 h-3'
+                    : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
                   }`}
               >
                 {i === desktopActiveIndex && (
