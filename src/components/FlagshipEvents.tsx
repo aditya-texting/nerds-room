@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -23,9 +23,20 @@ interface EventData {
 const CountUp = ({ value }: { value: string }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
+  const [isInView, setIsInView] = useState(false);
   const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
   const suffix = value.replace(/[0-9]/g, '');
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsInView(true); },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!isInView) return;
@@ -167,11 +178,12 @@ const FlagshipEvents = () => {
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // ── Mobile carousel ───────────────────────────────────────────────────────
+  // ── Mobile carousel state ─────────────────────────────────────────────────
   const mobileCardsPerPage = 3;
   const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
 
+  // Auto-rotate mobile pages
   useEffect(() => {
     if (!isMobileView || events.length <= mobileCardsPerPage) return;
     const interval = setInterval(() => {
@@ -180,6 +192,7 @@ const FlagshipEvents = () => {
     return () => clearInterval(interval);
   }, [isMobileView, events.length, mobileNumPages]);
 
+  // Visible mobile events for current page
   const visibleMobileEvents = useMemo(() => {
     if (!events.length) return [];
     if (events.length <= mobileCardsPerPage) return events;
@@ -190,48 +203,72 @@ const FlagshipEvents = () => {
     return sliced;
   }, [events, mobileActiveIndex]);
 
-  // ── Mobile GSAP Scroll Stack ─────────────────────────────────────────────
+  // ── Mobile GSAP Scroll Stack ──────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
+  const gsapCtxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => {
     if (!isMobileView || !containerRef.current || visibleMobileEvents.length === 0) return;
 
-    let ctx = gsap.context(() => {
-      const cardsWrappers = gsap.utils.toArray(".card-wrapper");
-      const cards = gsap.utils.toArray(".card");
+    // Kill old context before re-init
+    if (gsapCtxRef.current) {
+      gsapCtxRef.current.revert();
+      gsapCtxRef.current = null;
+    }
 
-      cardsWrappers.forEach((wrapper: any, i) => {
-        const card = cards[i] as HTMLElement;
-        let scale = 1,
-          rotation = 0;
-        if (i !== cards.length - 1) {
-          scale = 0.9 + 0.025 * i;
-          rotation = -10;
-        }
-        gsap.to(card, {
-          scale: scale,
-          rotationX: rotation,
-          transformOrigin: "top center",
-          ease: "none",
-          scrollTrigger: {
-            trigger: wrapper,
-            start: "top " + (60 + 10 * i),
-            end: "bottom bottom",
-            endTrigger: ".wrapper",
-            scrub: true,
-            pin: wrapper,
-            pinSpacing: false,
-            id: String(i + 1)
+    // Small delay so React DOM finishes rendering new cards
+    const timeout = setTimeout(() => {
+      if (!containerRef.current) return;
+
+      gsapCtxRef.current = gsap.context(() => {
+        const cardsWrappers = gsap.utils.toArray<HTMLElement>('.card-wrapper');
+        const cards = gsap.utils.toArray<HTMLElement>('.card');
+
+        if (cardsWrappers.length === 0 || cards.length === 0) return;
+
+        cardsWrappers.forEach((wrapper, i) => {
+          const card = cards[i];
+          if (!card) return;
+
+          let scale = 1;
+          let rotation = 0;
+          if (i !== cards.length - 1) {
+            scale = 0.9 + 0.025 * i;
+            rotation = -10;
           }
-        });
-      });
-      ScrollTrigger.refresh();
-    }, containerRef);
 
-    return () => ctx.revert();
+          gsap.to(card, {
+            scale,
+            rotationX: rotation,
+            transformOrigin: 'top center',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: wrapper,
+              start: 'top ' + (60 + 10 * i),
+              end: 'bottom 550',
+              endTrigger: '.wrapper',
+              scrub: true,
+              pin: wrapper,
+              pinSpacing: false,
+              id: String(i + 1),
+            },
+          });
+        });
+
+        ScrollTrigger.refresh();
+      }, containerRef.current);
+    }, 50);
+
+    return () => {
+      clearTimeout(timeout);
+      if (gsapCtxRef.current) {
+        gsapCtxRef.current.revert();
+        gsapCtxRef.current = null;
+      }
+    };
   }, [isMobileView, visibleMobileEvents]);
 
-  // ── Desktop carousel ──────────────────────────────────────────────────────
+  // ── Desktop carousel state ────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
   const desktopNumPages = Math.ceil(events.length / desktopCardsPerPage);
   const [desktopActiveIndex, setDesktopActiveIndex] = useState(0);
@@ -254,6 +291,7 @@ const FlagshipEvents = () => {
     return sliced;
   }, [events, desktopActiveIndex]);
 
+  // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
       <section className="py-20 px-4">
@@ -274,7 +312,7 @@ const FlagshipEvents = () => {
       id="events"
       className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden"
     >
-      {/* Heading */}
+      {/* ── Heading ── */}
       <div className="max-w-[1400px] mx-auto mb-10 md:mb-12">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
@@ -288,28 +326,37 @@ const FlagshipEvents = () => {
 
       {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
-        
-        {/* GSAP Stacking Wrapper Container */}
-        <div className="wrapper relative w-full pt-10 pb-[50px] min-h-[100vh]" ref={containerRef}>
-          <div className="cards w-full max-w-[750px] mx-auto px-5" style={{ minHeight: '150vh' }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mobileActiveIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="w-full flex flex-col items-center"
-              >
-                {visibleMobileEvents.map((event, index) => (
-                  <div key={`${mobileActiveIndex}-${event.id ?? index}`} className="card-wrapper w-full mb-[50px] last:mb-0" style={{ perspective: '500px' }}>
-                    <div className={`card w-[300px] h-[400px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}>
-                      <CardInner event={event} />
-                    </div>
+
+        {/* GSAP Stacking Scroll Container */}
+        <div
+          className="wrapper relative w-full pt-10 pb-[50px]"
+          style={{ minHeight: `${visibleMobileEvents.length * 450 + 200}px` }}
+          ref={containerRef}
+        >
+          <div className="cards w-full max-w-[750px] mx-auto px-5">
+            {/*
+              NOTE: AnimatePresence removed here intentionally.
+              It conflicts with GSAP ScrollTrigger pin/scrub system.
+              Page transitions are handled by key change + GSAP re-init.
+            */}
+            <div
+              key={mobileActiveIndex}
+              className="w-full flex flex-col items-center"
+            >
+              {visibleMobileEvents.map((event, index) => (
+                <div
+                  key={`${mobileActiveIndex}-${event.id ?? index}`}
+                  className="card-wrapper w-full mb-[50px] last:mb-0"
+                  style={{ perspective: '500px' }}
+                >
+                  <div
+                    className={`card w-[300px] h-[400px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
+                  >
+                    <CardInner event={event} />
                   </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -320,9 +367,10 @@ const FlagshipEvents = () => {
               <button
                 key={i}
                 onClick={() => setMobileActiveIndex(i)}
-                className={`relative rounded-full overflow-hidden transition-all duration-300 ${
-                  i === mobileActiveIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
-                }`}
+                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === mobileActiveIndex
+                    ? 'w-12 h-3'
+                    : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                  }`}
               >
                 {i === mobileActiveIndex && (
                   <motion.div
@@ -343,24 +391,23 @@ const FlagshipEvents = () => {
       {/* ══════════ DESKTOP (lg+) ══════════ */}
       <div className="hidden lg:block">
         <div className="relative w-full flex justify-center min-h-[583px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={desktopActiveIndex}
-              className="flex flex-row gap-[80px] lg:gap-[120px] w-full justify-center"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              transition={{ duration: 0.6 }}
-            >
-              {visibleDesktopEvents.map((event, index) => (
-                <DesktopEventCard
-                  key={`${desktopActiveIndex}-${event.id ?? index}`}
-                  event={event}
-                  index={index}
-                />
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          {/* AnimatePresence is fine on desktop — no GSAP conflict here */}
+          <motion.div
+            key={desktopActiveIndex}
+            className="flex flex-row gap-[80px] lg:gap-[120px] w-full justify-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.6 }}
+          >
+            {visibleDesktopEvents.map((event, index) => (
+              <DesktopEventCard
+                key={`${desktopActiveIndex}-${event.id ?? index}`}
+                event={event}
+                index={index}
+              />
+            ))}
+          </motion.div>
         </div>
 
         {events.length > desktopCardsPerPage && (
