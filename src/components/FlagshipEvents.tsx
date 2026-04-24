@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -210,7 +210,7 @@ const FlagshipEvents = () => {
       gsapCtxRef.current = null;
     }
 
-    // Small delay so React DOM finishes rendering new cards
+    // Increase delay so React + AnimatePresence (exit/enter) finishes
     const timeout = setTimeout(() => {
       if (!containerRef.current) return;
 
@@ -251,7 +251,7 @@ const FlagshipEvents = () => {
 
         ScrollTrigger.refresh();
       }, containerRef.current);
-    }, 50);
+    }, 500);
 
     return () => {
       clearTimeout(timeout);
@@ -327,30 +327,31 @@ const FlagshipEvents = () => {
           style={{ minHeight: `${visibleMobileEvents.length * 450 + 200}px` }}
           ref={containerRef}
         >
-          <div className="cards w-full max-w-[750px] mx-auto px-5">
-            {/*
-              NOTE: AnimatePresence removed here intentionally.
-              It conflicts with GSAP ScrollTrigger pin/scrub system.
-              Page transitions are handled by key change + GSAP re-init.
-            */}
-            <div
-              key={mobileActiveIndex}
-              className="w-full flex flex-col items-center"
-            >
-              {visibleMobileEvents.map((event, index) => (
-                <div
-                  key={`${mobileActiveIndex}-${event.id ?? index}`}
-                  className="card-wrapper w-full mb-[50px] last:mb-0"
-                  style={{ perspective: '500px' }}
-                >
+          <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mobileActiveIndex}
+                className="w-full flex flex-col items-center"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+                {visibleMobileEvents.map((event, index) => (
                   <div
-                    className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
+                    key={`${mobileActiveIndex}-${event.id ?? index}`}
+                    className="card-wrapper w-full mb-[50px] last:mb-0"
+                    style={{ perspective: '500px' }}
                   >
-                    <CardInner event={event} />
+                    <div
+                      className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
+                    >
+                      <CardInner event={event} />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
 
