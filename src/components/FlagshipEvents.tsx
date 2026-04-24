@@ -239,22 +239,25 @@ const FlagshipEvents = () => {
           // Ensure later cards are visually above earlier ones
           gsap.set(wrapper, { zIndex: i });
 
-          // Scaling logic for the stack effect
-          let scale = 1;
-          let rotation = 0;
+          // Scaling logic: Cards scale down as they are covered
+          // We set the initial state and let ScrollTrigger handle the progress
+          let targetScale = 1;
+          let targetRotation = 0;
+          
           if (i !== cards.length - 1) {
-            scale = 0.9 + 0.02 * i;
-            rotation = -10;
+            targetScale = 0.9 + (0.02 * i);
+            targetRotation = -10;
           }
 
           gsap.to(card, {
-            scale,
-            rotationX: rotation,
+            scale: targetScale,
+            rotationX: targetRotation,
             transformOrigin: 'top center',
             ease: 'none',
             scrollTrigger: {
               trigger: wrapper,
-              start: 'top ' + (60 + 10 * i),
+              // All cards pin at the same top position for perfect overlap
+              start: 'top 60', 
               end: 'bottom bottom',
               endTrigger: containerRef.current,
               scrub: true,
