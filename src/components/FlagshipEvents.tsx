@@ -143,12 +143,34 @@ const FlagshipEvents = () => {
     }));
   }, [contextEvents]);
 
-  // ── GSAP Scroll Stack Logic (User Request) ─────────────────────────────────
+  // ── Mobile carousel state ──────────────────────────────────────────────────
+  const desktopCardsPerPage = 3;
+  const mobileCardsPerPage = 3;
+  const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+
+  const visibleMobileEvents = useMemo(() => {
+    if (!events.length) return [];
+    if (!isMobileView) return events.slice(0, desktopCardsPerPage);
+    const start = mobileActiveIndex * mobileCardsPerPage;
+    return events.slice(start, start + mobileCardsPerPage);
+  }, [events, mobileActiveIndex, mobileCardsPerPage, isMobileView]);
+
+  // Auto-rotate mobile pages
+  useEffect(() => {
+    if (!isMobileView || events.length <= mobileCardsPerPage) return;
+    const interval = setInterval(() => {
+      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
+    }, 6000); 
+    return () => clearInterval(interval);
+  }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage]);
+
+  // ── GSAP Scroll Stack Logic ─────────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
   const gsapCtxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => {
-    if (!isMobileView || events.length === 0) return;
+    if (!isMobileView || visibleMobileEvents.length === 0) return;
 
     if (gsapCtxRef.current) {
       gsapCtxRef.current.revert();
@@ -183,7 +205,7 @@ const FlagshipEvents = () => {
               trigger: wrapper,
               start: "top " + (60 + 10 * i),
               end: "bottom 550",
-              endTrigger: ".wrapper",
+              endTrigger: containerRef.current,
               scrub: true,
               pin: wrapper,
               pinSpacing: false,
@@ -194,7 +216,7 @@ const FlagshipEvents = () => {
 
         ScrollTrigger.refresh(true);
       }, containerRef.current);
-    }, 200);
+    }, 100);
 
     return () => {
       clearTimeout(timeout);
@@ -203,10 +225,9 @@ const FlagshipEvents = () => {
         gsapCtxRef.current = null;
       }
     };
-  }, [isMobileView, events.length]);
+  }, [isMobileView, mobileActiveIndex, visibleMobileEvents.length]);
 
   // ── Desktop carousel ──────────────────────────────────────────────────────
-  const desktopCardsPerPage = 3;
   const desktopNumPages = Math.ceil(events.length / desktopCardsPerPage);
   const [desktopActiveIndex, setDesktopActiveIndex] = useState(0);
 
@@ -241,26 +262,64 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — User Requested GSAP Stack ══════════ */}
+      {/* ══════════ MOBILE (< lg) — Carousel with GSAP Stack ══════════ */}
       <div className="block lg:hidden">
         <div 
           className="wrapper relative w-full pt-[100px] pb-[50px]"
           ref={containerRef}
-          style={{ minHeight: `${events.length * 400 + 300}px` }}
+          key={mobileActiveIndex}
+          style={{ minHeight: `${visibleMobileEvents.length * 400 + 300}px` }}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5">
-            {events.map((event, i) => (
-              <div key={event.id ?? i} className="card-wrapper w-full perspective-[500px] mb-[50px] last:mb-0">
-                <div 
-                  className={`card w-full h-[400px] flex flex-col items-center rounded-[10px] shadow-xl border border-[#0000001a] ${event.bgColor}`}
-                  style={{ backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'top center' }}
-                >
-                  <CardInner event={event} />
-                </div>
-              </div>
-            ))}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mobileActiveIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.5 }}
+                className="w-full flex flex-col items-center"
+              >
+                {visibleMobileEvents.map((event, i) => (
+                  <div key={event.id ?? i} className="card-wrapper w-full perspective-[500px] mb-[50px] last:mb-0">
+                    <div 
+                      className={`card w-full h-[400px] flex flex-col items-center rounded-[10px] shadow-xl border border-[#0000001a] ${event.bgColor}`}
+                      style={{ backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'top center' }}
+                    >
+                      <CardInner event={event} />
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
+
+        {/* Indicators for mobile carousel */}
+        {events.length > mobileCardsPerPage && (
+          <div className="flex justify-center gap-3 mt-4 pb-6">
+            {Array.from({ length: mobileNumPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setMobileActiveIndex(i)}
+                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === mobileActiveIndex
+                  ? 'w-12 h-3'
+                  : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                  }`}
+              >
+                {i === mobileActiveIndex && (
+                  <motion.div
+                    className="absolute inset-0 bg-[#4285F4]"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 6, ease: 'linear' }}
+                    style={{ originX: 0 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ══════════ DESKTOP (lg+) ══════════ */}
