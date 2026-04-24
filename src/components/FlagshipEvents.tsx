@@ -61,44 +61,52 @@ const CountUp = ({ value }: { value: string }) => {
 // ─── Shared card content ───────────────────────────────────────────────────────
 const CardInner = ({ event }: { event: EventData }) => (
   <>
-    <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
+    {/* Logo / Title */}
+    <div className="mt-5 md:mt-6 mb-4 flex items-center justify-center w-full px-6">
       {event.logo ? (
         <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
           <img src={event.logo} alt={event.title} className="object-contain w-full h-full" />
         </div>
       ) : (
-        <span className="text-2xl md:text-3xl font-black text-black leading-tight text-center">
+        <span className="text-xl md:text-2xl lg:text-3xl font-black text-black leading-tight text-center">
           {event.title}
         </span>
       )}
     </div>
 
-    <div className="relative w-[250px] md:w-[290px] lg:w-[334px] h-[260px] md:h-[295px] lg:h-[347px] shrink-0">
-      <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#0000001a]">
+    {/* Image container */}
+    <div className="relative w-[240px] md:w-[290px] lg:w-[334px] h-[250px] md:h-[295px] lg:h-[347px] shrink-0">
+      <div className="relative w-full h-full rounded-[16px] overflow-hidden shadow-md border border-[#00000012]">
         <img
           src={event.image}
           alt={event.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
+      {/* Stats container */}
       <div className="absolute bottom-3 left-4 md:left-6 lg:left-8 space-y-2 max-w-[90%]">
         {event.stats.map((stat, sIndex) => (
           <div
             key={sIndex}
-            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-[#0000001a] w-fit"
+            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-[#00000008] w-fit"
           >
-            <span className="text-[18px] md:text-[24px] font-normal text-[#34A853]">
+            <span className="text-[18px] md:text-[24px] lg:text-[33px] font-medium text-[#34A853]">
               <CountUp value={stat.value} />
             </span>
-            <span className="text-[14px] md:text-[16px] font-normal text-black truncate">{stat.label}</span>
+            <span className="text-[13px] md:text-[16px] lg:text-[22px] font-normal text-black whitespace-nowrap">
+              {stat.label}
+            </span>
           </div>
         ))}
       </div>
     </div>
 
-    <div className="flex items-center justify-center gap-1.5 text-black mt-auto pt-1.5 pb-4 px-4">
-      <MapPin className="w-4 h-4 shrink-0" />
-      <span className="text-[14px] font-medium text-center leading-tight">{event.location}</span>
+    {/* Location */}
+    <div className="flex items-center justify-center gap-1.5 text-black mt-auto pt-2 pb-5 lg:pb-6 px-4">
+      <MapPin className="w-4 h-4 md:w-5 lg:w-5 shrink-0 opacity-80" />
+      <span className="text-[13px] md:text-[15px] lg:text-[20px] font-semibold text-center leading-tight tracking-tight">
+        {event.location}
+      </span>
     </div>
   </>
 );
