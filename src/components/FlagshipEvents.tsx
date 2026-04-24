@@ -214,11 +214,11 @@ const FlagshipEvents = () => {
             scrollTrigger: {
               trigger: wrapper,
               start: 'top 60', 
-              end: '+=600', // All cards pin for the same relative duration
+              end: '+=600',
               scrub: true,
               pin: wrapper,
-              pinSpacing: i === cards.length - 1, // Only the last card pushes the content below
-              pinType: 'fixed',
+              pinSpacing: i === cards.length - 1,
+              anticipatePin: 1,
               id: String(i + 1),
             },
           });
@@ -284,28 +284,23 @@ const FlagshipEvents = () => {
           className="wrapper relative w-full pt-4"
           ref={containerRef}
         >
-          <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={mobileActiveIndex}
-                className="w-full flex flex-col items-center"
-              >
-                {visibleMobileEvents.map((event, index) => (
+          <div className="cards w-full max-w-[750px] mx-auto px-5">
+            <div className="w-full flex flex-col items-center">
+              {visibleMobileEvents.map((event, index) => (
+                <div
+                  key={`${mobileActiveIndex}-${event.id ?? index}`}
+                  className="card-wrapper w-full mb-[50px] last:mb-0 flex justify-center"
+                  style={{ perspective: '1000px' }}
+                >
                   <div
-                    key={`${mobileActiveIndex}-${event.id ?? index}`}
-                    className="card-wrapper w-full mb-[50px] last:mb-0 flex justify-center"
-                    style={{ perspective: '1000px' }}
+                    className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${event.bgColor}`}
+                    style={{ backfaceVisibility: 'hidden', willChange: 'transform', transformStyle: 'preserve-3d' }}
                   >
-                    <div
-                      className={`card w-full max-w-[280px] md:max-w-[320px] h-[380px] md:h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${event.bgColor}`}
-                      style={{ backfaceVisibility: 'hidden', willChange: 'transform', transformStyle: 'preserve-3d' }}
-                    >
-                      <CardInner event={event} />
-                    </div>
+                    <CardInner event={event} />
                   </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
