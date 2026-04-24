@@ -261,12 +261,12 @@ const FlagshipEvents = () => {
 
   return (
     <section id="events" className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto mb-12 text-center md:text-left">
-        <h2 className="text-4xl md:text-5xl font-black text-black tracking-tight mb-4 uppercase">
-          Our Flagship <span className="text-[#4285F4]">Events</span>
+      <div className="max-w-7xl mx-auto mb-10 md:mb-12 text-center">
+        <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
+          Our <span className="font-bold">Flagship Events</span>
         </h2>
-        <p className="text-base md:text-lg text-gray-500 max-w-2xl font-medium">
-          Experience our biggest annual gatherings where technology, innovation, and community come together.
+        <p className="text-base md:text-2xl text-gray-600 mt-3">
+          Our signature experiences that define excellence
         </p>
       </div>
 
