@@ -282,9 +282,9 @@ const FlagshipEvents = () => {
       {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
         <div 
-          className="wrapper relative w-full pt-6"
+          className="wrapper relative w-full pt-4"
           ref={containerRef}
-          style={{ minHeight: `${visibleMobileEvents.length * 600}px` }}
+          style={{ minHeight: `${visibleMobileEvents.length * 500}px` }}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
             <AnimatePresence mode="wait">
