@@ -214,7 +214,7 @@ const FlagshipEvents = () => {
             scrollTrigger: {
               trigger: wrapper,
               start: 'top 60', 
-              end: '+=600',
+              end: '+=300',
               scrub: true,
               pin: wrapper,
               pinSpacing: i === cards.length - 1,
