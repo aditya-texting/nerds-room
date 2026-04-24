@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react'; // useRef kept for CountUp
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
@@ -90,21 +90,12 @@ const CardInner = ({ event }: { event: EventData }) => (
 
 // ─── Mobile Card — scroll-triggered vertical entrance ──────────────────────────
 const MobileEventCard = ({ event, index }: { event: EventData; index: number }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.25 });
-
   return (
-    <div
-      ref={ref}
-      className="flex-shrink-0 w-full flex justify-center"
-    >
+    <div className="flex-shrink-0 w-full flex justify-center">
       <motion.div
         initial={{ opacity: 0, y: 70, scale: 0.95 }}
-        animate={
-          isInView
-            ? { opacity: 1, y: 0, scale: 1 }
-            : { opacity: 0, y: 70, scale: 0.95 }
-        }
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
         transition={{
           duration: 0.65,
           delay: index * 0.12,
