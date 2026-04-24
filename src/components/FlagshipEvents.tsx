@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'; // useRef kept for CountUp
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
@@ -18,7 +18,7 @@ interface EventData {
 // ─── CountUp ──────────────────────────────────────────────────────────────────
 const CountUp = ({ value }: { value: string }) => {
   const [displayValue, setDisplayValue] = useState(0);
-  const ref = useRef(null);
+  const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.5 });
   const target = parseInt(value.replace(/[^0-9]/g, '')) || 0;
   const suffix = value.replace(/[0-9]/g, '');
@@ -88,41 +88,28 @@ const CardInner = ({ event }: { event: EventData }) => (
   </>
 );
 
-// ─── Mobile Card — scroll-triggered vertical entrance ──────────────────────────
-const MobileEventCard = ({ event, index }: { event: EventData; index: number }) => {
-  return (
-    <div className="flex-shrink-0 w-full flex justify-center">
-      <motion.div
-        initial={{ opacity: 0, y: 70, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{
-          duration: 0.65,
-          delay: index * 0.12,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
-          w-[300px] h-[430px]
-          ${event.bgColor}
-          mx-auto
-        `}
-      >
-        <CardInner event={event} />
-      </motion.div>
-    </div>
-  );
-};
+// ─── Mobile Scroll Card — whileInView only, no AnimatePresence conflict ────────
+const MobileScrollCard = ({ event, index }: { event: EventData; index: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 60 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.15 }}
+    transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+    className={`w-[300px] h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
+  >
+    <CardInner event={event} />
+  </motion.div>
+);
 
 // ─── Desktop Card ─────────────────────────────────────────────────────────────
 const DesktopEventCard = ({ event, index }: { event: EventData; index: number }) => {
   const isLower = index % 2 !== 0;
-
   return (
     <div className="flex-shrink-0">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
         viewport={{ once: true, margin: '-100px' }}
         className={`rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center
           md:max-w-[320px] lg:max-w-[372px]
@@ -190,7 +177,7 @@ const FlagshipEvents = () => {
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // ── Mobile auto-carousel (1 card at a time) ───────────────────────────────
+  // ── Mobile auto-carousel ──────────────────────────────────────────────────
   useEffect(() => {
     if (!isMobileView || events.length <= 1) return;
     const interval = setInterval(() => {
@@ -199,10 +186,9 @@ const FlagshipEvents = () => {
     return () => clearInterval(interval);
   }, [isMobileView, events.length]);
 
-  // ── Desktop visible events (3 at a time with auto-rotate) ────────────────
+  // ── Desktop carousel ──────────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
   const desktopNumPages = Math.ceil(events.length / desktopCardsPerPage);
-
   const [desktopActiveIndex, setDesktopActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -223,7 +209,6 @@ const FlagshipEvents = () => {
     return sliced;
   }, [events, desktopActiveIndex]);
 
-  // Current mobile card
   const currentMobileEvent = events[activeIndex] ?? null;
 
   if (loading) {
@@ -246,7 +231,7 @@ const FlagshipEvents = () => {
       id="events"
       className="relative py-12 md:py-20 px-4 md:px-8 lg:px-16 bg-white overflow-hidden"
     >
-      {/* ── Heading ── */}
+      {/* Heading */}
       <div className="max-w-[1400px] mx-auto mb-10 md:mb-12">
         <div className="text-center">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
@@ -258,27 +243,32 @@ const FlagshipEvents = () => {
         </div>
       </div>
 
-      {/* ══════════════════════════ MOBILE VIEW (< lg) ══════════════════════════ */}
+      {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
-        {/* Single card carousel with vertical scroll-triggered animation */}
-        <div className="relative w-full flex justify-center min-h-[450px]">
+
+        {/* Top carousel — AnimatePresence handles enter/exit, NO whileInView here */}
+        <div className="relative w-full flex justify-center" style={{ minHeight: 430 }}>
           <AnimatePresence mode="wait">
             {currentMobileEvent && (
               <motion.div
                 key={activeIndex}
-                initial={{ opacity: 0, y: 60, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -40, scale: 0.96 }}
-                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full flex justify-center"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute w-full flex justify-center"
               >
-                <MobileEventCard event={currentMobileEvent} index={0} />
+                <div
+                  className={`w-[300px] h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${currentMobileEvent.bgColor}`}
+                >
+                  <CardInner event={currentMobileEvent} />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Dots */}
+        {/* Dot indicators */}
         {events.length > 1 && (
           <div className="flex justify-center gap-3 mt-6">
             {events.map((_, i) => (
@@ -290,6 +280,7 @@ const FlagshipEvents = () => {
               >
                 {i === activeIndex && (
                   <motion.div
+                    key={activeIndex}
                     className="absolute inset-0 bg-[#4285F4]"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -302,20 +293,20 @@ const FlagshipEvents = () => {
           </div>
         )}
 
-        {/* ── Scroll strip: all 3 cards visible below with scroll-triggered animation ── */}
+        {/* All Events scroll strip — each card uses whileInView separately */}
         {events.length > 1 && (
-          <div className="mt-10 flex flex-col gap-6 items-center">
-            <p className="text-sm text-gray-400 font-medium tracking-wide uppercase">
+          <div className="mt-12 flex flex-col gap-8 items-center">
+            <p className="text-xs text-gray-400 font-semibold tracking-widest uppercase">
               All Events
             </p>
             {events.map((event, index) => (
-              <MobileEventCard key={event.id ?? index} event={event} index={index} />
+              <MobileScrollCard key={event.id ?? index} event={event} index={index} />
             ))}
           </div>
         )}
       </div>
 
-      {/* ══════════════════════════ DESKTOP VIEW (lg+) ══════════════════════════ */}
+      {/* ══════════ DESKTOP (lg+) ══════════ */}
       <div className="hidden lg:block">
         <div className="relative w-full flex justify-center min-h-[583px]">
           <AnimatePresence mode="wait">
@@ -351,6 +342,7 @@ const FlagshipEvents = () => {
               >
                 {i === desktopActiveIndex && (
                   <motion.div
+                    key={desktopActiveIndex}
                     className="absolute inset-0 bg-[#4285F4]"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
