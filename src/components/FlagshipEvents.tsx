@@ -148,7 +148,7 @@ const FlagshipEvents = () => {
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const gsapCtxRef   = useRef<gsap.Context | null>(null);
+  const gsapCtxRef = useRef<gsap.Context | null>(null);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -165,14 +165,14 @@ const FlagshipEvents = () => {
       .map((ce: any, i: number) => {
         const bgColors = ['bg-[#e8f5e9]', 'bg-[#fce4ec]', 'bg-[#eceff1]', 'bg-[#fff9c4]'];
         const dynamicStats = (ce.stats || []).map((s: any) => {
-          const label  = (s.label || '').toLowerCase();
+          const label = (s.label || '').toLowerCase();
           const rawVal = String(s.value || '').trim();
           const numVal = parseFloat(rawVal.replace(/[^0-9.]/g, ''));
           const isEmpty = !rawVal || rawVal === '0' || isNaN(numVal);
           if (isEmpty) {
             if (label.includes('registration')) return { ...s, value: `${totalRegs}+` };
-            if (label.includes('attendee'))     return { ...s, value: `${totalApprovedRegs || 350}+` };
-            if (label.includes('speaker'))      return { ...s, value: '30+' };
+            if (label.includes('attendee')) return { ...s, value: `${totalApprovedRegs || 350}+` };
+            if (label.includes('speaker')) return { ...s, value: '30+' };
           }
           return s;
         });
@@ -212,14 +212,14 @@ const FlagshipEvents = () => {
       if (!container) return;
 
       const wrappers = Array.from(container.querySelectorAll<HTMLElement>('.f-card-wrapper'));
-      const cards    = Array.from(container.querySelectorAll<HTMLElement>('.f-card'));
+      const cards = Array.from(container.querySelectorAll<HTMLElement>('.f-card'));
 
       if (!wrappers.length || !cards.length) return;
 
-      const CARD_HEIGHT   = cards[0].offsetHeight || 430;   // px
-      const TOP_PADDING   = 80;                             // how far from viewport top each pin snaps
-      const SCALE_STEP    = 0.04;                           // scale reduction per card behind
-      const MAX_ROTX      = -8;                             // max 3-D tilt in degrees
+      const CARD_HEIGHT = cards[0].offsetHeight || 430;   // px
+      const TOP_PADDING = 80;                             // how far from viewport top each pin snaps
+      const SCALE_STEP = 0.04;                           // scale reduction per card behind
+      const MAX_ROTX = -8;                             // max 3-D tilt in degrees
 
       const ctx = gsap.context(() => {
         // ── Initial state: flat, full-size, no tilt ──────────────────────
@@ -230,7 +230,7 @@ const FlagshipEvents = () => {
         });
 
         wrappers.forEach((wrapper, i) => {
-          const card   = cards[i];
+          const card = cards[i];
           if (!card) return;
 
           const isLast = i === wrappers.length - 1;
@@ -249,21 +249,21 @@ const FlagshipEvents = () => {
           if (!isLast) {
             const cardsAhead = wrappers.length - 1 - i;
             const targetScale = Math.max(0.78, 1 - SCALE_STEP * cardsAhead);
-            const targetRotX  = MAX_ROTX;
+            const targetRotX = MAX_ROTX;
 
             gsap.to(card, {
-              scale:      targetScale,
-              rotationX:  targetRotX,
-              ease:       'none',
+              scale: targetScale,
+              rotationX: targetRotX,
+              ease: 'none',
               scrollTrigger: {
-                trigger:          wrapper,
-                start:            `top ${pinTopPx}px`,         // card hits its pin position
-                end:              `+=${CARD_HEIGHT * 0.9}`,    // scroll window per card
-                endTrigger:       container,
-                scrub:            0.6,                         // slight smoothing
-                pin:              wrapper,
-                pinSpacing:       false,
-                anticipatePin:    1,
+                trigger: wrapper,
+                start: `top ${pinTopPx}px`,         // card hits its pin position
+                end: `+=${CARD_HEIGHT * 0.9}`,    // scroll window per card
+                endTrigger: container,
+                scrub: 0.6,                         // slight smoothing
+                pin: wrapper,
+                pinSpacing: false,
+                anticipatePin: 1,
                 invalidateOnRefresh: true,
               },
             });
@@ -276,14 +276,14 @@ const FlagshipEvents = () => {
               card,
               { scale: 0.93, opacity: 0.6 },
               {
-                scale:   1,
+                scale: 1,
                 opacity: 1,
-                ease:    'none',
+                ease: 'none',
                 scrollTrigger: {
-                  trigger:          wrapper,
-                  start:            `top ${pinTopPx + 60}px`,
-                  end:              `top ${pinTopPx}px`,
-                  scrub:            true,
+                  trigger: wrapper,
+                  start: `top ${pinTopPx + 60}px`,
+                  end: `top ${pinTopPx}px`,
+                  scrub: true,
                   invalidateOnRefresh: true,
                 },
               }
@@ -321,8 +321,8 @@ const FlagshipEvents = () => {
     if (!events.length) return [];
     if (isMobileView) return events;
     if (events.length <= 3) return events;
-    const start  = activeIndex * 3;
-    let sliced   = events.slice(start, start + 3);
+    const start = activeIndex * 3;
+    let sliced = events.slice(start, start + 3);
     if (sliced.length < 3) sliced = [...sliced, ...events.slice(0, 3 - sliced.length)];
     return sliced;
   }, [events, activeIndex, isMobileView]);
@@ -420,9 +420,8 @@ const FlagshipEvents = () => {
             <button
               key={i}
               onClick={() => setActiveIndex(i)}
-              className={`relative rounded-full overflow-hidden transition-all duration-300 ${
-                i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
-              }`}
+              className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                }`}
             >
               {i === activeIndex && (
                 <motion.div
