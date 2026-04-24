@@ -90,15 +90,15 @@ const EventsPage = () => {
                                     </div>
                                 </div>
                                 <iframe
-                                    src="https://lu.ma/embed/calendar/cal-RnzTQXOxDIzD7SU/events?theme=light"
+                                    src="https://lu.ma/embed/calendar/cal-RnzTQXOxDIzD7SU/events"
                                     width="100%"
                                     height="700"
                                     frameBorder="0"
-                                    style={{ border: 'none', backgroundColor: '#ffffff' }}
+                                    style={{ border: 'none', backgroundColor: '#ffffff', colorScheme: 'light' }}
                                     allowFullScreen
                                     aria-hidden="false"
                                     tabIndex={0}
-                                    className="relative z-10 w-full"
+                                    className="relative z-10 w-full [color-scheme:light]"
                                 />
                             </div>
                         </div>
