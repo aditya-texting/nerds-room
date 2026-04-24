@@ -275,7 +275,7 @@ const FlagshipEvents = () => {
         <div 
           className="wrapper relative w-full pt-6"
           ref={containerRef}
-          style={{ minHeight: `${visibleMobileEvents.length * 350 + 50}px` }}
+          style={{ minHeight: `${visibleMobileEvents.length * 450}px` }}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5 overflow-hidden">
             <AnimatePresence mode="wait">
