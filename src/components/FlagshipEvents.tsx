@@ -143,27 +143,35 @@ const FlagshipEvents = () => {
     }));
   }, [contextEvents]);
 
-  // ── Mobile carousel state ──────────────────────────────────────────────────
+  // ── Carousel Config ───────────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
   const mobileCardsPerPage = 3;
   const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
 
-  const visibleMobileEvents = useMemo(() => {
-    if (!events.length) return [];
-    if (!isMobileView) return events.slice(0, desktopCardsPerPage);
-    const start = mobileActiveIndex * mobileCardsPerPage;
-    return events.slice(start, start + mobileCardsPerPage);
-  }, [events, mobileActiveIndex, mobileCardsPerPage, isMobileView]);
-
-  // Auto-rotate mobile pages
+  // Auto-rotate by scrolling to the next page
   useEffect(() => {
     if (!isMobileView || events.length <= mobileCardsPerPage) return;
     const interval = setInterval(() => {
-      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
-    }, 6000); 
+      const nextIndex = (mobileActiveIndex + 1) % mobileNumPages;
+      setMobileActiveIndex(nextIndex);
+      
+      // Scroll to the next group of cards
+      const targetScroll = containerRef.current?.offsetTop || 0;
+      const scrollOffset = nextIndex * (3 * 440); // Approx height of 3 cards
+      window.scrollTo({
+        top: targetScroll + scrollOffset,
+        behavior: 'smooth'
+      });
+    }, 8000); 
     return () => clearInterval(interval);
-  }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage]);
+  }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage, mobileActiveIndex]);
+
+  const visibleMobileEvents = useMemo(() => {
+    if (!events.length) return [];
+    if (isMobileView) return events; // Show all events in the scroll stack on mobile
+    return events.slice(0, desktopCardsPerPage);
+  }, [events, isMobileView]);
 
   // ── GSAP Scroll Stack Logic ─────────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
@@ -208,29 +216,26 @@ const FlagshipEvents = () => {
             scale: scale,
             rotationX: rotation,
             transformOrigin: "top center",
-            force3D: true, // Hardware acceleration
+            force3D: true,
             ease: "none",
             scrollTrigger: {
               trigger: wrapper,
-              start: "top " + (60 + 10 * i),
+              start: "top " + (60 + 10 * (i % 3)),
               end: "bottom 550",
               endTrigger: containerRef.current,
               scrub: 1,
               pin: wrapper,
               pinSpacing: false,
               anticipatePin: 1,
-              fastScrollEnd: true, // Prevent glitches on fast scroll
-              id: `mobile-p${mobileActiveIndex}-c${i}`
+              fastScrollEnd: true,
+              id: `mobile-c${i}`
             }
           });
         });
 
-        // Forced refresh after delay to ensure DOM is ready on mobile devices
-        setTimeout(() => {
-          ScrollTrigger.refresh();
-        }, 200);
+        setTimeout(() => ScrollTrigger.refresh(), 200);
       }, containerRef.current);
-    }, 250);
+    }, 400);
 
     return () => {
       clearTimeout(timeout);
@@ -239,7 +244,7 @@ const FlagshipEvents = () => {
         gsapCtxRef.current = null;
       }
     };
-  }, [isMobileView, mobileActiveIndex, visibleMobileEvents.length]);
+  }, [isMobileView, events.length]);
 
   // ── Desktop carousel ──────────────────────────────────────────────────────
   const desktopNumPages = Math.ceil(events.length / desktopCardsPerPage);
@@ -276,13 +281,12 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — Carousel with GSAP Stack ══════════ */}
+      {/* ══════════ MOBILE (< lg) — Pre-loaded Scroll Stack ══════════ */}
       <div className="block lg:hidden">
         <div 
           className="wrapper relative w-full pt-[80px] pb-[50px] flex justify-center"
           ref={containerRef}
-          key={mobileActiveIndex}
-          style={{ minHeight: '1400px' }} // Fixed height to prevent layout jumps
+          style={{ minHeight: `${events.length * 440 + 400}px` }} 
         >
           <div className="cards w-full max-w-[500px] flex flex-col items-center px-4">
             {visibleMobileEvents.map((event, i) => (
@@ -307,13 +311,17 @@ const FlagshipEvents = () => {
           </div>
         </div>
 
-        {/* Indicators for mobile carousel */}
+        {/* Indicators for scroll progress */}
         {events.length > mobileCardsPerPage && (
           <div className="flex justify-center gap-3 mt-4 pb-12">
             {Array.from({ length: mobileNumPages }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => setMobileActiveIndex(i)}
+                onClick={() => {
+                  setMobileActiveIndex(i);
+                  const targetScroll = containerRef.current?.offsetTop || 0;
+                  window.scrollTo({ top: targetScroll + i * (3 * 440), behavior: 'smooth' });
+                }}
                 className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === mobileActiveIndex
                   ? 'w-12 h-3'
                   : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
@@ -324,7 +332,7 @@ const FlagshipEvents = () => {
                     className="absolute inset-0 bg-[#4285F4]"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ duration: 6, ease: 'linear' }}
+                    transition={{ duration: 8, ease: 'linear' }}
                     style={{ originX: 0 }}
                   />
                 )}
