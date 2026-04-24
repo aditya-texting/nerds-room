@@ -1,8 +1,12 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import { MapPin } from 'lucide-react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface EventData {
   id?: string | number;
@@ -88,19 +92,6 @@ const CardInner = ({ event }: { event: EventData }) => (
   </>
 );
 
-// ─── Mobile Scroll Card — whileInView only, no AnimatePresence conflict ────────
-const MobileScrollCard = ({ event, index }: { event: EventData; index: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 60 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.15 }}
-    transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-    className={`w-[300px] h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}
-  >
-    <CardInner event={event} />
-  </motion.div>
-);
-
 // ─── Desktop Card ─────────────────────────────────────────────────────────────
 const DesktopEventCard = ({ event, index }: { event: EventData; index: number }) => {
   const isLower = index % 2 !== 0;
@@ -177,14 +168,69 @@ const FlagshipEvents = () => {
       });
   }, [contextEvents, totalRegs, totalApprovedRegs]);
 
-  // ── Mobile auto-carousel ──────────────────────────────────────────────────
+  // ── Mobile carousel ───────────────────────────────────────────────────────
+  const mobileCardsPerPage = 3;
+  const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+
   useEffect(() => {
-    if (!isMobileView || events.length <= 1) return;
+    if (!isMobileView || events.length <= mobileCardsPerPage) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % events.length);
-    }, 5000);
+      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
+    }, 6000);
     return () => clearInterval(interval);
-  }, [isMobileView, events.length]);
+  }, [isMobileView, events.length, mobileNumPages]);
+
+  const visibleMobileEvents = useMemo(() => {
+    if (!events.length) return [];
+    if (events.length <= mobileCardsPerPage) return events;
+    const start = mobileActiveIndex * mobileCardsPerPage;
+    let sliced = events.slice(start, start + mobileCardsPerPage);
+    if (sliced.length < mobileCardsPerPage)
+      sliced = [...sliced, ...events.slice(0, mobileCardsPerPage - sliced.length)];
+    return sliced;
+  }, [events, mobileActiveIndex]);
+
+  // ── Mobile GSAP Scroll Stack ─────────────────────────────────────────────
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!isMobileView || !containerRef.current || visibleMobileEvents.length === 0) return;
+
+    let ctx = gsap.context(() => {
+      const cardsWrappers = gsap.utils.toArray(".card-wrapper");
+      const cards = gsap.utils.toArray(".card");
+
+      cardsWrappers.forEach((wrapper: any, i) => {
+        const card = cards[i] as HTMLElement;
+        let scale = 1,
+          rotation = 0;
+        if (i !== cards.length - 1) {
+          scale = 0.9 + 0.025 * i;
+          rotation = -10;
+        }
+        gsap.to(card, {
+          scale: scale,
+          rotationX: rotation,
+          transformOrigin: "top center",
+          ease: "none",
+          scrollTrigger: {
+            trigger: wrapper,
+            start: "top " + (60 + 10 * i),
+            end: "bottom bottom",
+            endTrigger: ".wrapper",
+            scrub: true,
+            pin: wrapper,
+            pinSpacing: false,
+            id: String(i + 1)
+          }
+        });
+      });
+      ScrollTrigger.refresh();
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMobileView, visibleMobileEvents]);
 
   // ── Desktop carousel ──────────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
@@ -208,8 +254,6 @@ const FlagshipEvents = () => {
       sliced = [...sliced, ...events.slice(0, desktopCardsPerPage - sliced.length)];
     return sliced;
   }, [events, desktopActiveIndex]);
-
-  const currentMobileEvent = events[activeIndex] ?? null;
 
   if (loading) {
     return (
@@ -245,62 +289,53 @@ const FlagshipEvents = () => {
 
       {/* ══════════ MOBILE (< lg) ══════════ */}
       <div className="block lg:hidden">
-
-        {/* Top carousel — AnimatePresence handles enter/exit, NO whileInView here */}
-        <div className="relative w-full flex justify-center" style={{ minHeight: 430 }}>
-          <AnimatePresence mode="wait">
-            {currentMobileEvent && (
+        
+        {/* GSAP Stacking Wrapper Container */}
+        <div className="wrapper relative w-full pt-10 pb-[50px] min-h-[100vh]" ref={containerRef}>
+          <div className="cards w-full max-w-[750px] mx-auto px-5" style={{ minHeight: '150vh' }}>
+            <AnimatePresence mode="wait">
               <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, y: 50 }}
+                key={mobileActiveIndex}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -30 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute w-full flex justify-center"
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="w-full flex flex-col items-center"
               >
-                <div
-                  className={`w-[300px] h-[430px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center ${currentMobileEvent.bgColor}`}
-                >
-                  <CardInner event={currentMobileEvent} />
-                </div>
+                {visibleMobileEvents.map((event, index) => (
+                  <div key={`${mobileActiveIndex}-${event.id ?? index}`} className="card-wrapper w-full mb-[50px] last:mb-0" style={{ perspective: '500px' }}>
+                    <div className={`card w-[300px] h-[400px] rounded-[20px] shadow-xl border border-[#0000001a] flex flex-col items-center mx-auto ${event.bgColor}`}>
+                      <CardInner event={event} />
+                    </div>
+                  </div>
+                ))}
               </motion.div>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Dot indicators */}
-        {events.length > 1 && (
-          <div className="flex justify-center gap-3 mt-6">
-            {events.map((_, i) => (
+        {events.length > mobileCardsPerPage && (
+          <div className="flex justify-center gap-3 mt-6 pb-6">
+            {Array.from({ length: mobileNumPages }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === activeIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
-                  }`}
+                onClick={() => setMobileActiveIndex(i)}
+                className={`relative rounded-full overflow-hidden transition-all duration-300 ${
+                  i === mobileActiveIndex ? 'w-12 h-3' : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                }`}
               >
-                {i === activeIndex && (
+                {i === mobileActiveIndex && (
                   <motion.div
-                    key={activeIndex}
+                    key={mobileActiveIndex}
                     className="absolute inset-0 bg-[#4285F4]"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ duration: 5, ease: 'linear' }}
+                    transition={{ duration: 6, ease: 'linear' }}
                     style={{ originX: 0 }}
                   />
                 )}
               </button>
-            ))}
-          </div>
-        )}
-
-        {/* All Events scroll strip — each card uses whileInView separately */}
-        {events.length > 1 && (
-          <div className="mt-12 flex flex-col gap-8 items-center">
-            <p className="text-xs text-gray-400 font-semibold tracking-widest uppercase">
-              All Events
-            </p>
-            {events.map((event, index) => (
-              <MobileScrollCard key={event.id ?? index} event={event} index={index} />
             ))}
           </div>
         )}
