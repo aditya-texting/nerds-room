@@ -166,7 +166,7 @@ const FlagshipEvents = () => {
   // Auto-rotate mobile pages - DISABLED to prevent GSAP conflict
   useEffect(() => {
     if (!isMobileView || events.length <= mobileCardsPerPage) return;
-  }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage]);
+  }, [isMobileView, events.length, mobileCardsPerPage]);
 
   useLayoutEffect(() => {
     if (!isMobileView || events.length === 0) return;
@@ -286,7 +286,6 @@ const FlagshipEvents = () => {
               ))}
             </div>
           </div>
-        </div>
         {/* Indicators removed for mobile to focus on scroll-stacking */}
       </div>
 
