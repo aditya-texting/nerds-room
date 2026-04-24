@@ -218,7 +218,8 @@ const FlagshipEvents = () => {
       gsapCtxRef.current = null;
     }
 
-    // Increased delay to ensure DOM is fully painted and images have started loading
+    // Increased delay to allow AnimatePresence 'exit' animation (0.4s) to complete
+    // so that the new cards are actually mounted in the DOM before GSAP tries to find them.
     const timeout = setTimeout(() => {
       if (!containerRef.current) return;
 
@@ -235,6 +236,7 @@ const FlagshipEvents = () => {
           const card = cards[i];
           if (!card) return;
 
+          // Scaling logic for the stack effect
           let scale = 1;
           let rotation = 0;
           if (i !== cards.length - 1) {
@@ -272,7 +274,7 @@ const FlagshipEvents = () => {
           }
         });
       }, containerRef.current);
-    }, 250); // Slightly longer delay for better reliability on reload
+    }, 600); // 600ms > 400ms (exit duration) ensures new DOM is ready
 
     return () => {
       clearTimeout(timeout);
