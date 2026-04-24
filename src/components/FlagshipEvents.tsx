@@ -170,6 +170,12 @@ const FlagshipEvents = () => {
   const gsapCtxRef = useRef<gsap.Context | null>(null);
 
   useLayoutEffect(() => {
+    // Mobile specific ScrollTrigger config
+    ScrollTrigger.config({ 
+      ignoreMobileResize: true,
+    });
+    ScrollTrigger.normalizeScroll(true);
+
     if (!isMobileView || visibleMobileEvents.length === 0) return;
 
     if (gsapCtxRef.current) {
@@ -206,9 +212,10 @@ const FlagshipEvents = () => {
               start: "top " + (60 + 10 * i),
               end: "bottom 550",
               endTrigger: containerRef.current,
-              scrub: true,
+              scrub: 1,
               pin: wrapper,
               pinSpacing: false,
+              anticipatePin: 1,
               id: `mobile-p${mobileActiveIndex}-c${i}`
             }
           });
