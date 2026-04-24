@@ -143,33 +143,29 @@ const FlagshipEvents = () => {
     }));
   }, [contextEvents]);
 
-  // ── Carousel Config ───────────────────────────────────────────────────────
+  // ── Config ────────────────────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
-  const mobileCardsPerPage = 3;
-  const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
+
+  // ── Mobile Progress Indicators ──────────────────────────────────────────────
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
 
-  // Auto-rotate by scrolling to the next page
+  // Sync active index with scroll position for dots
   useEffect(() => {
-    if (!isMobileView || events.length <= mobileCardsPerPage) return;
-    const interval = setInterval(() => {
-      const nextIndex = (mobileActiveIndex + 1) % mobileNumPages;
-      setMobileActiveIndex(nextIndex);
-      
-      // Scroll to the next group of cards
-      const targetScroll = containerRef.current?.offsetTop || 0;
-      const scrollOffset = nextIndex * (3 * 440); // Approx height of 3 cards
-      window.scrollTo({
-        top: targetScroll + scrollOffset,
-        behavior: 'smooth'
-      });
-    }, 8000); 
-    return () => clearInterval(interval);
-  }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage, mobileActiveIndex]);
+    if (!isMobileView) return;
+    const handleScroll = () => {
+      const scrollPos = window.scrollY;
+      const targetOffset = containerRef.current?.offsetTop || 0;
+      const cardHeight = 440; // Approx height per card trigger
+      const index = Math.max(0, Math.min(events.length - 1, Math.floor((scrollPos - targetOffset) / cardHeight)));
+      setMobileActiveIndex(index);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobileView, events.length]);
 
   const visibleMobileEvents = useMemo(() => {
     if (!events.length) return [];
-    if (isMobileView) return events; // Show all events in the scroll stack on mobile
+    if (isMobileView) return events;
     return events.slice(0, desktopCardsPerPage);
   }, [events, isMobileView]);
 
@@ -203,34 +199,37 @@ const FlagshipEvents = () => {
           const card = cards[i];
           if (!card) return;
 
-          // Explicitly set z-index to prevent clipping
-          gsap.set(wrapper, { zIndex: 10 + i });
-
-          let scale = 1, rotation = 0;
-          if (i !== cards.length - 1) {
-            scale = 0.9 + 0.025 * i;
-            rotation = -10;
-          }
-
-          gsap.to(card, {
-            scale: scale,
-            rotationX: rotation,
-            transformOrigin: "top center",
-            force3D: true,
-            ease: "none",
-            scrollTrigger: {
-              trigger: wrapper,
-              start: "top " + (60 + 10 * (i % 3)),
-              end: "bottom 550",
-              endTrigger: containerRef.current,
-              scrub: 1,
-              pin: wrapper,
-              pinSpacing: false,
-              anticipatePin: 1,
-              fastScrollEnd: true,
-              id: `mobile-c${i}`
-            }
+          // Pin the current card
+          ScrollTrigger.create({
+            trigger: wrapper,
+            start: "top 80",
+            endTrigger: containerRef.current,
+            end: "bottom 550",
+            pin: true,
+            pinSpacing: false,
+            scrub: true,
+            id: `pin-${i}`,
+            anticipatePin: 1
           });
+
+          // Animation for the card: 
+          // As the NEXT card starts to enter, this card scales down and fades out
+          if (i < cards.length - 1) {
+            const nextWrapper = cardsWrappers[i + 1];
+            gsap.to(card, {
+              scale: 0.92,
+              opacity: 0.6,
+              filter: "blur(1px)",
+              ease: "none",
+              scrollTrigger: {
+                trigger: nextWrapper,
+                start: "top bottom",
+                end: "top 80",
+                scrub: true,
+                id: `scale-${i}`
+              }
+            });
+          }
         });
 
         setTimeout(() => ScrollTrigger.refresh(), 200);
@@ -281,27 +280,24 @@ const FlagshipEvents = () => {
         </p>
       </div>
 
-      {/* ══════════ MOBILE (< lg) — Pre-loaded Scroll Stack ══════════ */}
+      {/* ══════════ MOBILE (< lg) — GDG Noida Style Stack ══════════ */}
       <div className="block lg:hidden">
         <div 
-          className="wrapper relative w-full pt-[80px] pb-[50px] flex justify-center"
+          className="wrapper relative w-full pt-[40px] pb-[400px] flex justify-center"
           ref={containerRef}
-          style={{ minHeight: `${events.length * 440 + 400}px` }} 
         >
-          <div className="cards w-full max-w-[500px] flex flex-col items-center px-4">
-            {visibleMobileEvents.map((event, i) => (
+          <div className="cards w-full max-w-[450px] flex flex-col items-center px-4">
+            {events.map((event, i) => (
               <div 
                 key={event.id ?? i} 
-                className="card-wrapper w-full perspective-[1000px] mb-[40px] last:mb-0 flex justify-center"
+                className="card-wrapper w-full mb-[300px] last:mb-0 flex justify-center h-[400px]"
               >
                 <div 
-                  className={`card w-full max-w-[300px] h-[400px] flex flex-col items-center rounded-[15px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
+                  className={`card w-full max-w-[320px] h-full flex flex-col items-center rounded-[24px] shadow-2xl border border-[#0000001a] ${event.bgColor}`}
                   style={{ 
-                    backgroundSize: 'cover', 
-                    backgroundRepeat: 'no-repeat', 
-                    backgroundPosition: 'top center',
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden'
+                    willChange: 'transform, opacity',
+                    backfaceVisibility: 'hidden',
+                    zIndex: i + 1
                   }}
                 >
                   <CardInner event={event} />
@@ -312,34 +308,23 @@ const FlagshipEvents = () => {
         </div>
 
         {/* Indicators for scroll progress */}
-        {events.length > mobileCardsPerPage && (
-          <div className="flex justify-center gap-3 mt-4 pb-12">
-            {Array.from({ length: mobileNumPages }).map((_, i) => (
+        <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center gap-3 px-4 py-2 pointer-events-none">
+          <div className="flex gap-2 p-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 pointer-events-auto shadow-lg">
+            {events.map((_, i) => (
               <button
                 key={i}
                 onClick={() => {
-                  setMobileActiveIndex(i);
                   const targetScroll = containerRef.current?.offsetTop || 0;
-                  window.scrollTo({ top: targetScroll + i * (3 * 440), behavior: 'smooth' });
+                  window.scrollTo({ top: targetScroll + i * 440, behavior: 'smooth' });
                 }}
-                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === mobileActiveIndex
-                  ? 'w-12 h-3'
-                  : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${i === mobileActiveIndex
+                  ? 'bg-[#4285F4] w-8'
+                  : 'bg-gray-400 opacity-50 hover:opacity-100'
                   }`}
-              >
-                {i === mobileActiveIndex && (
-                  <motion.div
-                    className="absolute inset-0 bg-[#4285F4]"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 8, ease: 'linear' }}
-                    style={{ originX: 0 }}
-                  />
-                )}
-              </button>
+              />
             ))}
           </div>
-        )}
+        </div>
       </div>
 
       {/* ══════════ DESKTOP (lg+) ══════════ */}
