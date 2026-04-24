@@ -297,7 +297,7 @@ const FlagshipEvents = () => {
         gsapCtxRef.current = null;
       }
     };
-  }, [isMobileView, events.length]);
+  }, [isMobileView, events.length, loading]);
 
   // ── Re-init GSAP on orientation change / resize ────────────────────────────
   useEffect(() => {
