@@ -154,24 +154,18 @@ const FlagshipEvents = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gsapCtxRef = useRef<gsap.Context | null>(null);
 
-  // ── Mobile carousel state ──────────────────────────────────────────────────
+  // ── Mobile carousel state - Simplified for scroll-stacking
   const mobileCardsPerPage = 3;
-  const mobileNumPages = Math.ceil(events.length / mobileCardsPerPage);
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
 
   const visibleMobileEvents = useMemo(() => {
     if (!events.length) return [];
-    const start = mobileActiveIndex * mobileCardsPerPage;
-    return events.slice(start, start + mobileCardsPerPage);
-  }, [events, mobileActiveIndex, mobileCardsPerPage]);
+    if (isMobileView) return events; // Show all events in the scroll stack on mobile
+    return events.slice(0, desktopCardsPerPage); // Fallback for safety
+  }, [events, isMobileView]);
 
-  // Auto-rotate mobile pages
+  // Auto-rotate mobile pages - DISABLED to prevent GSAP conflict
   useEffect(() => {
     if (!isMobileView || events.length <= mobileCardsPerPage) return;
-    const interval = setInterval(() => {
-      setMobileActiveIndex((prev) => (prev + 1) % mobileNumPages);
-    }, 6000); // Matches the dot progress duration (6s)
-    return () => clearInterval(interval);
   }, [isMobileView, events.length, mobileNumPages, mobileCardsPerPage]);
 
   useLayoutEffect(() => {
@@ -211,22 +205,21 @@ const FlagshipEvents = () => {
             ease: 'none',
             scrollTrigger: {
               trigger: wrapper,
-              start: 'top 60',
-              end: '+=300',
+              start: 'top center', 
+              end: '+=200',
               scrub: true,
-              pin: wrapper,
-              pinSpacing: i === cards.length - 1,
-              anticipatePin: 1,
-              id: String(i + 1),
+              pin: true,
+              pinSpacing: false,
+              id: `card-${i}`,
             },
           });
         });
 
-        // Fast reveal and layout refresh
+        // Ensure visibility and refresh
         gsap.to(cards, { opacity: 1, y: 0, duration: 0.3 });
         ScrollTrigger.refresh(true);
       }, containerRef.current);
-    }, 100);
+    }, 200);
 
     return () => {
       clearTimeout(timeout);
@@ -235,7 +228,7 @@ const FlagshipEvents = () => {
         gsapCtxRef.current = null;
       }
     };
-  }, [isMobileView, visibleMobileEvents]);
+  }, [isMobileView, events.length]);
 
   // ── Desktop carousel state ────────────────────────────────────────────────
   const desktopCardsPerPage = 3;
@@ -277,10 +270,9 @@ const FlagshipEvents = () => {
           ref={containerRef}
         >
           <div className="cards w-full max-w-[750px] mx-auto px-5">
-            <div className="w-full flex flex-col items-center">
               {visibleMobileEvents.map((event, index) => (
                 <div
-                  key={`${mobileActiveIndex}-${event.id ?? index}`}
+                  key={event.id ?? index}
                   className="card-wrapper w-full mb-[50px] last:mb-0 flex justify-center"
                   style={{ perspective: '1000px' }}
                 >
@@ -295,32 +287,7 @@ const FlagshipEvents = () => {
             </div>
           </div>
         </div>
-
-        {events.length > mobileCardsPerPage && (
-          <div className="flex justify-center gap-3 mt-4 pb-6">
-            {Array.from({ length: mobileNumPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setMobileActiveIndex(i)}
-                className={`relative rounded-full overflow-hidden transition-all duration-300 ${i === mobileActiveIndex
-                  ? 'w-12 h-3'
-                  : 'w-3 h-3 bg-gray-200 hover:bg-gray-300'
-                  }`}
-              >
-                {i === mobileActiveIndex && (
-                  <motion.div
-                    key={mobileActiveIndex}
-                    className="absolute inset-0 bg-[#4285F4]"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 6, ease: 'linear' }}
-                    style={{ originX: 0 }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Indicators removed for mobile to focus on scroll-stacking */}
       </div>
 
       {/* ══════════ DESKTOP (lg+) ══════════ */}
