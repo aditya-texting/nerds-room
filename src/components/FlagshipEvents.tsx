@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
-import { MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface EventData {
@@ -29,7 +29,6 @@ const CARD_COLORS = [
   'bg-[#EAF2FF]',
   'bg-[#E6F6EB]',
 ];
-const AUTO_ADVANCE_MS = 9000;
 const COUNT_DURATION_MS = 4500;
 
 const CountUp = ({ value, duration = COUNT_DURATION_MS }: { value: number; duration?: number }) => {
@@ -163,11 +162,10 @@ const FlagshipEvents = () => {
     if (page >= pages && pages > 0) setPage(0);
   }, [page, pages]);
 
-  useEffect(() => {
-    if (events.length <= EVENTS_PER_PAGE) return;
-    const timer = window.setInterval(() => setPage((current) => (current + 1) % pages), AUTO_ADVANCE_MS);
-    return () => window.clearInterval(timer);
-  }, [events.length, pages]);
+  const goToPage = (nextPage: number) => {
+    if (pages <= 0) return;
+    setPage((nextPage + pages) % pages);
+  };
 
   if (loading) return <Skeleton />;
   if (!events.length) return null;
@@ -212,31 +210,40 @@ const FlagshipEvents = () => {
           </AnimatePresence>
 
           {pages > 1 && (
-            <div className="flex justify-center gap-3 mt-8 lg:mt-16">
-              {Array.from({ length: pages }).map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setPage(index)}
-                  aria-label={`Go to event set ${index + 1}`}
-                  className={`relative rounded-full overflow-hidden transition-all duration-300 ${
-                    index === page ? 'w-12 h-3' : 'w-3 h-3'
-                  }`}
-                >
-                  <span className="absolute inset-0 bg-gray-300" />
-                  {index === page ? (
-                    <motion.span
-                      key={page}
-                      className="absolute inset-0 bg-gradient-to-r from-[#4285F4] to-[#34A853] origin-left"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: 'linear' }}
-                    />
-                  ) : (
-                    <span className="absolute inset-0 bg-gray-300 hover:bg-gray-400 transition-colors" />
-                  )}
-                </button>
-              ))}
+            <div className="flex items-center justify-center gap-4 mt-8 lg:mt-16">
+              <button
+                type="button"
+                onClick={() => goToPage(page - 1)}
+                aria-label="Previous event set"
+                className="w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center text-black hover:bg-gray-50 hover:shadow-lg transition-all"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="flex justify-center gap-3">
+                {Array.from({ length: pages }).map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => goToPage(index)}
+                    aria-label={`Go to event set ${index + 1}`}
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      index === page
+                        ? 'w-12 bg-gradient-to-r from-[#4285F4] to-[#34A853]'
+                        : 'w-3 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => goToPage(page + 1)}
+                aria-label="Next event set"
+                className="w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center text-black hover:bg-gray-50 hover:shadow-lg transition-all"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           )}
         </div>
