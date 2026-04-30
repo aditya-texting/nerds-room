@@ -21,7 +21,18 @@ const toStatValue = (value: string | number) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const CountUp = ({ value, duration = 2000 }: { value: number; duration?: number }) => {
+const CARD_COLORS = [
+  'bg-[#E8F5E9]',
+  'bg-[#FCE4EC]',
+  'bg-[#ECEFF1]',
+  'bg-[#FFF7E0]',
+  'bg-[#EAF2FF]',
+  'bg-[#E6F6EB]',
+];
+const AUTO_ADVANCE_MS = 9000;
+const COUNT_DURATION_MS = 4500;
+
+const CountUp = ({ value, duration = COUNT_DURATION_MS }: { value: number; duration?: number }) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const started = useRef(false);
@@ -71,7 +82,7 @@ const EventCard = ({
     <motion.article
       initial={{ opacity: 0, y: 26 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, delay: index * 0.08 }}
+      transition={{ duration: 0.65, delay: index * 0.1 }}
       viewport={{ once: true, margin: '-80px' }}
       className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 border border-black/5 ${event.bgColor} ${
         isDesktop ? (lowerOnDesktop ? 'lg:mt-[90px]' : 'lg:mt-[39px]') : ''
@@ -131,9 +142,11 @@ const FlagshipEvents = () => {
 
   const events: EventData[] = useMemo(() => {
     if (!contextEvents) return [];
-    return contextEvents.map((event: any) => ({
+    return contextEvents.map((event: any, index: number) => ({
       ...event,
-      bgColor: event.bgColor || 'bg-white',
+      bgColor: event.bgColor && event.bgColor !== 'bg-white'
+        ? event.bgColor
+        : CARD_COLORS[index % CARD_COLORS.length],
       stats: Array.isArray(event.stats)
         ? event.stats.map((stat: any) => ({ ...stat, value: toStatValue(stat.value) }))
         : [],
@@ -152,7 +165,7 @@ const FlagshipEvents = () => {
 
   useEffect(() => {
     if (events.length <= EVENTS_PER_PAGE) return;
-    const timer = window.setInterval(() => setPage((current) => (current + 1) % pages), 5000);
+    const timer = window.setInterval(() => setPage((current) => (current + 1) % pages), AUTO_ADVANCE_MS);
     return () => window.clearInterval(timer);
   }, [events.length, pages]);
 
@@ -179,7 +192,7 @@ const FlagshipEvents = () => {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.45, ease: 'easeOut' }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
               draggable={false}
               style={{
                 WebkitTouchCallout: 'none',
@@ -217,7 +230,7 @@ const FlagshipEvents = () => {
                       className="absolute inset-0 bg-gradient-to-r from-[#4285F4] to-[#34A853] origin-left"
                       initial={{ scaleX: 0 }}
                       animate={{ scaleX: 1 }}
-                      transition={{ duration: 5, ease: 'linear' }}
+                      transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: 'linear' }}
                     />
                   ) : (
                     <span className="absolute inset-0 bg-gray-300 hover:bg-gray-400 transition-colors" />
