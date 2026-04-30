@@ -39,16 +39,16 @@ const CommunitySays = () => {
           </h2>
         </div>
         <div className="max-w-[1400px] mx-auto">
-          <div className="scrollbar-hide flex flex-nowrap items-stretch overflow-x-auto space-x-4 sm:space-x-6 md:space-x-8 pb-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-x-visible lg:space-x-0 lg:items-stretch">
+          <div className="scrollbar-hide flex flex-nowrap items-start overflow-x-auto space-x-4 sm:space-x-6 md:space-x-8 pb-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-x-visible lg:space-x-0 lg:items-stretch">
             {testimonials.map((column, colIndex) => (
               <div
                 key={colIndex}
-                className="flex-none w-[calc(100vw-2rem)] sm:w-96 flex flex-col gap-4 sm:gap-6 md:gap-5 lg:w-auto h-full"
+                className="flex-none w-[calc(100vw-2rem)] sm:w-96 flex flex-col gap-4 sm:gap-6 md:gap-5 lg:w-auto lg:h-full"
               >
                 {column.map((testimonial, index) => (
                   <div
                     key={index}
-                    className={`${testimonial.bgColor} p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl md:rounded-3xl shadow-sm w-full flex flex-col justify-between flex-grow transition-transform hover:scale-[1.02] duration-300`}
+                    className={`${testimonial.bgColor} p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl md:rounded-3xl shadow-sm w-full flex flex-col justify-between lg:flex-grow transition-transform hover:scale-[1.02] duration-300`}
                   >
                     <div className="text-sm sm:text-base md:text-base lg:text-base leading-relaxed text-zinc-600">
                       {testimonial.paragraphs.map((para: any, pIndex: number) => {
