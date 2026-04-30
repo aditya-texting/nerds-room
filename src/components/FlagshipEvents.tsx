@@ -52,19 +52,19 @@ const CountUp = ({ value, duration = 2000 }: { value: number; duration?: number 
 // ─── Card Inner ───────────────────────────────────────────────────────────────
 const CardInner = ({ event }: { event: EventData }) => (
   <>
-    <div className="mt-5 mb-4 flex items-center justify-center w-full px-6">
+    <div className="mt-4 sm:mt-5 mb-3 sm:mb-4 flex items-center justify-center w-full px-4 sm:px-6">
       {event.logo ? (
-        <div className="relative w-full h-[45px]">
+        <div className="relative w-full h-[38px] sm:h-[45px]">
           <img src={event.logo} alt={event.title} className="object-contain w-full h-full" />
         </div>
       ) : (
-        <span className="text-xl font-black text-black leading-tight text-center">
+        <span className="text-lg sm:text-xl font-black text-black leading-tight text-center">
           {event.title}
         </span>
       )}
     </div>
 
-    <div className="relative w-[240px] h-[230px] shrink-0">
+    <div className="relative w-[min(240px,calc(100%-32px))] h-[210px] sm:h-[230px] shrink-0">
       <div className="relative w-full h-full rounded-[16px] overflow-hidden shadow-md border border-[#00000012]">
         <img
           src={event.image}
@@ -72,16 +72,16 @@ const CardInner = ({ event }: { event: EventData }) => (
           className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
-      <div className="absolute bottom-3 left-4 space-y-2 max-w-[90%]">
+      <div className="absolute bottom-3 left-3 sm:left-4 space-y-2 max-w-[92%]">
         {event.stats.map((stat, sIndex) => (
           <div
             key={sIndex}
-            className="bg-white rounded-[12px] px-3 py-1.5 flex items-center gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-[#00000008] w-fit"
+            className="bg-white rounded-[12px] px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 sm:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.12)] border border-[#00000008] w-fit max-w-full"
           >
-            <span className="text-[18px] font-medium text-[#34A853]">
+            <span className="text-[16px] sm:text-[18px] font-medium text-[#34A853]">
               <CountUp value={stat.value} />
             </span>
-            <span className="text-[13px] font-normal text-black whitespace-nowrap">
+            <span className="text-[12px] sm:text-[13px] font-normal text-black whitespace-nowrap">
               {stat.label}
             </span>
           </div>
@@ -89,7 +89,7 @@ const CardInner = ({ event }: { event: EventData }) => (
       </div>
     </div>
 
-    <div className="flex items-center justify-center gap-1.5 text-black mt-auto pt-2 pb-5 px-4">
+    <div className="flex items-center justify-center gap-1.5 text-black mt-auto pt-2 pb-4 sm:pb-5 px-4">
       <MapPin className="w-4 h-4 shrink-0 opacity-80" />
       <span className="text-[13px] font-semibold text-center leading-tight tracking-tight">
         {event.location}
@@ -120,7 +120,7 @@ const DesktopEventCard = ({ event, index }: { event: EventData; index: number })
 // KEY RULE: Any ancestor with overflow:hidden or overflow-x:hidden will break
 // position:sticky. We use clipPath on the section instead for horizontal clipping.
 
-const CARD_H = 400;  // card height px
+const CARD_H = 380;  // card height px
 const PEEK = 16;   // px each card peeks below the stack
 
 const MobileScrollStack = ({
