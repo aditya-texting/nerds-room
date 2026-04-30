@@ -13,8 +13,8 @@ const Chapters = () => {
     const marqueeContent = [...chapters, ...chapters, ...chapters];
 
     return (
-        <section className="w-full bg-white py-12 border-t border-b border-gray-100 overflow-hidden">
-            <div className="max-w-[1400px] mx-auto px-4 mb-10 text-center">
+        <section className="w-full bg-white py-8 md:py-12 border-t border-b border-gray-100 overflow-hidden">
+            <div className="max-w-[1400px] mx-auto px-4 mb-6 md:mb-10 text-center">
                 <h3 className="text-2xl md:text-3xl font-black text-gray-900 uppercase tracking-tight">
                     Our <span className="text-nerdBlue">Chapters</span>
                 </h3>

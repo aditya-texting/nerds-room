@@ -31,9 +31,9 @@ const CommunitySays = () => {
 
 
   return (
-    <section id="testimonials" className="relative w-full overflow-hidden py-12 sm:py-16 md:py-24 bg-white">
+    <section id="testimonials" className="relative w-full overflow-hidden py-8 sm:py-12 md:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="mb-8 sm:mb-12 text-center md:mb-16">
+        <div className="mb-5 sm:mb-8 text-center md:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-zinc-900 mb-2 sm:mb-4">
             <span className="font-bold">Success Stories</span> that Define Our Community
           </h2>

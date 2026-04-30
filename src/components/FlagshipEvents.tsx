@@ -132,7 +132,7 @@ const EventCard = ({
   );
 };
 
-const MOBILE_STACK_GAP_CLASS = ['mt-0 z-10', 'mt-[25vh] z-20', 'mt-[25vh] z-30'];
+const MOBILE_STACK_GAP_CLASS = ['mt-0 z-10', 'mt-[10vh] z-20', 'mt-[10vh] z-30'];
 const EVENTS_PER_PAGE = 3;
 
 const FlagshipEvents = () => {
@@ -171,9 +171,9 @@ const FlagshipEvents = () => {
   if (!events.length) return null;
 
   return (
-    <section id="flagship-events" className="py-16 md:py-20 px-4 md:px-8 lg:px-16 bg-white transition-all duration-700">
+    <section id="flagship-events" className="py-10 md:py-20 px-4 md:px-8 lg:px-16 bg-white transition-all duration-700">
       <div className="max-w-[1400px] mx-auto">
-        <div className="text-center mb-10 md:mb-12">
+        <div className="text-center mb-7 md:mb-12">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
             Our <span className="font-bold">Flagship Events</span>
           </h2>

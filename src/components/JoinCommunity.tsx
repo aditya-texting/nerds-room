@@ -130,11 +130,11 @@ const JoinCommunity = () => {
     <section
       ref={sectionRef}
       id="join"
-      className="relative py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-nerdLime/10"
+      className="relative py-9 sm:py-12 md:py-20 px-4 sm:px-6 md:px-8 bg-nerdLime/10"
     >
       <div className="relative max-w-6xl mx-auto">
         {/* Heading */}
-        <div className="text-center mb-8 sm:mb-10 md:mb-12">
+        <div className="text-center mb-6 sm:mb-8 md:mb-12">
           <h2
             ref={headingRef}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-nerdBlue mb-2 sm:mb-3 opacity-0"
