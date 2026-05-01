@@ -138,6 +138,9 @@ const EVENTS_PER_PAGE = 3;
 const FlagshipEvents = () => {
   const { flagshipEvents: contextEvents, loading } = useAppData();
   const [page, setPage] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const scrollAdvanceSentinelRef = useRef<HTMLDivElement>(null);
+  const scrollAdvanceLockRef = useRef(false);
 
   const events: EventData[] = useMemo(() => {
     if (!contextEvents) return [];
@@ -164,6 +167,8 @@ const FlagshipEvents = () => {
 
   useEffect(() => {
     if (pages <= 1) return;
+    const desktopQuery = window.matchMedia('(min-width: 1024px)');
+    if (!desktopQuery.matches) return;
 
     const interval = window.setInterval(() => {
       setPage((currentPage) => (currentPage + 1) % pages);
@@ -171,6 +176,36 @@ const FlagshipEvents = () => {
 
     return () => window.clearInterval(interval);
   }, [pages]);
+
+  useEffect(() => {
+    if (pages <= 1) return;
+    const mobileQuery = window.matchMedia('(max-width: 1023px)');
+    if (!mobileQuery.matches) return;
+
+    const sentinel = scrollAdvanceSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || scrollAdvanceLockRef.current) return;
+
+        scrollAdvanceLockRef.current = true;
+        setPage((currentPage) => (currentPage + 1) % pages);
+
+        window.setTimeout(() => {
+          sectionRef.current?.scrollIntoView({ block: 'start' });
+        }, 0);
+
+        window.setTimeout(() => {
+          scrollAdvanceLockRef.current = false;
+        }, 900);
+      },
+      { threshold: 0.7 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [page, pages]);
 
   const goToPage = (nextPage: number) => {
     if (pages <= 0) return;
@@ -181,7 +216,7 @@ const FlagshipEvents = () => {
   if (!events.length) return null;
 
   return (
-    <section id="flagship-events" className="py-10 md:py-20 px-4 md:px-8 lg:px-16 bg-white transition-all duration-700">
+    <section ref={sectionRef} id="flagship-events" className="py-10 md:py-20 px-4 md:px-8 lg:px-16 bg-white transition-all duration-700">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-7 md:mb-12">
           <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
@@ -226,6 +261,7 @@ const FlagshipEvents = () => {
               ))}
             </motion.div>
           </AnimatePresence>
+          <div ref={scrollAdvanceSentinelRef} className="h-6 lg:hidden" aria-hidden="true" />
 
           {pages > 1 && (
             <div className="flex items-center justify-center mt-8 lg:mt-16">
