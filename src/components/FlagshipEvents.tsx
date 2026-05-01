@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
-import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface EventData {
@@ -191,11 +191,19 @@ const FlagshipEvents = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.7, ease: 'easeOut' }}
+              drag={pages > 1 ? 'x' : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.18}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -70) goToPage(page + 1);
+                if (info.offset.x > 70) goToPage(page - 1);
+              }}
               draggable={false}
               style={{
                 WebkitTouchCallout: 'none',
                 userSelect: 'none',
                 touchAction: 'pan-y',
+                cursor: pages > 1 ? 'grab' : 'default',
               }}
             >
               {pageEvents.map((event, index) => (
@@ -210,16 +218,7 @@ const FlagshipEvents = () => {
           </AnimatePresence>
 
           {pages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-8 lg:mt-16">
-              <button
-                type="button"
-                onClick={() => goToPage(page - 1)}
-                aria-label="Previous event set"
-                className="w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center text-black hover:bg-gray-50 hover:shadow-lg transition-all"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
+            <div className="flex items-center justify-center mt-8 lg:mt-16">
               <div className="flex justify-center gap-3">
                 {Array.from({ length: pages }).map((_, index) => (
                   <button
@@ -235,15 +234,6 @@ const FlagshipEvents = () => {
                   />
                 ))}
               </div>
-
-              <button
-                type="button"
-                onClick={() => goToPage(page + 1)}
-                aria-label="Next event set"
-                className="w-10 h-10 rounded-full bg-white border border-black/10 shadow-md flex items-center justify-center text-black hover:bg-gray-50 hover:shadow-lg transition-all"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
             </div>
           )}
         </div>
