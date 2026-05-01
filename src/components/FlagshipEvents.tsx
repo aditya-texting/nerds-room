@@ -162,6 +162,16 @@ const FlagshipEvents = () => {
     if (page >= pages && pages > 0) setPage(0);
   }, [page, pages]);
 
+  useEffect(() => {
+    if (pages <= 1) return;
+
+    const interval = window.setInterval(() => {
+      setPage((currentPage) => (currentPage + 1) % pages);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [pages]);
+
   const goToPage = (nextPage: number) => {
     if (pages <= 0) return;
     setPage((nextPage + pages) % pages);
