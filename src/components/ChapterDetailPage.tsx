@@ -94,6 +94,11 @@ const ChapterDetailPage = () => {
             <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.1]">
               {chapter.name}
             </h1>
+            {chapter.description && (
+              <p className="max-w-2xl mt-4 text-gray-200 text-lg md:text-xl font-medium">
+                {chapter.description}
+              </p>
+            )}
             {chapter.location && (
               <p className="inline-flex items-center gap-1.5 text-gray-200 text-lg mt-3">
                 <MapPin className="w-5 h-5" />{chapter.location}
@@ -117,6 +122,17 @@ const ChapterDetailPage = () => {
                 Join Our Chapter
                 <ArrowUpRight size={16} />
               </a>
+              {chapter.partner_link && (
+                <a
+                  href={chapter.partner_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-white/10 text-white border border-white/30 font-black px-6 py-3 rounded-xl hover:bg-white/20 transition-all text-sm tracking-wide uppercase"
+                >
+                  Partner With Us
+                  <ArrowUpRight size={16} />
+                </a>
+              )}
             </div>
           </motion.div>
         </div>

@@ -44,6 +44,12 @@ CREATE TABLE IF NOT EXISTS chapter_content (
 --    Ensure chapter_id is populated so events are scoped to a chapter.
 -- ----------------------------------------------------------------------------
 
+-- ----------------------------------------------------------------------------
+-- 4. Extend `chapters` with header tagline + partner link
+-- ----------------------------------------------------------------------------
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS partner_link text;-----------
+
 -- ============================================================================
 -- ROW LEVEL SECURITY
 -- Public = read only. Authenticated (admins) = write.

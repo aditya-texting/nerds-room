@@ -63,6 +63,8 @@ export interface Chapter {
     lead?: string;
     member_count?: number;
     banner_url?: string;
+    description?: string;
+    partner_link?: string;
     is_live?: boolean; // campus chapters: Private(false)/Live(true); city chapters always live
 }
 

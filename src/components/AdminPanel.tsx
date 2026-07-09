@@ -1672,6 +1672,8 @@ const AdminPanel = () => {
                 <input id="new-chapter-lead" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
                 <input id="new-chapter-members" type="number" defaultValue={0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
                 <input id="new-chapter-banner" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <textarea id="new-chapter-desc" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-20" placeholder="Header tagline / description" />
+                <input id="new-chapter-partner" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Partner With Us link (optional)" />
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input id="new-chapter-live" type="checkbox" defaultChecked className="w-4 h-4" />
                   Live (visible on public site) — uncheck for Private
@@ -1686,9 +1688,11 @@ const AdminPanel = () => {
                   const lead = (document.getElementById('new-chapter-lead') as HTMLInputElement).value;
                   const members = Number((document.getElementById('new-chapter-members') as HTMLInputElement).value || 0);
                   const banner = (document.getElementById('new-chapter-banner') as HTMLInputElement).value;
+                  const description = (document.getElementById('new-chapter-desc') as HTMLTextAreaElement).value;
+                  const partner_link = (document.getElementById('new-chapter-partner') as HTMLInputElement).value;
                   const live = (document.getElementById('new-chapter-live') as HTMLInputElement).checked;
                   if (name) {
-                    addChapter({ name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, is_live: type === 'campus' ? live : true });
+                    addChapter({ name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, description, partner_link, is_live: type === 'campus' ? live : true });
                     setShowAddChapter(false);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
@@ -1714,6 +1718,8 @@ const AdminPanel = () => {
                 <input id="edit-chapter-lead" defaultValue={editingChapter.lead} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
                 <input id="edit-chapter-members" type="number" defaultValue={editingChapter.member_count ?? 0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
                 <input id="edit-chapter-banner" defaultValue={editingChapter.banner_url} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <textarea id="edit-chapter-desc" defaultValue={editingChapter.description} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-20" placeholder="Header tagline / description" />
+                <input id="edit-chapter-partner" defaultValue={editingChapter.partner_link} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Partner With Us link (optional)" />
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input id="edit-chapter-live" type="checkbox" defaultChecked={editingChapter.is_live !== false} className="w-4 h-4" />
                   Live (visible on public site) — uncheck for Private
@@ -1728,9 +1734,11 @@ const AdminPanel = () => {
                   const lead = (document.getElementById('edit-chapter-lead') as HTMLInputElement).value;
                   const members = Number((document.getElementById('edit-chapter-members') as HTMLInputElement).value || 0);
                   const banner = (document.getElementById('edit-chapter-banner') as HTMLInputElement).value;
+                  const description = (document.getElementById('edit-chapter-desc') as HTMLTextAreaElement).value;
+                  const partner_link = (document.getElementById('edit-chapter-partner') as HTMLInputElement).value;
                   const live = (document.getElementById('edit-chapter-live') as HTMLInputElement).checked;
                   if (name) {
-                    updateChapter(editingChapter.id, { name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, is_live: type === 'campus' ? live : true });
+                    updateChapter(editingChapter.id, { name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, description, partner_link, is_live: type === 'campus' ? live : true });
                     setEditingChapter(null);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE CHANGES</button>
