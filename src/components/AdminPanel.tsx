@@ -84,6 +84,7 @@ const AdminPanel = () => {
     addChapter,
     updateChapter,
     deleteChapter,
+    reorderChapter,
     communityLeads,
     addCommunityLead,
     updateCommunityLead,
@@ -790,6 +791,8 @@ const AdminPanel = () => {
                             </div>
                           </div>
                           <div className="flex gap-1">
+                            <button onClick={() => reorderChapter(chapter.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded" title="Move up">▲</button>
+                            <button onClick={() => reorderChapter(chapter.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded" title="Move down">▼</button>
                             <button onClick={() => setEditingChapterContent(chapter)} className="text-nerdBlue font-bold text-[10px] px-1.5 py-1 rounded hover:bg-nerdBlue/10" title="Edit page content">PAGE</button>
                             <button onClick={() => setEditingChapter(chapter)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
                             <button onClick={() => setDeleteConfirm({ id: String(chapter.id), type: 'chapter' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
@@ -1857,6 +1860,7 @@ const AdminPanel = () => {
                 <input id="sub-lead" defaultValue={editingSubchapter?.lead || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
                 <input id="sub-members" type="number" defaultValue={editingSubchapter?.member_count ?? 0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
                 <input id="sub-banner" defaultValue={editingSubchapter?.banner_url || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <input id="sub-join" defaultValue={editingSubchapter?.join_link || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Join link (optional, per-subchapter)" />
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button onClick={() => { setShowAddSubchapter(false); setEditingSubchapter(null); }} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
@@ -1867,12 +1871,13 @@ const AdminPanel = () => {
                   const lead = (document.getElementById('sub-lead') as HTMLInputElement).value;
                   const member_count = Number((document.getElementById('sub-members') as HTMLInputElement).value || 0);
                   const banner_url = (document.getElementById('sub-banner') as HTMLInputElement).value;
+                  const join_link = (document.getElementById('sub-join') as HTMLInputElement).value;
                   if (!name || !chapter_id) { showToast('Name and parent chapter are required', 'error'); return; }
                   if (editingSubchapter) {
-                    updateSubchapter(editingSubchapter.id, { chapter_id, name, location, lead, member_count, banner_url });
+                    updateSubchapter(editingSubchapter.id, { chapter_id, name, location, lead, member_count, banner_url, join_link });
                     setEditingSubchapter(null);
                   } else {
-                    addSubchapter({ chapter_id, name, location, lead, member_count, banner_url, display_order: subchapters.length });
+                    addSubchapter({ chapter_id, name, location, lead, member_count, banner_url, join_link, display_order: subchapters.length });
                     setShowAddSubchapter(false);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>

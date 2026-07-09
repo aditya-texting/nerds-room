@@ -48,7 +48,13 @@ CREATE TABLE IF NOT EXISTS chapter_content (
 -- 4. Extend `chapters` with header tagline + partner link
 -- ----------------------------------------------------------------------------
 ALTER TABLE chapters ADD COLUMN IF NOT EXISTS description text;
-ALTER TABLE chapters ADD COLUMN IF NOT EXISTS partner_link text;-----------
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS partner_link text;
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS display_order integer NOT NULL DEFAULT 0;
+
+-- ----------------------------------------------------------------------------
+-- 5. Extend `subchapters` with per-subchapter join link
+-- ----------------------------------------------------------------------------
+ALTER TABLE subchapters ADD COLUMN IF NOT EXISTS join_link text;-----------
 
 -- ============================================================================
 -- ROW LEVEL SECURITY

@@ -65,6 +65,7 @@ export interface Chapter {
     banner_url?: string;
     description?: string;
     partner_link?: string;
+    display_order?: number;
     is_live?: boolean; // campus chapters: Private(false)/Live(true); city chapters always live
 }
 
@@ -97,6 +98,7 @@ export interface Subchapter {
     lead?: string;
     member_count?: number;
     banner_url?: string;
+    join_link?: string;
     display_order?: number;
     created_at?: string;
 }

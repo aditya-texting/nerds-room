@@ -1,16 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
 import { motion } from 'framer-motion';
-import { MapPin, Users, ArrowUpRight } from 'lucide-react';
+import { MapPin, Users, ArrowUpRight, Search } from 'lucide-react';
 
 const ChaptersPage = () => {
   const {
     chapters,
-    joinCommunityLink,
     navigate,
   } = useAppData();
+
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -22,68 +23,54 @@ const ChaptersPage = () => {
     return true; // city chapters always live
   });
 
-  const cityChapters = publicChapters.filter(c => c.chapter_type !== 'campus');
+  const cityChapters = [...publicChapters]
+    .filter(c => c.chapter_type !== 'campus')
+    .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+    .filter(c => {
+      if (!query.trim()) return true;
+      const q = query.toLowerCase();
+      return (
+        c.name.toLowerCase().includes(q) ||
+        (c.location || '').toLowerCase().includes(q) ||
+        (c.lead || '').toLowerCase().includes(q)
+      );
+    });
 
   return (
     <div className="min-h-screen bg-white font-sans">
       <Navbar />
 
-      {/* ── HERO ── */}
-      <section className="relative pt-36 pb-24 md:pt-44 md:pb-32 overflow-hidden bg-black">
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <img src="/hackathon.png" alt="Background" className="w-full h-full object-cover opacity-60" />
-          <div className="absolute -top-24 -left-24 w-[60%] h-[70%] bg-[#00308F]/40 blur-[130px] rounded-full animate-pulse-slow"></div>
-          <div className="absolute -bottom-24 -right-24 w-[60%] h-[70%] bg-[#9BE600]/25 blur-[130px] rounded-full animate-pulse-slow" style={{ animationDelay: '4s' }}></div>
-          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-transparent to-[#00308F]/10"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-nerdLime/20 border border-nerdLime/30 text-nerdLime text-[11px] font-medium uppercase tracking-[0.2em] mb-6">
-              <span className="w-2 h-2 rounded-full bg-nerdLime/40 animate-pulse flex items-center justify-center">
-                <span className="w-1 h-1 rounded-full bg-nerdLime"></span>
-              </span>
-              Our Community
-            </span>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
-              Chapters <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-nerdBlue via-blue-400 to-nerdLime bg-300-pc animate-gradient">Near You.</span>
+      {/* ── SEARCH HEADER ── */}
+      <section className="pt-32 md:pt-40 pb-10 md:pb-14 px-4 md:px-8">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-6xl font-bold text-black tracking-tight">
+              City <span className="text-nerdBlue">Chapters</span>
             </h1>
-            <p className="max-w-2xl mx-auto text-gray-300 text-lg md:text-xl mb-10 font-medium">
-              A student-driven movement building the future of technology — one city and campus at a time.
+            <p className="text-base md:text-xl text-gray-600 mt-3">
+              Growing stronger in cities near you.
             </p>
-            <a
-              href={joinCommunityLink || 'https://discord.gg/nerdsroom'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-nerdLime text-nerdBlue font-black px-8 py-4 rounded-xl shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all text-sm tracking-wide uppercase"
-            >
-              Join the Community
-              <ArrowUpRight size={18} />
-            </a>
-          </motion.div>
+          </div>
+          <div className="relative max-w-xl mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search chapters by name, city or lead..."
+              className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-nerdBlue/40 focus:border-nerdBlue"
+            />
+          </div>
         </div>
       </section>
 
       {/* ── CITY CHAPTERS ── */}
-      <section className="py-16 md:py-24 px-4 md:px-8">
+      <section className="pb-16 md:pb-24 px-4 md:px-8">
         <div className="max-w-[1400px] mx-auto">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
-              City <span className="font-bold text-nerdBlue">Chapters</span>
-            </h2>
-            <p className="text-base md:text-2xl text-gray-600 mt-3">
-              Growing stronger in cities near you.
-            </p>
-          </div>
-
           {cityChapters.length === 0 ? (
-            <div className="text-center text-gray-400 py-16">No city chapters yet.</div>
+            <div className="text-center text-gray-400 py-16">
+              {query ? 'No chapters match your search.' : 'No city chapters yet.'}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {cityChapters.map((chapter, i) => (

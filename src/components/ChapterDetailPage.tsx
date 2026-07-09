@@ -255,6 +255,15 @@ const ChapterDetailPage = () => {
                     <p className="inline-flex items-center gap-1.5 text-gray-500 text-sm mt-1">
                       <Users className="w-4 h-4" />{sub.member_count ?? 0} members
                     </p>
+                    <a
+                      href={sub.join_link || joinCommunityLink || 'https://discord.gg/nerdsroom'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center justify-center gap-2 bg-nerdLime text-nerdBlue font-black px-5 py-2.5 rounded-xl hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-sm w-fit"
+                    >
+                      Join Our Chapter
+                      <ArrowUpRight size={16} />
+                    </a>
                   </div>
                 </motion.div>
               ))}

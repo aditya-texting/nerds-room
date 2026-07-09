@@ -77,6 +77,7 @@ interface AppDataContextType {
   addChapter: (chapter: Omit<Chapter, 'id'>) => Promise<void>;
   updateChapter: (id: number, updates: Partial<Chapter>) => Promise<void>;
   deleteChapter: (id: number) => Promise<void>;
+  reorderChapter: (id: number, direction: 'up' | 'down') => Promise<void>;
 
   // Community Leads
   communityLeads: CommunityLead[];
@@ -844,6 +845,21 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     if (!error) fetchChapters();
   };
 
+  const reorderChapter = async (id: number, direction: 'up' | 'down') => {
+    const sorted = [...chapters].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    const idx = sorted.findIndex(c => c.id === id);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const current = sorted[idx];
+    const target = sorted[swapIdx];
+    const curOrder = current.display_order ?? idx;
+    const tgtOrder = target.display_order ?? swapIdx;
+    await supabase.from('chapters').update({ display_order: tgtOrder }).eq('id', current.id);
+    await supabase.from('chapters').update({ display_order: curOrder }).eq('id', target.id);
+    fetchChapters();
+  };
+
   // Subchapters
   const addSubchapter = async (sub: Omit<Subchapter, 'id'>) => {
     const { error } = await supabase.from('subchapters').insert([sub]);
@@ -1291,6 +1307,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     addChapter,
     updateChapter,
     deleteChapter,
+    reorderChapter,
     communityLeads,
     addCommunityLead,
     updateCommunityLead,
