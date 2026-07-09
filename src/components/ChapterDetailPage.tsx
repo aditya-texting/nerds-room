@@ -28,6 +28,12 @@ const ChapterDetailPage = () => {
       .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
   }, [chapterEvents, chapter]);
 
+  const subEvents = (subId: number) => {
+    return (chapterEvents || [])
+      .filter(e => e.subchapter_id === subId)
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  };
+
   const content = useMemo(() => {
     if (!chapter) return null;
     return (chapterContents || []).find(c => c.chapter_id === chapter.id) || null;
@@ -264,6 +270,24 @@ const ChapterDetailPage = () => {
                       Join Our Chapter
                       <ArrowUpRight size={16} />
                     </a>
+                    {subEvents(sub.id).length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Upcoming Events</p>
+                        <div className="space-y-2">
+                          {subEvents(sub.id).map((ev: any) => (
+                            <div key={ev.id} className="flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-black truncate">{ev.title}</p>
+                                {ev.date && <p className="text-xs text-gray-500 inline-flex items-center gap-1"><Calendar className="w-3 h-3" />{ev.date}</p>}
+                              </div>
+                              {ev.rsvp_link && (
+                                <a href={ev.rsvp_link} target="_blank" rel="noopener noreferrer" className="shrink-0 text-nerdBlue text-xs font-bold hover:underline">RSVP</a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}

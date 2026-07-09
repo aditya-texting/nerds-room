@@ -87,6 +87,7 @@ export interface ChapterEvent {
     rsvp_link?: string;
     is_featured?: boolean;
     chapter_id?: number | null;
+    subchapter_id?: number | null;
     created_at?: string;
 }
 

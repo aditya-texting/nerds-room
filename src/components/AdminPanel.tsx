@@ -104,6 +104,8 @@ const AdminPanel = () => {
     adminChapterId,
     joinCommunityLink,
     setJoinCommunityLink,
+    chaptersHeaderBanner,
+    setChaptersHeaderBanner,
 
     pastEvents,
     addPastEvent,
@@ -770,6 +772,23 @@ const AdminPanel = () => {
                     </div>
                     <input id="join-link" defaultValue={joinCommunityLink} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="https://..." />
                     <p className="text-xs text-gray-400 mt-2">This link powers the "Join the Community" button on the Chapters page. No redeploy needed.</p>
+                  </div>
+
+                  {/* All Chapters Header Banner */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-bold text-gray-800 text-lg">All Chapters Header Banner</h3>
+                      <button
+                        onClick={() => handleAction(() => setChaptersHeaderBanner((document.getElementById('chapters-banner') as HTMLInputElement).value), 'Header banner updated')}
+                        className="bg-[#9BE600] text-[#00308F] px-6 py-2 rounded-lg text-xs font-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+                      >SAVE</button>
+                    </div>
+                    <input id="chapters-banner" defaultValue={chaptersHeaderBanner} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="Image URL (background of All Chapters list header)" />
+                    <label className={`flex items-center justify-center gap-2 mt-3 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'chapters', 'chapters-banner')} />
+                      {isUploading ? 'UPLOADING...' : 'UPLOAD FROM DEVICE'}
+                    </label>
+                    <p className="text-xs text-gray-400 mt-2">Shows as a faded background behind the search header on the /chapters page.</p>
                   </div>
 
                   {/* Chapters CRUD */}
@@ -1675,6 +1694,10 @@ const AdminPanel = () => {
                 <input id="new-chapter-lead" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
                 <input id="new-chapter-members" type="number" defaultValue={0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
                 <input id="new-chapter-banner" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <label className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'chapters', 'new-chapter-banner')} />
+                  {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
+                </label>
                 <textarea id="new-chapter-desc" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-20" placeholder="Header tagline / description" />
                 <input id="new-chapter-partner" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Partner With Us link (optional)" />
                 <label className="flex items-center gap-2 text-sm text-gray-600">
@@ -1721,6 +1744,10 @@ const AdminPanel = () => {
                 <input id="edit-chapter-lead" defaultValue={editingChapter.lead} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
                 <input id="edit-chapter-members" type="number" defaultValue={editingChapter.member_count ?? 0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
                 <input id="edit-chapter-banner" defaultValue={editingChapter.banner_url} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <label className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'chapters', 'edit-chapter-banner')} />
+                  {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
+                </label>
                 <textarea id="edit-chapter-desc" defaultValue={editingChapter.description} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-20" placeholder="Header tagline / description" />
                 <input id="edit-chapter-partner" defaultValue={editingChapter.partner_link} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Partner With Us link (optional)" />
                 <label className="flex items-center gap-2 text-sm text-gray-600">
@@ -1811,6 +1838,15 @@ const AdminPanel = () => {
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
+                <select id="ce-subchapter" defaultValue={editingChapterEvent?.subchapter_id ?? ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
+                  <option value="">— No subchapter —</option>
+                  {subchapters.map((s: any) => {
+                    const parent = chapters.find((c: any) => c.id === s.chapter_id);
+                    return (
+                      <option key={s.id} value={s.id}>{parent ? parent.name + ' › ' : ''}{s.name}</option>
+                    );
+                  })}
+                </select>
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input id="ce-featured" type="checkbox" defaultChecked={editingChapterEvent?.is_featured} className="w-4 h-4" />
                   Featured (shows on Chapters page Featured Events section)
@@ -1825,9 +1861,10 @@ const AdminPanel = () => {
                   const banner = (document.getElementById('ce-banner') as HTMLInputElement).value;
                   const rsvp = (document.getElementById('ce-rsvp') as HTMLInputElement).value;
                   const chapterId = (document.getElementById('ce-chapter') as HTMLSelectElement).value;
+                  const subchapterId = (document.getElementById('ce-subchapter') as HTMLSelectElement).value;
                   const featured = (document.getElementById('ce-featured') as HTMLInputElement).checked;
                   if (!title) { showToast('Title is required', 'error'); return; }
-                  const payload: any = { title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured, chapter_id: chapterId ? Number(chapterId) : null };
+                  const payload: any = { title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured, chapter_id: chapterId ? Number(chapterId) : null, subchapter_id: subchapterId ? Number(subchapterId) : null };
                   if (editingChapterEvent) {
                     updateChapterEvent(editingChapterEvent.id, payload);
                     setEditingChapterEvent(null);

@@ -54,7 +54,19 @@ ALTER TABLE chapters ADD COLUMN IF NOT EXISTS display_order integer NOT NULL DEF
 -- ----------------------------------------------------------------------------
 -- 5. Extend `subchapters` with per-subchapter join link
 -- ----------------------------------------------------------------------------
-ALTER TABLE subchapters ADD COLUMN IF NOT EXISTS join_link text;-----------
+ALTER TABLE subchapters ADD COLUMN IF NOT EXISTS join_link text;
+
+-- ----------------------------------------------------------------------------
+-- 6. Extend `chapter_events` so events can belong to a subchapter
+-- ----------------------------------------------------------------------------
+ALTER TABLE chapter_events ADD COLUMN IF NOT EXISTS subchapter_id integer REFERENCES subchapters(id) ON DELETE CASCADE;
+
+-- ----------------------------------------------------------------------------
+-- 7. All-Chapters list header background banner (site setting)
+-- ----------------------------------------------------------------------------
+INSERT INTO site_settings (key, value)
+SELECT 'chapters_header_banner', ''
+WHERE NOT EXISTS (SELECT 1 FROM site_settings WHERE key = 'chapters_header_banner');-----------
 
 -- ============================================================================
 -- ROW LEVEL SECURITY

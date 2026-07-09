@@ -172,6 +172,8 @@ interface AppDataContextType {
   // Settings
   joinCommunityLink: string;
   setJoinCommunityLink: (link: string) => Promise<void>;
+  chaptersHeaderBanner: string;
+  setChaptersHeaderBanner: (url: string) => Promise<void>;
   registrationsOpen: boolean;
   setRegistrationsOpen: (open: boolean) => Promise<void>;
   emailNotifications: boolean;
@@ -273,6 +275,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [autoApprove, setAutoApproveState] = useState(false);
   const [maintenanceMode, setMaintenanceModeState] = useState(false);
   const [joinCommunityLink, setJoinCommunityLinkState] = useState('https://discord.gg/nerdsroom');
+  const [chaptersHeaderBanner, setChaptersHeaderBannerState] = useState('');
 
   // Cache timestamps to prevent excessive fetching
   const lastFetchTime = useRef<{ [key: string]: number }>({});
@@ -602,6 +605,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
           case 'auto_approve': setAutoApproveState(val); break;
           case 'maintenance_mode': setMaintenanceModeState(val); break;
           case 'join_community_link': if (val) setJoinCommunityLinkState(val); break;
+          case 'chapters_header_banner': if (val) setChaptersHeaderBannerState(val); break;
           case 'who_we_are_content': if (val) setWhoWeAreContentState(val); break;
         }
       });
@@ -1125,6 +1129,10 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setJoinCommunityLinkState(link);
     updateSetting('join_community_link', link);
   };
+  const setChaptersHeaderBanner = async (url: string) => {
+    setChaptersHeaderBannerState(url);
+    updateSetting('chapters_header_banner', url);
+  };
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -1379,6 +1387,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setMaintenanceMode,
     joinCommunityLink,
     setJoinCommunityLink,
+    chaptersHeaderBanner,
+    setChaptersHeaderBanner,
     showToast,
     uploadFile,
     convertGoogleDriveUrl,

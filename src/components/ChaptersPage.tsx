@@ -9,6 +9,7 @@ const ChaptersPage = () => {
   const {
     chapters,
     navigate,
+    chaptersHeaderBanner,
   } = useAppData();
 
   const [query, setQuery] = useState('');
@@ -41,8 +42,14 @@ const ChaptersPage = () => {
       <Navbar />
 
       {/* ── SEARCH HEADER ── */}
-      <section className="pt-32 md:pt-40 pb-10 md:pb-14 px-4 md:px-8">
-        <div className="max-w-[1400px] mx-auto">
+      <section className="relative pt-32 md:pt-40 pb-10 md:pb-14 px-4 md:px-8 overflow-hidden">
+        {chaptersHeaderBanner ? (
+          <div className="absolute inset-0 z-0">
+            <img src={chaptersHeaderBanner} alt="" className="w-full h-full object-cover opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/70 to-white" />
+          </div>
+        ) : null}
+        <div className="relative z-10 max-w-[1400px] mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-6xl font-bold text-black tracking-tight">
               City <span className="text-nerdBlue">Chapters</span>
@@ -58,7 +65,7 @@ const ChaptersPage = () => {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search chapters by name, city or lead..."
-              className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-nerdBlue/40 focus:border-nerdBlue"
+              className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-white/90 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-nerdBlue/40 focus:border-nerdBlue"
             />
           </div>
         </div>
