@@ -91,6 +91,13 @@ const AdminPanel = () => {
     addChapterEvent,
     updateChapterEvent,
     deleteChapterEvent,
+    chapterEvents,
+    subchapters,
+    addSubchapter,
+    updateSubchapter,
+    deleteSubchapter,
+    chapterContents,
+    upsertChapterContent,
     userRoles,
     isSuperAdmin,
     adminChapterId,
@@ -206,6 +213,9 @@ const AdminPanel = () => {
   const [showAddChapterEvent, setShowAddChapterEvent] = useState(false);
   const [editingLead, setEditingLead] = useState<any | null>(null);
   const [editingChapterEvent, setEditingChapterEvent] = useState<any | null>(null);
+  const [showAddSubchapter, setShowAddSubchapter] = useState(false);
+  const [editingSubchapter, setEditingSubchapter] = useState<any | null>(null);
+  const [editingChapterContent, setEditingChapterContent] = useState<any | null>(null);
 
 
 
@@ -780,11 +790,72 @@ const AdminPanel = () => {
                             </div>
                           </div>
                           <div className="flex gap-1">
+                            <button onClick={() => setEditingChapterContent(chapter)} className="text-nerdBlue font-bold text-[10px] px-1.5 py-1 rounded hover:bg-nerdBlue/10" title="Edit page content">PAGE</button>
                             <button onClick={() => setEditingChapter(chapter)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
                             <button onClick={() => setDeleteConfirm({ id: String(chapter.id), type: 'chapter' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Subchapters CRUD */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Subchapters</h3>
+                      <button onClick={() => setShowAddSubchapter(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {subchapters.length === 0 && <div className="text-gray-400 text-sm col-span-full">No subchapters yet.</div>}
+                      {subchapters.map((sub: any) => {
+                        const parent = chapters.find((c: any) => c.id === sub.chapter_id);
+                        return (
+                          <div key={sub.id} className="p-4 border border-gray-100 rounded-xl flex items-center justify-between bg-gray-50/50">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center overflow-hidden shrink-0">
+                                {sub.banner_url ? <img src={sub.banner_url} alt={sub.name} className="w-full h-full object-cover" /> : <Icons.MapPin />}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-bold text-gray-800 truncate">{sub.name}</div>
+                                <div className="text-xs text-gray-500 truncate">{parent ? parent.name : '—'}</div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <button onClick={() => setEditingSubchapter(sub)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
+                              <button onClick={() => setDeleteConfirm({ id: String(sub.id), type: 'subchapter' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Upcoming Events (chapter-scoped) */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Upcoming Events</h3>
+                      <button onClick={() => setShowAddChapterEvent(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD EVENT</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {chapterEvents.length === 0 && <div className="text-gray-400 text-sm col-span-full">No events yet.</div>}
+                      {chapterEvents.map((ev: any) => {
+                        const parent = chapters.find((c: any) => c.id === ev.chapter_id);
+                        return (
+                          <div key={ev.id} className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 bg-gray-50/50">
+                            <div className="w-14 h-10 rounded-lg bg-nerdGray overflow-hidden shrink-0 flex items-center justify-center">
+                              {ev.banner_url ? <img src={ev.banner_url} alt={ev.title} className="w-full h-full object-cover" /> : <Icons.Image />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-gray-800 truncate">{ev.title}</div>
+                              <div className="text-xs text-gray-500 truncate">{ev.date}{ev.location ? ` · ${ev.location}` : ''}{parent ? ` · ${parent.name}` : ''}</div>
+                            </div>
+                            <div className="flex gap-1">
+                              <button onClick={() => setEditingChapterEvent(ev)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
+                              <button onClick={() => setDeleteConfirm({ id: String(ev.id), type: 'chapterEvent' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1723,6 +1794,12 @@ const AdminPanel = () => {
                   {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
                 </label>
                 <input id="ce-rsvp" defaultValue={editingChapterEvent?.rsvp_link || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="RSVP link" />
+                <select id="ce-chapter" defaultValue={editingChapterEvent?.chapter_id ?? ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
+                  <option value="">— No chapter (global) —</option>
+                  {chapters.map((c: any) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input id="ce-featured" type="checkbox" defaultChecked={editingChapterEvent?.is_featured} className="w-4 h-4" />
                   Featured (shows on Chapters page Featured Events section)
@@ -1736,15 +1813,129 @@ const AdminPanel = () => {
                   const location = (document.getElementById('ce-location') as HTMLInputElement).value;
                   const banner = (document.getElementById('ce-banner') as HTMLInputElement).value;
                   const rsvp = (document.getElementById('ce-rsvp') as HTMLInputElement).value;
+                  const chapterId = (document.getElementById('ce-chapter') as HTMLSelectElement).value;
                   const featured = (document.getElementById('ce-featured') as HTMLInputElement).checked;
                   if (!title) { showToast('Title is required', 'error'); return; }
+                  const payload: any = { title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured, chapter_id: chapterId ? Number(chapterId) : null };
                   if (editingChapterEvent) {
-                    updateChapterEvent(editingChapterEvent.id, { title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured });
+                    updateChapterEvent(editingChapterEvent.id, payload);
                     setEditingChapterEvent(null);
                   } else {
-                    addChapterEvent({ title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured });
+                    addChapterEvent(payload);
                     setShowAddChapterEvent(false);
                   }
+                }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* ADD/EDIT SUBCHAPTER MODAL */}
+      {
+        (showAddSubchapter || editingSubchapter) && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+              <h3 className="text-xl font-bold mb-6">{editingSubchapter ? 'Edit Subchapter' : 'Add Subchapter'}</h3>
+              <div className="space-y-4">
+                <select id="sub-chapter" defaultValue={editingSubchapter?.chapter_id ?? ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
+                  <option value="">— Parent Chapter —</option>
+                  {chapters.map((c: any) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <input id="sub-name" defaultValue={editingSubchapter?.name || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Subchapter name" />
+                <input id="sub-loc" defaultValue={editingSubchapter?.location || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Location" />
+                <input id="sub-lead" defaultValue={editingSubchapter?.lead || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
+                <input id="sub-members" type="number" defaultValue={editingSubchapter?.member_count ?? 0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
+                <input id="sub-banner" defaultValue={editingSubchapter?.banner_url || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+              </div>
+              <div className="flex justify-end gap-3 mt-8">
+                <button onClick={() => { setShowAddSubchapter(false); setEditingSubchapter(null); }} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
+                <button onClick={() => {
+                  const chapter_id = Number((document.getElementById('sub-chapter') as HTMLSelectElement).value);
+                  const name = (document.getElementById('sub-name') as HTMLInputElement).value;
+                  const location = (document.getElementById('sub-loc') as HTMLInputElement).value;
+                  const lead = (document.getElementById('sub-lead') as HTMLInputElement).value;
+                  const member_count = Number((document.getElementById('sub-members') as HTMLInputElement).value || 0);
+                  const banner_url = (document.getElementById('sub-banner') as HTMLInputElement).value;
+                  if (!name || !chapter_id) { showToast('Name and parent chapter are required', 'error'); return; }
+                  if (editingSubchapter) {
+                    updateSubchapter(editingSubchapter.id, { chapter_id, name, location, lead, member_count, banner_url });
+                    setEditingSubchapter(null);
+                  } else {
+                    addSubchapter({ chapter_id, name, location, lead, member_count, banner_url, display_order: subchapters.length });
+                    setShowAddSubchapter(false);
+                  }
+                }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* EDIT CHAPTER CONTENT MODAL */}
+      {
+        editingChapterContent && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+              <h3 className="text-xl font-bold mb-2">Edit Page Content</h3>
+              <p className="text-sm text-gray-400 mb-6">{editingChapterContent.name}</p>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">About Us — Title</label>
+                  <input id="cc-about-title" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.about_title || 'About Us'} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">About Us — Text</label>
+                  <textarea id="cc-about-text" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.about_text || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-24" placeholder="About text..." />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">About Us — Image URL</label>
+                  <input id="cc-about-image" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.about_image || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Image URL" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">How We Gather — Title</label>
+                  <input id="cc-gather-title" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.gather_title || 'How We Gather'} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">How We Gather — Text</label>
+                  <textarea id="cc-gather-text" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.gather_text || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-24" placeholder="Gather text..." />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">How We Gather — Image URL</label>
+                  <input id="cc-gather-image" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.gather_image || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Image URL" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Our Values — Title</label>
+                  <input id="cc-values-title" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.values_title || 'Our Values'} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Our Values — Text</label>
+                  <textarea id="cc-values-text" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.values_text || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-24" placeholder="Values text..." />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Our Values — Image URL</label>
+                  <input id="cc-values-image" defaultValue={chapterContents.find((c: any) => c.chapter_id === editingChapterContent.id)?.values_image || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Image URL" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-8">
+                <button onClick={() => setEditingChapterContent(null)} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
+                <button onClick={() => {
+                  const payload = {
+                    chapter_id: editingChapterContent.id,
+                    about_title: (document.getElementById('cc-about-title') as HTMLInputElement).value,
+                    about_text: (document.getElementById('cc-about-text') as HTMLTextAreaElement).value,
+                    about_image: (document.getElementById('cc-about-image') as HTMLInputElement).value,
+                    gather_title: (document.getElementById('cc-gather-title') as HTMLInputElement).value,
+                    gather_text: (document.getElementById('cc-gather-text') as HTMLTextAreaElement).value,
+                    gather_image: (document.getElementById('cc-gather-image') as HTMLInputElement).value,
+                    values_title: (document.getElementById('cc-values-title') as HTMLInputElement).value,
+                    values_text: (document.getElementById('cc-values-text') as HTMLTextAreaElement).value,
+                    values_image: (document.getElementById('cc-values-image') as HTMLInputElement).value,
+                  };
+                  upsertChapterContent(payload);
+                  setEditingChapterContent(null);
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
               </div>
             </div>
@@ -1775,6 +1966,7 @@ const AdminPanel = () => {
                   else if (type === 'chapter') await handleAction(() => deleteChapter(numId), 'Chapter deleted');
                   else if (type === 'lead') await handleAction(() => deleteCommunityLead(numId), 'Lead deleted');
                   else if (type === 'chapterEvent') await handleAction(() => deleteChapterEvent(numId), 'Event deleted');
+                  else if (type === 'subchapter') await handleAction(() => deleteSubchapter(numId), 'Subchapter deleted');
                   else if (type === 'past_event') await handleAction(() => deletePastEvent(numId), 'Past event deleted');
 
                 }} className="flex-1 bg-red-500 text-white py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-red-600 shadow-lg shadow-red-200">Delete</button>

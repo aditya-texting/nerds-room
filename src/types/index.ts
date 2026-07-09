@@ -87,6 +87,33 @@ export interface ChapterEvent {
     created_at?: string;
 }
 
+export interface Subchapter {
+    id: number;
+    chapter_id: number;
+    name: string;
+    location?: string;
+    lead?: string;
+    member_count?: number;
+    banner_url?: string;
+    display_order?: number;
+    created_at?: string;
+}
+
+export interface ChapterContent {
+    id: number;
+    chapter_id: number;
+    about_title?: string;
+    about_text?: string;
+    about_image?: string;
+    gather_title?: string;
+    gather_text?: string;
+    gather_image?: string;
+    values_title?: string;
+    values_text?: string;
+    values_image?: string;
+    created_at?: string;
+}
+
 export interface UserRole {
     id: number;
     user_id: string;

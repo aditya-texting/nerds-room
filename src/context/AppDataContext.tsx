@@ -14,6 +14,8 @@ import type {
   Chapter,
   CommunityLead,
   ChapterEvent,
+  Subchapter,
+  ChapterContent,
   UserRole,
   Hackathon,
   Workshop,
@@ -88,6 +90,16 @@ interface AppDataContextType {
   addChapterEvent: (event: Omit<ChapterEvent, 'id'>) => Promise<void>;
   updateChapterEvent: (id: number, updates: Partial<ChapterEvent>) => Promise<void>;
   deleteChapterEvent: (id: number) => Promise<void>;
+
+  // Subchapters
+  subchapters: Subchapter[];
+  addSubchapter: (sub: Omit<Subchapter, 'id'>) => Promise<void>;
+  updateSubchapter: (id: number, updates: Partial<Subchapter>) => Promise<void>;
+  deleteSubchapter: (id: number) => Promise<void>;
+
+  // Chapter Content
+  chapterContents: ChapterContent[];
+  upsertChapterContent: (content: Omit<ChapterContent, 'id'>) => Promise<void>;
 
   // Roles
   userRoles: UserRole[];
@@ -210,6 +222,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [communityLeads, setCommunityLeads] = useState<CommunityLead[]>([]);
   const [chapterEvents, setChapterEvents] = useState<ChapterEvent[]>([]);
+  const [subchapters, setSubchapters] = useState<Subchapter[]>([]);
+  const [chapterContents, setChapterContents] = useState<ChapterContent[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [adminChapterId, setAdminChapterId] = useState<number | null>(null);
@@ -287,6 +301,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       { key: 'chapters', fn: fetchChapters },
       { key: 'communityLeads', fn: fetchCommunityLeads },
       { key: 'chapterEvents', fn: fetchChapterEvents },
+      { key: 'subchapters', fn: fetchSubchapters },
+      { key: 'chapterContents', fn: fetchChapterContents },
       { key: 'userRoles', fn: fetchUserRoles },
       { key: 'hackathons', fn: fetchHackathons },
       { key: 'pastEvents', fn: fetchPastEvents },
@@ -481,6 +497,16 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const fetchCommunityLeads = async () => {
     const { data } = await supabase.from('community_leads').select('*').order('display_order', { ascending: true });
     if (data) setCommunityLeads(data);
+  };
+
+  const fetchSubchapters = async () => {
+    const { data } = await supabase.from('subchapters').select('*').order('display_order', { ascending: true });
+    if (data) setSubchapters(data);
+  };
+
+  const fetchChapterContents = async () => {
+    const { data } = await supabase.from('chapter_content').select('*');
+    if (data) setChapterContents(data);
   };
 
   const fetchChapterEvents = async () => {
@@ -816,6 +842,30 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const deleteChapter = async (id: number) => {
     const { error } = await supabase.from('chapters').delete().eq('id', id);
     if (!error) fetchChapters();
+  };
+
+  // Subchapters
+  const addSubchapter = async (sub: Omit<Subchapter, 'id'>) => {
+    const { error } = await supabase.from('subchapters').insert([sub]);
+    if (!error) fetchSubchapters();
+  };
+
+  const updateSubchapter = async (id: number, updates: Partial<Subchapter>) => {
+    const { error } = await supabase.from('subchapters').update(updates).eq('id', id);
+    if (!error) fetchSubchapters();
+  };
+
+  const deleteSubchapter = async (id: number) => {
+    const { error } = await supabase.from('subchapters').delete().eq('id', id);
+    if (!error) fetchSubchapters();
+  };
+
+  // Chapter Content (upsert one row per chapter)
+  const upsertChapterContent = async (content: Omit<ChapterContent, 'id'>) => {
+    const { error } = await supabase
+      .from('chapter_content')
+      .upsert([content], { onConflict: 'chapter_id' });
+    if (!error) fetchChapterContents();
   };
 
   // Community Leads
@@ -1250,6 +1300,12 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     addChapterEvent,
     updateChapterEvent,
     deleteChapterEvent,
+    subchapters,
+    addSubchapter,
+    updateSubchapter,
+    deleteSubchapter,
+    chapterContents,
+    upsertChapterContent,
     userRoles,
     isSuperAdmin,
     adminChapterId,

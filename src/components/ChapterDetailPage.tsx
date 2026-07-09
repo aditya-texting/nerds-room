@@ -3,16 +3,35 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAppData } from '../context/AppDataContext';
 import { motion } from 'framer-motion';
-import { MapPin, Users, ArrowLeft } from 'lucide-react';
+import { MapPin, Users, ArrowLeft, Calendar, ArrowUpRight } from 'lucide-react';
 
 const ChapterDetailPage = () => {
-  const { chapters, loading, navigate } = useAppData();
+  const { chapters, subchapters, chapterEvents, chapterContents, loading, navigate, joinCommunityLink } = useAppData();
 
   const name = useMemo(() => decodeURIComponent(window.location.pathname.split('/').pop() || ''), []);
 
   const chapter = useMemo(() => {
     return (chapters || []).find(c => c.name === name) || null;
   }, [chapters, name]);
+
+  const subs = useMemo(() => {
+    if (!chapter) return [];
+    return (subchapters || [])
+      .filter(s => s.chapter_id === chapter.id)
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+  }, [subchapters, chapter]);
+
+  const events = useMemo(() => {
+    if (!chapter) return [];
+    return (chapterEvents || [])
+      .filter(e => e.chapter_id === chapter.id)
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  }, [chapterEvents, chapter]);
+
+  const content = useMemo(() => {
+    if (!chapter) return null;
+    return (chapterContents || []).find(c => c.chapter_id === chapter.id) || null;
+  }, [chapterContents, chapter]);
 
   if (loading) {
     return (
@@ -45,7 +64,7 @@ const ChapterDetailPage = () => {
     <div className="min-h-screen bg-white font-sans">
       <Navbar />
 
-      {/* ── BANNER ── */}
+      {/* ── 1. HERO ── */}
       <section className="relative pt-28 md:pt-32 pb-10 md:pb-16 overflow-hidden bg-black">
         <div className="absolute inset-0 z-0 overflow-hidden">
           {chapter.banner_url ? (
@@ -80,56 +99,187 @@ const ChapterDetailPage = () => {
                 <MapPin className="w-5 h-5" />{chapter.location}
               </p>
             )}
+            <div className="flex flex-wrap items-center gap-4 mt-5">
+              {chapter.lead && (
+                <p className="text-nerdLime font-semibold">Lead: {chapter.lead}</p>
+              )}
+              <p className="inline-flex items-center gap-1.5 text-gray-200 text-sm">
+                <Users className="w-4 h-4" />{chapter.member_count ?? 0} members
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-6">
+              <a
+                href={joinCommunityLink || 'https://discord.gg/nerdsroom'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-nerdLime text-nerdBlue font-black px-6 py-3 rounded-xl shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all text-sm tracking-wide uppercase"
+              >
+                Join Our Chapter
+                <ArrowUpRight size={16} />
+              </a>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ── INFO CARD ── */}
-      <section className="py-12 md:py-16 px-4 md:px-8">
+      {/* ── 2. UPCOMING EVENTS ── */}
+      <section className="py-12 md:py-16 px-4 md:px-8 bg-nerdGray/40">
         <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 26 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
-            viewport={{ once: true, margin: '-80px' }}
-            className="rounded-[24px] shadow-xl border border-black/5 bg-white p-8 md:p-10 flex flex-col gap-6"
-          >
-            {chapter.lead && (
-              <div>
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Chapter Lead</h2>
-                <p className="text-xl md:text-2xl font-bold text-nerdBlue">{chapter.lead}</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-black mb-8">Upcoming Events</h2>
+          {events.length === 0 ? (
+            <div className="rounded-[24px] border-2 border-dashed border-gray-200 bg-white py-16 px-6 text-center">
+              <div className="mx-auto w-14 h-14 rounded-2xl bg-nerdGray flex items-center justify-center mb-4">
+                <Calendar className="w-7 h-7 text-gray-400" />
               </div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-              {chapter.location && (
-                <div className="inline-flex items-center gap-2 text-gray-700">
-                  <MapPin className="w-5 h-5 text-nerdBlue" />
-                  <span className="font-semibold">{chapter.location}</span>
-                </div>
-              )}
-              <div className="inline-flex items-center gap-2 text-gray-700">
-                <Users className="w-5 h-5 text-nerdBlue" />
-                <span className="font-semibold">{chapter.member_count ?? 0} members</span>
-              </div>
+              <h3 className="text-xl font-bold text-gray-700">No upcoming events at this time.</h3>
+              <p className="text-gray-500 mt-2">Check back soon — we're cooking up something epic.</p>
             </div>
-
-            <div className="pt-2">
-              <button
-                onClick={() => navigate('/chapters')}
-                className="inline-flex items-center gap-2 bg-nerdBlue text-white font-bold px-6 py-3 rounded-xl hover:bg-nerdDark transition-all text-sm uppercase tracking-wide"
-              >
-                <ArrowLeft size={16} />
-                Back to Chapters
-              </button>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {events.map((ev, i) => (
+                <motion.div
+                  key={ev.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: (i % 2) * 0.1 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  className="rounded-[20px] shadow-xl border border-black/5 bg-white overflow-hidden flex flex-col"
+                >
+                  <div className="relative w-full aspect-[16/9] bg-nerdGray">
+                    {ev.banner_url ? (
+                      <img src={ev.banner_url} alt={ev.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-nerdBlue/10 to-nerdLime/10">
+                        <Calendar className="w-10 h-10 text-nerdBlue/40" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3 className="text-lg md:text-xl font-bold text-black leading-tight">{ev.title}</h3>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500 text-sm mt-2">
+                      {ev.date && (
+                        <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4" />{ev.date}</span>
+                      )}
+                      {ev.location && (
+                        <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" />{ev.location}</span>
+                      )}
+                    </div>
+                    {ev.rsvp_link && (
+                      <a
+                        href={ev.rsvp_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex items-center justify-center gap-2 bg-nerdBlue text-white font-bold px-5 py-2.5 rounded-xl hover:bg-nerdDark transition-all text-sm w-fit"
+                      >
+                        RSVP
+                        <ArrowUpRight size={16} />
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
+          )}
         </div>
+      </section>
+
+      {/* ── 3. ABOUT US ── */}
+      <Section
+        title={content?.about_title || 'About Us'}
+        text={content?.about_text}
+        image={content?.about_image}
+      />
+
+      {/* ── 4. HOW WE GATHER ── */}
+      <Section
+        title={content?.gather_title || 'How We Gather'}
+        text={content?.gather_text}
+        image={content?.gather_image}
+      />
+
+      {/* ── 5. OUR VALUES ── */}
+      <Section
+        title={content?.values_title || 'Our Values'}
+        text={content?.values_text}
+        image={content?.values_image}
+      />
+
+      {/* ── SUBCHAPTERS ── */}
+      {subs.length > 0 && (
+        <section className="py-12 md:py-16 px-4 md:px-8 bg-nerdGray/40">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-black mb-8">Subchapters</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {subs.map((sub, i) => (
+                <motion.div
+                  key={sub.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: (i % 3) * 0.1 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  className="rounded-[20px] shadow-xl border border-black/5 bg-white overflow-hidden flex flex-col"
+                >
+                  <div className="relative w-full aspect-[16/9] bg-nerdGray">
+                    {sub.banner_url ? (
+                      <img src={sub.banner_url} alt={sub.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-nerdBlue/10 to-nerdLime/10">
+                        <MapPin className="w-10 h-10 text-nerdBlue/40" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <h3 className="text-lg md:text-xl font-bold text-black leading-tight">{sub.name}</h3>
+                    {sub.lead && <p className="text-sm text-nerdBlue font-medium mt-0.5">Lead: {sub.lead}</p>}
+                    {sub.location && (
+                      <p className="inline-flex items-center gap-1.5 text-gray-500 text-sm mt-2">
+                        <MapPin className="w-4 h-4" />{sub.location}
+                      </p>
+                    )}
+                    <p className="inline-flex items-center gap-1.5 text-gray-500 text-sm mt-1">
+                      <Users className="w-4 h-4" />{sub.member_count ?? 0} members
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="py-10 px-4 text-center">
+        <button
+          onClick={() => navigate('/chapters')}
+          className="inline-flex items-center gap-2 bg-nerdBlue text-white font-bold px-6 py-3 rounded-xl hover:bg-nerdDark transition-all text-sm uppercase tracking-wide"
+        >
+          <ArrowLeft size={16} />
+          Back to Chapters
+        </button>
       </section>
 
       <Footer />
     </div>
   );
 };
+
+const Section = ({ title, text, image }: { title: string; text?: string; image?: string }) => (
+  <section className="py-12 md:py-16 px-4 md:px-8">
+    <div className="max-w-5xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55 }}
+        viewport={{ once: true, margin: '-80px' }}
+        className="rounded-[24px] shadow-xl border border-black/5 bg-white p-8 md:p-10 flex flex-col gap-6"
+      >
+        <h2 className="text-3xl md:text-4xl font-bold text-black">{title}</h2>
+        {text && <p className="text-gray-600 text-lg leading-relaxed whitespace-pre-line">{text}</p>}
+        {image && (
+          <img src={image} alt={title} className="w-full rounded-2xl object-cover max-h-[420px]" />
+        )}
+      </motion.div>
+    </div>
+  </section>
+);
 
 export default ChapterDetailPage;
