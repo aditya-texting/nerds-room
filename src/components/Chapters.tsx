@@ -4,7 +4,13 @@ import { motion } from 'framer-motion';
 const Chapters = () => {
     const { chapters: contextChapters } = useAppData();
 
-    const chapters = contextChapters?.map(c => c.name) || [];
+    const chapters = (contextChapters || [])
+      .filter(c => {
+        // City chapters always public; campus chapters only when Live (is_live)
+        if (c.chapter_type === 'campus') return c.is_live !== false;
+        return true;
+      })
+      .map(c => c.name) || [];
 
     if (chapters.length === 0) return null;
 

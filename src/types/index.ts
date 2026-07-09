@@ -59,6 +59,40 @@ export interface Chapter {
     id: number;
     name: string;
     location?: string;
+    chapter_type?: 'city' | 'campus';
+    lead?: string;
+    member_count?: number;
+    banner_url?: string;
+    is_live?: boolean; // campus chapters: Private(false)/Live(true); city chapters always live
+}
+
+export interface CommunityLead {
+    id: number;
+    name: string;
+    position: string;
+    avatar_url?: string;
+    display_order?: number;
+    created_at?: string;
+}
+
+export interface ChapterEvent {
+    id: number;
+    title: string;
+    date?: string;
+    location?: string;
+    banner_url?: string;
+    rsvp_link?: string;
+    is_featured?: boolean;
+    chapter_id?: number | null;
+    created_at?: string;
+}
+
+export interface UserRole {
+    id: number;
+    user_id: string;
+    role: 'superadmin' | 'chapter_admin';
+    chapter_id?: number | null;
+    created_at?: string;
 }
 
 export interface Organizer {

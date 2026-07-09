@@ -77,6 +77,13 @@ const Navbar = () => {
                 Events
               </a>
               <a
+                href="/chapters"
+                className="hover:text-nerdBlue transition-colors"
+                onClick={(e) => { e.preventDefault(); navigate('/chapters'); }}
+              >
+                Chapters
+              </a>
+              <a
                 href="#who-we-are"
                 className="hover:text-nerdBlue transition-colors"
                 onClick={(e) => handleSmoothScroll(e, '#who-we-are')}
@@ -143,6 +150,13 @@ const Navbar = () => {
               onClick={(e) => { e.preventDefault(); navigate('/events'); setMobileMenuOpen(false); }}
             >
               EVENTS <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
+            </a>
+            <a
+              href="/chapters"
+              className="mobile-link p-3 rounded-lg hover:bg-gray-50 flex items-center justify-between group"
+              onClick={(e) => { e.preventDefault(); navigate('/chapters'); setMobileMenuOpen(false); }}
+            >
+              CHAPTERS <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
             </a>
             <a
               href="#who-we-are"

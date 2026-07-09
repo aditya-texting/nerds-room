@@ -12,6 +12,9 @@ import type {
   PhotoGalleryItem,
   SuccessStory,
   Chapter,
+  CommunityLead,
+  ChapterEvent,
+  UserRole,
   Hackathon,
   Workshop,
   PastEvent,
@@ -72,6 +75,24 @@ interface AppDataContextType {
   addChapter: (chapter: Omit<Chapter, 'id'>) => Promise<void>;
   updateChapter: (id: number, updates: Partial<Chapter>) => Promise<void>;
   deleteChapter: (id: number) => Promise<void>;
+
+  // Community Leads
+  communityLeads: CommunityLead[];
+  addCommunityLead: (lead: Omit<CommunityLead, 'id'>) => Promise<void>;
+  updateCommunityLead: (id: number, updates: Partial<CommunityLead>) => Promise<void>;
+  deleteCommunityLead: (id: number) => Promise<void>;
+  reorderCommunityLead: (id: number, direction: 'up' | 'down') => Promise<void>;
+
+  // Chapter Events
+  chapterEvents: ChapterEvent[];
+  addChapterEvent: (event: Omit<ChapterEvent, 'id'>) => Promise<void>;
+  updateChapterEvent: (id: number, updates: Partial<ChapterEvent>) => Promise<void>;
+  deleteChapterEvent: (id: number) => Promise<void>;
+
+  // Roles
+  userRoles: UserRole[];
+  isSuperAdmin: boolean;
+  adminChapterId: number | null;
 
   // Hackathons
   hackathons: Hackathon[];
@@ -136,6 +157,8 @@ interface AppDataContextType {
   dashboardStats: DashboardStats;
 
   // Settings
+  joinCommunityLink: string;
+  setJoinCommunityLink: (link: string) => Promise<void>;
   registrationsOpen: boolean;
   setRegistrationsOpen: (open: boolean) => Promise<void>;
   emailNotifications: boolean;
@@ -185,6 +208,11 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [photoGallery, setPhotoGallery] = useState<PhotoGalleryItem[]>([]);
   const [successStories, setSuccessStories] = useState<SuccessStory[]>([]);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [communityLeads, setCommunityLeads] = useState<CommunityLead[]>([]);
+  const [chapterEvents, setChapterEvents] = useState<ChapterEvent[]>([]);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [adminChapterId, setAdminChapterId] = useState<number | null>(null);
   const [hackathons, setHackathons] = useState<Hackathon[]>(() => {
     try {
       const cached = localStorage.getItem('cache_hackathons');
@@ -229,6 +257,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [emailNotifications, setEmailNotificationsState] = useState(true);
   const [autoApprove, setAutoApproveState] = useState(false);
   const [maintenanceMode, setMaintenanceModeState] = useState(false);
+  const [joinCommunityLink, setJoinCommunityLinkState] = useState('https://discord.gg/nerdsroom');
 
   // Cache timestamps to prevent excessive fetching
   const lastFetchTime = useRef<{ [key: string]: number }>({});
@@ -256,6 +285,9 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       { key: 'photoGallery', fn: fetchPhotoGallery },
       { key: 'successStories', fn: fetchSuccessStories },
       { key: 'chapters', fn: fetchChapters },
+      { key: 'communityLeads', fn: fetchCommunityLeads },
+      { key: 'chapterEvents', fn: fetchChapterEvents },
+      { key: 'userRoles', fn: fetchUserRoles },
       { key: 'hackathons', fn: fetchHackathons },
       { key: 'pastEvents', fn: fetchPastEvents },
       { key: 'otherEvents', fn: fetchOtherEvents },
@@ -446,6 +478,34 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     if (data) setChapters(data);
   };
 
+  const fetchCommunityLeads = async () => {
+    const { data } = await supabase.from('community_leads').select('*').order('display_order', { ascending: true });
+    if (data) setCommunityLeads(data);
+  };
+
+  const fetchChapterEvents = async () => {
+    const { data } = await supabase.from('chapter_events').select('*').order('created_at', { ascending: false });
+    if (data) setChapterEvents(data);
+  };
+
+  const fetchUserRoles = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setIsSuperAdmin(false);
+      setAdminChapterId(null);
+      setUserRoles([]);
+      return;
+    }
+    const { data } = await supabase.from('user_roles').select('*').or(`user_id.eq.${user.id}`);
+    if (data) {
+      setUserRoles(data);
+      const superAdmin = data.some(r => r.role === 'superadmin');
+      setIsSuperAdmin(superAdmin);
+      const chapterAdmin = data.find(r => r.role === 'chapter_admin');
+      setAdminChapterId(superAdmin ? null : (chapterAdmin?.chapter_id ?? null));
+    }
+  };
+
   const fetchHackathons = async () => {
     const { data } = await supabase.from('hackathons').select('*').order('created_at', { ascending: false });
     if (data) {
@@ -514,6 +574,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
           case 'email_notifications': setEmailNotificationsState(val); break;
           case 'auto_approve': setAutoApproveState(val); break;
           case 'maintenance_mode': setMaintenanceModeState(val); break;
+          case 'join_community_link': if (val) setJoinCommunityLinkState(val); break;
           case 'who_we_are_content': if (val) setWhoWeAreContentState(val); break;
         }
       });
@@ -757,6 +818,67 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     if (!error) fetchChapters();
   };
 
+  // Community Leads
+  const addCommunityLead = async (lead: Omit<CommunityLead, 'id'>) => {
+    const { error } = await supabase.from('community_leads').insert([{
+      name: lead.name,
+      position: lead.position,
+      avatar_url: lead.avatar_url ?? null,
+      display_order: lead.display_order ?? 0,
+    }]);
+    if (!error) fetchCommunityLeads();
+  };
+
+  const updateCommunityLead = async (id: number, updates: Partial<CommunityLead>) => {
+    const { error } = await supabase.from('community_leads').update(updates).eq('id', id);
+    if (!error) fetchCommunityLeads();
+  };
+
+  const deleteCommunityLead = async (id: number) => {
+    const { error } = await supabase.from('community_leads').delete().eq('id', id);
+    if (!error) fetchCommunityLeads();
+  };
+
+  const reorderCommunityLead = async (id: number, direction: 'up' | 'down') => {
+    const sorted = [...communityLeads].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    const idx = sorted.findIndex(l => l.id === id);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const current = sorted[idx];
+    const target = sorted[swapIdx];
+    const curOrder = current.display_order ?? idx;
+    const tgtOrder = target.display_order ?? swapIdx;
+    // Swap display_order values
+    await supabase.from('community_leads').update({ display_order: tgtOrder }).eq('id', current.id);
+    await supabase.from('community_leads').update({ display_order: curOrder }).eq('id', target.id);
+    fetchCommunityLeads();
+  };
+
+  // Chapter Events
+  const addChapterEvent = async (event: Omit<ChapterEvent, 'id'>) => {
+    const { error } = await supabase.from('chapter_events').insert([{
+      title: event.title,
+      date: event.date ?? null,
+      location: event.location ?? null,
+      banner_url: event.banner_url ?? null,
+      rsvp_link: event.rsvp_link ?? null,
+      is_featured: event.is_featured ?? false,
+      chapter_id: event.chapter_id ?? null,
+    }]);
+    if (!error) fetchChapterEvents();
+  };
+
+  const updateChapterEvent = async (id: number, updates: Partial<ChapterEvent>) => {
+    const { error } = await supabase.from('chapter_events').update(updates).eq('id', id);
+    if (!error) fetchChapterEvents();
+  };
+
+  const deleteChapterEvent = async (id: number) => {
+    const { error } = await supabase.from('chapter_events').delete().eq('id', id);
+    if (!error) fetchChapterEvents();
+  };
+
   // Hackathons
   const addHackathon = async (hackathon: Omit<Hackathon, 'id'>) => {
     const { error } = await supabase.from('hackathons').insert([hackathon]);
@@ -932,6 +1054,10 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const setMaintenanceMode = async (val: boolean) => {
     setMaintenanceModeState(val);
     updateSetting('maintenance_mode', val);
+  };
+  const setJoinCommunityLink = async (link: string) => {
+    setJoinCommunityLinkState(link);
+    updateSetting('join_community_link', link);
   };
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -1115,6 +1241,18 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     addChapter,
     updateChapter,
     deleteChapter,
+    communityLeads,
+    addCommunityLead,
+    updateCommunityLead,
+    deleteCommunityLead,
+    reorderCommunityLead,
+    chapterEvents,
+    addChapterEvent,
+    updateChapterEvent,
+    deleteChapterEvent,
+    userRoles,
+    isSuperAdmin,
+    adminChapterId,
     hackathons,
     addHackathon,
     updateHackathon,
@@ -1166,6 +1304,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setAutoApprove,
     maintenanceMode,
     setMaintenanceMode,
+    joinCommunityLink,
+    setJoinCommunityLink,
     showToast,
     uploadFile,
     convertGoogleDriveUrl,

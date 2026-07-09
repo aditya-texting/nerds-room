@@ -83,23 +83,23 @@ const EventCard = ({
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.65, delay: index * 0.1 }}
       viewport={{ once: true, margin: '-80px' }}
-      className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[280px] md:max-w-[320px] lg:max-w-[372px] h-[380px] md:h-[430px] lg:h-[493px] mx-auto lg:mx-0 border border-black/5 ${event.bgColor} ${
+      className={`rounded-[20px] shadow-xl flex flex-col items-center w-full max-w-[clamp(280px,90vw,372px)] h-[clamp(360px,118vw,493px)] mx-auto lg:mx-0 border border-black/5 ${event.bgColor} ${
         isDesktop ? (lowerOnDesktop ? 'lg:mt-[90px]' : 'lg:mt-[39px]') : ''
       }`}
     >
       <div className="mt-4 md:mt-5 lg:mt-6 mb-3 md:mb-3.5 lg:mb-4 flex items-center justify-center w-full px-4 md:px-5 lg:px-6">
         {event.logo ? (
-          <div className="relative w-full h-[45px] md:h-[50px] lg:h-[60px]">
+          <div className="relative w-full h-[clamp(40px,11vw,60px)]">
             <img src={event.logo} alt={`${event.title} Logo`} className="w-full h-full object-contain" />
           </div>
         ) : (
-          <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-black leading-tight text-center">
+          <h3 className="text-[clamp(20px,5.5vw,30px)] font-bold text-black leading-tight text-center">
             {event.title}
           </h3>
         )}
       </div>
 
-      <div className="relative w-[min(250px,calc(100%-30px))] md:w-[290px] lg:w-[334px] h-[240px] md:h-[295px] lg:h-[347px] shrink-0">
+      <div className="relative w-[clamp(230px,72vw,334px)] aspect-[250/240] shrink-0">
         <div className="relative w-full h-full rounded-2xl overflow-hidden">
           <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
         </div>
@@ -110,11 +110,11 @@ const EventCard = ({
               key={`${stat.label}-${statIndex}`}
               className="bg-white rounded-[12px] md:rounded-[15px] lg:rounded-[17px] px-2 md:px-2.5 py-1.5 md:py-2 flex items-center gap-1.5 md:gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)] w-fit max-w-full"
             >
-              <span className="text-[21px] md:text-[28px] lg:text-[33px] font-normal text-[#34A853] leading-none">
+              <span className="text-[clamp(18px,5.5vw,33px)] font-normal text-[#34A853] leading-none">
                 <CountUp value={stat.value} />
                 <span className="text-current">+</span>
               </span>
-              <span className="text-[13px] md:text-[19px] lg:text-[22px] font-normal text-black leading-tight break-words">
+              <span className="text-[clamp(12px,3.6vw,22px)] font-normal text-black leading-tight break-words">
                 {stat.label}
               </span>
             </div>
@@ -124,7 +124,7 @@ const EventCard = ({
 
       <div className="flex items-center justify-center gap-1.5 md:gap-2 text-black mt-auto pt-1.5 md:pt-2 pb-4 md:pb-5 lg:pb-6 px-4">
         <MapPin className="w-4 h-4 md:w-[18px] md:h-[18px] lg:w-5 lg:h-5 shrink-0" />
-        <span className="text-[14px] md:text-[17px] lg:text-[20px] font-medium text-center leading-tight">
+        <span className="text-[clamp(13px,3.4vw,20px)] font-medium text-center leading-tight">
           {event.location}
         </span>
       </div>
@@ -186,10 +186,10 @@ const FlagshipEvents = () => {
     <section id="flagship-events" className="py-10 md:py-20 px-4 md:px-8 lg:px-16 bg-white transition-all duration-700">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center mb-7 md:mb-12">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl text-black">
+          <h2 className="text-[clamp(28px,8vw,60px)] text-black">
             Our <span className="font-bold">Flagship Events</span>
           </h2>
-          <p className="text-base md:text-2xl text-gray-600 mt-3">
+          <p className="text-[clamp(14px,3.8vw,24px)] text-gray-600 mt-3">
             Our signature experiences that define excellence
           </p>
         </div>

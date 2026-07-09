@@ -18,7 +18,7 @@ import {
 
 
 // Tab Types
-type TabType = 'analytics' | 'content_engine' | 'strategic_programs' | 'core_systems' | 'media_gallery' | 'success_stories' | 'chapters' | 'past_events' | 'mission_letter';
+type TabType = 'analytics' | 'content_engine' | 'strategic_programs' | 'core_systems' | 'media_gallery' | 'success_stories' | 'chapters' | 'past_events' | 'mission_letter' | 'community' | 'chapter_management';
 
 
 
@@ -52,7 +52,7 @@ const Icons = {
   List: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>,
   Twitter: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" /></svg>,
   Linkedin: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 financial 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451c.979 0 1.778-.773 1.778-1.729V1.729C24 .774 23.204 0 22.225 0z" /></svg>,
-  Github: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>,
+  Github: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-.63A9.935 9.935 0 0024 4.59z" /></svg>,
   Instagram: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>,
   Globe: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
   ArrowLeft: ({ className }: { className?: string }) => <svg className={className || "w-5 h-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>,
@@ -84,6 +84,20 @@ const AdminPanel = () => {
     addChapter,
     updateChapter,
     deleteChapter,
+    communityLeads,
+    addCommunityLead,
+    updateCommunityLead,
+    deleteCommunityLead,
+    reorderCommunityLead,
+    chapterEvents,
+    addChapterEvent,
+    updateChapterEvent,
+    deleteChapterEvent,
+    userRoles,
+    isSuperAdmin,
+    adminChapterId,
+    joinCommunityLink,
+    setJoinCommunityLink,
 
     pastEvents,
     addPastEvent,
@@ -190,6 +204,10 @@ const AdminPanel = () => {
   const [showAddChapter, setShowAddChapter] = useState(false);
   const [showAddPastEvent, setShowAddPastEvent] = useState(false);
   const [showAddPhoto, setShowAddPhoto] = useState(false);
+  const [showAddLead, setShowAddLead] = useState(false);
+  const [showAddChapterEvent, setShowAddChapterEvent] = useState(false);
+  const [editingLead, setEditingLead] = useState<any | null>(null);
+  const [editingChapterEvent, setEditingChapterEvent] = useState<any | null>(null);
 
 
 
@@ -314,6 +332,8 @@ const AdminPanel = () => {
     { id: 'media_gallery', label: 'Gallery', icon: <Icons.Image /> },
     { id: 'success_stories', label: 'Stories', icon: <Icons.Message /> },
     { id: 'chapters', label: 'Chapters', icon: <Icons.MapPin /> },
+    { id: 'community', label: 'Community', icon: <Icons.Users /> },
+    { id: 'chapter_management', label: 'Chapter Mgmt', icon: <Icons.Layers /> },
     { id: 'past_events', label: 'Who We Are', icon: <Icons.Calendar /> },
     { id: 'mission_letter', label: 'Mission Letter', icon: <Icons.Content /> },
     { id: 'core_systems', label: 'Settings', icon: <Icons.Settings /> },
@@ -728,6 +748,131 @@ const AdminPanel = () => {
 
 
 
+              {/* COMMUNITY — Leads + Featured Events */}
+              {activeTab === 'community' && (
+                <div className="space-y-6">
+                  {/* Community Leads */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Community Leads</h3>
+                      <button onClick={() => setShowAddLead(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD LEAD</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[...communityLeads].sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)).map((lead: any) => (
+                        <div key={lead.id} className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 bg-gray-50/50">
+                          <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold overflow-hidden shrink-0">
+                            {lead.avatar_url ? <img src={lead.avatar_url} alt={lead.name} className="w-full h-full object-cover" /> : lead.name.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold text-gray-800 truncate">{lead.name}</div>
+                            <div className="text-xs text-gray-500 truncate">{lead.position}</div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <button onClick={() => reorderCommunityLead(lead.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded">▲</button>
+                            <button onClick={() => reorderCommunityLead(lead.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded">▼</button>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => setEditingLead(lead)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
+                            <button onClick={() => setDeleteConfirm({ id: String(lead.id), type: 'lead' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
+                          </div>
+                        </div>
+                      ))}
+                      {communityLeads.length === 0 && <div className="text-gray-400 text-sm col-span-full">No community leads yet.</div>}
+                    </div>
+                  </div>
+
+                  {/* Featured Events */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Featured Events</h3>
+                      <button onClick={() => setShowAddChapterEvent(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD EVENT</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {chapterEvents.map((ev: any) => (
+                        <div key={ev.id} className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 bg-gray-50/50">
+                          <div className="w-14 h-10 rounded-lg bg-nerdGray overflow-hidden shrink-0 flex items-center justify-center">
+                            {ev.banner_url ? <img src={ev.banner_url} alt={ev.title} className="w-full h-full object-cover" /> : <Icons.Image />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold text-gray-800 truncate">{ev.title}</div>
+                            <div className="text-xs text-gray-500 truncate">{ev.date}{ev.location ? ` · ${ev.location}` : ''} {ev.is_featured ? '· ★ Featured' : ''}</div>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => setEditingChapterEvent(ev)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
+                            <button onClick={() => setDeleteConfirm({ id: String(ev.id), type: 'chapterEvent' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
+                          </div>
+                        </div>
+                      ))}
+                      {chapterEvents.length === 0 && <div className="text-gray-400 text-sm col-span-full">No events yet.</div>}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* CHAPTER MGMT — Chapters CRUD + Join link + Roles */}
+              {activeTab === 'chapter_management' && (
+                <div className="space-y-6">
+                  {/* Join Community Link */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-bold text-gray-800 text-lg">Join Community Link</h3>
+                      <button
+                        onClick={() => handleAction(() => setJoinCommunityLink((document.getElementById('join-link') as HTMLInputElement).value), 'Join link updated')}
+                        className="bg-[#9BE600] text-[#00308F] px-6 py-2 rounded-lg text-xs font-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+                      >SAVE</button>
+                    </div>
+                    <input id="join-link" defaultValue={joinCommunityLink} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="https://..." />
+                    <p className="text-xs text-gray-400 mt-2">This link powers the "Join the Community" button on the Chapters page. No redeploy needed.</p>
+                  </div>
+
+                  {/* Chapters CRUD */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-gray-800 text-lg">Chapters</h3>
+                      <button onClick={() => setShowAddChapter(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {chapters.map((chapter: any) => (
+                        <div key={chapter.id} className="p-4 border border-gray-100 rounded-xl flex items-center justify-between bg-gray-50/50">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center overflow-hidden shrink-0">
+                              {chapter.banner_url ? <img src={chapter.banner_url} alt={chapter.name} className="w-full h-full object-cover" /> : <Icons.MapPin />}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-gray-800 truncate">{chapter.name}</div>
+                              <div className="text-xs text-gray-500 truncate">{chapter.chapter_type === 'campus' ? 'Campus' : 'City'}{chapter.chapter_type === 'campus' ? (chapter.is_live === false ? ' · Private' : ' · Live') : ' · Live'}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => setEditingChapter(chapter)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
+                            <button onClick={() => setDeleteConfirm({ id: String(chapter.id), type: 'chapter' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Roles */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 className="font-bold text-gray-800 text-lg mb-2">Admin Roles</h3>
+                    <p className="text-xs text-gray-400 mb-4">SuperAdmin manages everything. Chapter Admin is scoped to one chapter. (Assign roles via Supabase: insert into <code>user_roles</code>.)</p>
+                    <div className="space-y-2">
+                      {userRoles.length === 0 && <div className="text-gray-400 text-sm">No roles assigned yet.</div>}
+                      {userRoles.map((r: any) => (
+                        <div key={r.id} className="flex items-center gap-3 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
+                          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${r.role === 'superadmin' ? 'bg-nerdLime/20 text-nerdBlue' : 'bg-indigo-50 text-indigo-600'}`}>{r.role}</span>
+                          <span className="text-sm text-gray-600 font-mono truncate">{r.user_id}</span>
+                          {r.chapter_id && <span className="text-xs text-gray-400">· Chapter #{r.chapter_id}</span>}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 text-xs text-gray-400">
+                      Current session: {isSuperAdmin ? <span className="text-nerdBlue font-bold">SuperAdmin</span> : adminChapterId ? <span className="text-indigo-600 font-bold">Chapter Admin (#{adminChapterId})</span> : <span>Viewer</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* WHO WE ARE */}
               {activeTab === 'past_events' && (
                 <div className="space-y-6">
@@ -1083,7 +1228,6 @@ const AdminPanel = () => {
 
                               <label className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-[#5f33e1] hover:text-[#5f33e1] hover:bg-indigo-50 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                                 <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'mission-assets', 'ml-image')} />
-                                <Icons.Image className="w-4 h-4" />
                                 {isUploading ? 'UPLOADING...' : 'UPLOAD NEW PHOTO'}
                               </label>
                             </div>
@@ -1183,7 +1327,6 @@ const AdminPanel = () => {
                           onClick={() => setModalEventStats(modalEventStats.filter((_, i: number) => i !== idx))}
                           className="text-gray-400 hover:text-red-500 p-1"
                         >
-
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                       </div>
@@ -1304,7 +1447,6 @@ const AdminPanel = () => {
                         <button
                           type="button"
                           onClick={() => setModalEventStats(modalEventStats.filter((_, i: number) => i !== idx))}
-
                           className="text-gray-400 hover:text-red-500 p-1"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -1516,14 +1658,30 @@ const AdminPanel = () => {
               <div className="space-y-4">
                 <input id="new-chapter-name" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Chapter Name" />
                 <input id="new-chapter-loc" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Location" />
+                <select id="new-chapter-type" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
+                  <option value="city">City Chapter (always public)</option>
+                  <option value="campus">Campus Chapter (Private/Live toggle)</option>
+                </select>
+                <input id="new-chapter-lead" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
+                <input id="new-chapter-members" type="number" defaultValue={0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
+                <input id="new-chapter-banner" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <label className="flex items-center gap-2 text-sm text-gray-600">
+                  <input id="new-chapter-live" type="checkbox" defaultChecked className="w-4 h-4" />
+                  Live (visible on public site) — uncheck for Private
+                </label>
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button onClick={() => setShowAddChapter(false)} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
                 <button onClick={() => {
                   const name = (document.getElementById('new-chapter-name') as HTMLInputElement).value;
                   const loc = (document.getElementById('new-chapter-loc') as HTMLInputElement).value;
+                  const type = (document.getElementById('new-chapter-type') as HTMLSelectElement).value as 'city' | 'campus';
+                  const lead = (document.getElementById('new-chapter-lead') as HTMLInputElement).value;
+                  const members = Number((document.getElementById('new-chapter-members') as HTMLInputElement).value || 0);
+                  const banner = (document.getElementById('new-chapter-banner') as HTMLInputElement).value;
+                  const live = (document.getElementById('new-chapter-live') as HTMLInputElement).checked;
                   if (name) {
-                    addChapter({ name, location: loc });
+                    addChapter({ name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, is_live: type === 'campus' ? live : true });
                     setShowAddChapter(false);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
@@ -1542,17 +1700,116 @@ const AdminPanel = () => {
               <div className="space-y-4">
                 <input id="edit-chapter-name" defaultValue={editingChapter.name} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Chapter Name" />
                 <input id="edit-chapter-loc" defaultValue={editingChapter.location} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Location" />
+                <select id="edit-chapter-type" defaultValue={editingChapter.chapter_type || 'city'} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
+                  <option value="city">City Chapter (always public)</option>
+                  <option value="campus">Campus Chapter (Private/Live toggle)</option>
+                </select>
+                <input id="edit-chapter-lead" defaultValue={editingChapter.lead} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
+                <input id="edit-chapter-members" type="number" defaultValue={editingChapter.member_count ?? 0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
+                <input id="edit-chapter-banner" defaultValue={editingChapter.banner_url} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <label className="flex items-center gap-2 text-sm text-gray-600">
+                  <input id="edit-chapter-live" type="checkbox" defaultChecked={editingChapter.is_live !== false} className="w-4 h-4" />
+                  Live (visible on public site) — uncheck for Private
+                </label>
               </div>
               <div className="flex justify-end gap-3 mt-8">
                 <button onClick={() => setEditingChapter(null)} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
                 <button onClick={() => {
                   const name = (document.getElementById('edit-chapter-name') as HTMLInputElement).value;
                   const loc = (document.getElementById('edit-chapter-loc') as HTMLInputElement).value;
+                  const type = (document.getElementById('edit-chapter-type') as HTMLSelectElement).value as 'city' | 'campus';
+                  const lead = (document.getElementById('edit-chapter-lead') as HTMLInputElement).value;
+                  const members = Number((document.getElementById('edit-chapter-members') as HTMLInputElement).value || 0);
+                  const banner = (document.getElementById('edit-chapter-banner') as HTMLInputElement).value;
+                  const live = (document.getElementById('edit-chapter-live') as HTMLInputElement).checked;
                   if (name) {
-                    updateChapter(editingChapter.id, { name, location: loc });
+                    updateChapter(editingChapter.id, { name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, is_live: type === 'campus' ? live : true });
                     setEditingChapter(null);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE CHANGES</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* ADD/EDIT LEAD MODAL */}
+      {
+        (showAddLead || editingLead) && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+              <h3 className="text-xl font-bold mb-6">{editingLead ? 'Edit Lead' : 'Add Lead'}</h3>
+              <div className="space-y-4">
+                <input id="lead-name" defaultValue={editingLead?.name || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Name" />
+                <input id="lead-position" defaultValue={editingLead?.position || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Position (e.g. Community Lead – Delhi)" />
+                <input id="lead-avatar" defaultValue={editingLead?.avatar_url || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Avatar image URL" />
+                <label className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'leads', 'lead-avatar')} />
+                  {isUploading ? 'UPLOADING...' : 'UPLOAD AVATAR FROM DEVICE'}
+                </label>
+              </div>
+              <div className="flex justify-end gap-3 mt-8">
+                <button onClick={() => { setShowAddLead(false); setEditingLead(null); }} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
+                <button onClick={() => {
+                  const name = (document.getElementById('lead-name') as HTMLInputElement).value;
+                  const position = (document.getElementById('lead-position') as HTMLInputElement).value;
+                  const avatar = (document.getElementById('lead-avatar') as HTMLInputElement).value;
+                  if (!name || !position) { showToast('Name and position are required', 'error'); return; }
+                  if (editingLead) {
+                    updateCommunityLead(editingLead.id, { name, position, avatar_url: avatar });
+                    setEditingLead(null);
+                  } else {
+                    addCommunityLead({ name, position, avatar_url: avatar, display_order: communityLeads.length });
+                    setShowAddLead(false);
+                  }
+                }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* ADD/EDIT CHAPTER EVENT MODAL */}
+      {
+        (showAddChapterEvent || editingChapterEvent) && (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+              <h3 className="text-xl font-bold mb-6">{editingChapterEvent ? 'Edit Event' : 'Add Event'}</h3>
+              <div className="space-y-4">
+                <input id="ce-title" defaultValue={editingChapterEvent?.title || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Event title" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input id="ce-date" defaultValue={editingChapterEvent?.date || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Date" />
+                  <input id="ce-location" defaultValue={editingChapterEvent?.location || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Location" />
+                </div>
+                <input id="ce-banner" defaultValue={editingChapterEvent?.banner_url || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <label className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'events', 'ce-banner')} />
+                  {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
+                </label>
+                <input id="ce-rsvp" defaultValue={editingChapterEvent?.rsvp_link || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="RSVP link" />
+                <label className="flex items-center gap-2 text-sm text-gray-600">
+                  <input id="ce-featured" type="checkbox" defaultChecked={editingChapterEvent?.is_featured} className="w-4 h-4" />
+                  Featured (shows on Chapters page Featured Events section)
+                </label>
+              </div>
+              <div className="flex justify-end gap-3 mt-8">
+                <button onClick={() => { setShowAddChapterEvent(false); setEditingChapterEvent(null); }} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
+                <button onClick={() => {
+                  const title = (document.getElementById('ce-title') as HTMLInputElement).value;
+                  const date = (document.getElementById('ce-date') as HTMLInputElement).value;
+                  const location = (document.getElementById('ce-location') as HTMLInputElement).value;
+                  const banner = (document.getElementById('ce-banner') as HTMLInputElement).value;
+                  const rsvp = (document.getElementById('ce-rsvp') as HTMLInputElement).value;
+                  const featured = (document.getElementById('ce-featured') as HTMLInputElement).checked;
+                  if (!title) { showToast('Title is required', 'error'); return; }
+                  if (editingChapterEvent) {
+                    updateChapterEvent(editingChapterEvent.id, { title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured });
+                    setEditingChapterEvent(null);
+                  } else {
+                    addChapterEvent({ title, date, location, banner_url: banner, rsvp_link: rsvp, is_featured: featured });
+                    setShowAddChapterEvent(false);
+                  }
+                }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
               </div>
             </div>
           </div>
@@ -1580,6 +1837,8 @@ const AdminPanel = () => {
                   else if (type === 'photo') await handleAction(() => deletePhotoGalleryItem(numId), 'Photo deleted');
                   else if (type === 'story') await handleAction(() => deleteSuccessStory(numId), 'Story deleted');
                   else if (type === 'chapter') await handleAction(() => deleteChapter(numId), 'Chapter deleted');
+                  else if (type === 'lead') await handleAction(() => deleteCommunityLead(numId), 'Lead deleted');
+                  else if (type === 'chapterEvent') await handleAction(() => deleteChapterEvent(numId), 'Event deleted');
                   else if (type === 'past_event') await handleAction(() => deletePastEvent(numId), 'Past event deleted');
 
                 }} className="flex-1 bg-red-500 text-white py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-red-600 shadow-lg shadow-red-200">Delete</button>
@@ -1592,7 +1851,7 @@ const AdminPanel = () => {
       {/* Add/Edit Past Event Modal */}
       {
         (showAddPastEvent || editingPastEvent) && (
-          <div key={editingPastEvent?.id || 'new'} className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div key={editingPastEvent?.id || 'new'} className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800">{editingPastEvent ? 'Edit Past Event' : 'Add Past Event'}</h2>
@@ -1667,9 +1926,9 @@ const AdminPanel = () => {
             </div>
           )
         }
-      </div>
-    );
-  };
+    </div>
+  );
+};
 
 
 export default AdminPanel;
