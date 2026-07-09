@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import Skeleton from './Skeleton';
 import GrowthChart from './GrowthChart';
-import { 
-  Registration, 
-  FlagshipEvent, 
-  WhatWeDoCard, 
-  PhotoGalleryItem, 
-  Chapter, 
-  PastEvent, 
-  SocialLinks 
+import {
+  Registration,
+  FlagshipEvent,
+  WhatWeDoCard,
+  PhotoGalleryItem,
+  Chapter,
+  PastEvent,
+  SocialLinks
 } from '../types/index';
 
 
@@ -909,7 +909,7 @@ const AdminPanel = () => {
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="font-bold text-gray-800 text-lg">Header Content</h3>
-                      <button 
+                      <button
                         onClick={() => handleAction(() => updateWhoWeAreContent(localWhoWeAre), 'Content Updated Successfully')}
                         className="bg-[#9BE600] text-[#00308F] px-6 py-2 rounded-lg text-xs font-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
                       >
@@ -919,51 +919,51 @@ const AdminPanel = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Heading Line 1</label>
-                        <input 
-                          type="text" 
-                          value={localWhoWeAre.headingLine1 || ''} 
-                          onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, headingLine1: e.target.value })} 
-                          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" 
-                          placeholder="Line 1 (e.g. WHO WE)" 
+                        <input
+                          type="text"
+                          value={localWhoWeAre.headingLine1 || ''}
+                          onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, headingLine1: e.target.value })}
+                          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold"
+                          placeholder="Line 1 (e.g. WHO WE)"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Heading Line 2</label>
-                        <input 
-                          type="text" 
-                          value={localWhoWeAre.headingLine2 || ''} 
-                          onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, headingLine2: e.target.value })} 
-                          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" 
-                          placeholder="Line 2 (e.g. ARE)" 
+                        <input
+                          type="text"
+                          value={localWhoWeAre.headingLine2 || ''}
+                          onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, headingLine2: e.target.value })}
+                          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold"
+                          placeholder="Line 2 (e.g. ARE)"
                         />
                       </div>
                     </div>
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Main Description (Bold)</label>
-                      <textarea 
-                        value={localWhoWeAre.description || ''} 
-                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, description: e.target.value })} 
-                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" 
-                        placeholder="Main Description" 
+                      <textarea
+                        value={localWhoWeAre.description || ''}
+                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, description: e.target.value })}
+                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24"
+                        placeholder="Main Description"
                       />
                     </div>
                     <div className="mb-4">
                       <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Secondary Description</label>
-                      <textarea 
-                        value={localWhoWeAre.description2 || ''} 
-                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, description2: e.target.value })} 
-                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24" 
-                        placeholder="Secondary Description" 
+                      <textarea
+                        value={localWhoWeAre.description2 || ''}
+                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, description2: e.target.value })}
+                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm h-24"
+                        placeholder="Secondary Description"
                       />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Builders Count Override (Optional)</label>
-                      <input 
-                        type="number" 
-                        value={localWhoWeAre.buildersOverride || ''} 
-                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, buildersOverride: parseInt(e.target.value) || undefined })} 
-                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm" 
-                        placeholder="Enter manual count (leave blank to use sum of past events)" 
+                      <input
+                        type="number"
+                        value={localWhoWeAre.buildersOverride || ''}
+                        onChange={e => setLocalWhoWeAre({ ...localWhoWeAre, buildersOverride: parseInt(e.target.value) || undefined })}
+                        className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm"
+                        placeholder="Enter manual count (leave blank to use sum of past events)"
                       />
                       <p className="text-[10px] text-gray-400 mt-1 italic">If left empty, the system will automatically sum the attendees of all past events.</p>
                     </div>
@@ -972,71 +972,71 @@ const AdminPanel = () => {
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="font-bold text-gray-800 text-lg">Past Events List ({pastEvents.length})</h3>
-                    <button onClick={() => setShowAddPastEvent(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD PAST EVENT</button>
-                  </div>
+                      <button onClick={() => setShowAddPastEvent(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD PAST EVENT</button>
+                    </div>
 
-                  {pastEvents.length === 0 ? (
-                    <div className="text-center py-12 text-gray-400">
-                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Icons.Calendar className="w-8 h-8 opacity-20" />
+                    {pastEvents.length === 0 ? (
+                      <div className="text-center py-12 text-gray-400">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Icons.Calendar className="w-8 h-8 opacity-20" />
+                        </div>
+                        <p className="text-sm font-medium">No past events found in database.</p>
+                        <button
+                          onClick={() => setShowAddPastEvent(true)}
+                          className="mt-4 text-indigo-600 text-xs font-black uppercase tracking-widest hover:underline"
+                        >+ Add Your First Event</button>
                       </div>
-                      <p className="text-sm font-medium">No past events found in database.</p>
-                      <button 
-                        onClick={() => setShowAddPastEvent(true)}
-                        className="mt-4 text-indigo-600 text-xs font-black uppercase tracking-widest hover:underline"
-                      >+ Add Your First Event</button>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-gray-200">
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Event</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Location</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Type</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Attendees</th>
-                            <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pastEvents.map((event: PastEvent) => (
-
-                            <tr key={event.id} className="border-b border-gray-100 hover:bg-gray-50">
-                              <td className="py-4 px-4">
-                                <div className="flex items-center gap-3">
-                                  {event.image_url && <img src={event.image_url} alt="" className="w-10 h-10 rounded object-cover" />}
-                                  <div>
-                                    <div className="font-bold text-gray-800">{event.title}</div>
-                                    <div className="text-xs text-gray-500">{event.date}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="py-4 px-4 text-sm text-gray-600">{event.location}</td>
-                              <td className="py-4 px-4">
-                                <span className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-wider">
-                                  {event.event_type}
-                                </span>
-                              </td>
-                              <td className="py-4 px-4 text-sm font-bold text-gray-700">{event.attendees_count}</td>
-                              <td className="py-4 px-4">
-                                <div className="flex gap-2">
-                                  <button onClick={() => setEditingPastEvent(event)} className="text-indigo-600 font-bold text-xs p-2 hover:bg-indigo-50 rounded"><Icons.Edit /></button>
-                                  <button
-                                    onClick={() => setDeleteConfirm({ id: String(event.id), type: 'past_event' })}
-                                    className="text-red-500 font-bold text-xs p-2 hover:bg-red-50 rounded"
-                                  >
-                                    <Icons.Trash />
-                                  </button>
-                                </div>
-                              </td>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-gray-200">
+                              <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Event</th>
+                              <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Location</th>
+                              <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Type</th>
+                              <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Attendees</th>
+                              <th className="text-left py-3 px-4 text-xs font-bold text-gray-500 uppercase">Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                          </thead>
+                          <tbody>
+                            {pastEvents.map((event: PastEvent) => (
+
+                              <tr key={event.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                <td className="py-4 px-4">
+                                  <div className="flex items-center gap-3">
+                                    {event.image_url && <img src={event.image_url} alt="" className="w-10 h-10 rounded object-cover" />}
+                                    <div>
+                                      <div className="font-bold text-gray-800">{event.title}</div>
+                                      <div className="text-xs text-gray-500">{event.date}</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="py-4 px-4 text-sm text-gray-600">{event.location}</td>
+                                <td className="py-4 px-4">
+                                  <span className="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-wider">
+                                    {event.event_type}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-4 text-sm font-bold text-gray-700">{event.attendees_count}</td>
+                                <td className="py-4 px-4">
+                                  <div className="flex gap-2">
+                                    <button onClick={() => setEditingPastEvent(event)} className="text-indigo-600 font-bold text-xs p-2 hover:bg-indigo-50 rounded"><Icons.Edit /></button>
+                                    <button
+                                      onClick={() => setDeleteConfirm({ id: String(event.id), type: 'past_event' })}
+                                      className="text-red-500 font-bold text-xs p-2 hover:bg-red-50 rounded"
+                                    >
+                                      <Icons.Trash />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
               )}
 
 
@@ -2099,11 +2099,11 @@ const AdminPanel = () => {
                   setShowAddPastEvent(false);
                   setEditingPastEvent(null);
                 }} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700 shadow-lg shadow-indigo-200">{editingPastEvent ? 'Update' : 'Add'} Event</button>
-                </div>
               </div>
             </div>
-          )
-        }
+          </div>
+        )
+      }
     </div>
   );
 };
