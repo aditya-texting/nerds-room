@@ -5,19 +5,6 @@
 -- chapter_events, user_roles, plus a backend-driven "Join Community" link.
 -- ============================================================================
 
--- Helper: is the current auth user a SuperAdmin? (SECURITY DEFINER avoids recursion)
-CREATE OR REPLACE FUNCTION public.is_superadmin()
-RETURNS boolean
-LANGUAGE sql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM public.user_roles
-    WHERE user_id = auth.uid() AND role = 'superadmin'
-  );
-$$;
-
 -- ----------------------------------------------------------------------------
 -- 1. Extend existing `chapters` table (id, name, location already exist)
 -- ----------------------------------------------------------------------------
@@ -65,6 +52,22 @@ CREATE TABLE IF NOT EXISTS user_roles (
   created_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (user_id, chapter_id)
 );
+
+-- ----------------------------------------------------------------------------
+-- Helper: is the current auth user a SuperAdmin? (SECURITY DEFINER avoids recursion)
+-- Defined AFTER user_roles exists so the reference resolves at create time.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.is_superadmin()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles
+    WHERE user_id = auth.uid() AND role = 'superadmin'
+  );
+$$;
 
 -- ----------------------------------------------------------------------------
 -- 5. Backend-driven "Join Community" link (site_settings key/value store)
