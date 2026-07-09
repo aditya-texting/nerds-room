@@ -332,7 +332,6 @@ const AdminPanel = () => {
     { id: 'media_gallery', label: 'Gallery', icon: <Icons.Image /> },
     { id: 'success_stories', label: 'Stories', icon: <Icons.Message /> },
     { id: 'chapters', label: 'Chapters', icon: <Icons.MapPin /> },
-    { id: 'community', label: 'Community', icon: <Icons.Users /> },
     { id: 'chapter_management', label: 'Chapter Mgmt', icon: <Icons.Layers /> },
     { id: 'past_events', label: 'Who We Are', icon: <Icons.Calendar /> },
     { id: 'mission_letter', label: 'Mission Letter', icon: <Icons.Content /> },
@@ -747,67 +746,6 @@ const AdminPanel = () => {
               )}
 
 
-
-              {/* COMMUNITY — Leads + Featured Events */}
-              {activeTab === 'community' && (
-                <div className="space-y-6">
-                  {/* Community Leads */}
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold text-gray-800 text-lg">Community Leads</h3>
-                      <button onClick={() => setShowAddLead(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD LEAD</button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[...communityLeads].sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)).map((lead: any) => (
-                        <div key={lead.id} className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 bg-gray-50/50">
-                          <div className="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold overflow-hidden shrink-0">
-                            {lead.avatar_url ? <img src={lead.avatar_url} alt={lead.name} className="w-full h-full object-cover" /> : lead.name.slice(0, 2).toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-gray-800 truncate">{lead.name}</div>
-                            <div className="text-xs text-gray-500 truncate">{lead.position}</div>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <button onClick={() => reorderCommunityLead(lead.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded">▲</button>
-                            <button onClick={() => reorderCommunityLead(lead.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded">▼</button>
-                          </div>
-                          <div className="flex gap-1">
-                            <button onClick={() => setEditingLead(lead)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
-                            <button onClick={() => setDeleteConfirm({ id: String(lead.id), type: 'lead' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
-                          </div>
-                        </div>
-                      ))}
-                      {communityLeads.length === 0 && <div className="text-gray-400 text-sm col-span-full">No community leads yet.</div>}
-                    </div>
-                  </div>
-
-                  {/* Featured Events */}
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold text-gray-800 text-lg">Featured Events</h3>
-                      <button onClick={() => setShowAddChapterEvent(true)} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-colors">+ ADD EVENT</button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {chapterEvents.map((ev: any) => (
-                        <div key={ev.id} className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 bg-gray-50/50">
-                          <div className="w-14 h-10 rounded-lg bg-nerdGray overflow-hidden shrink-0 flex items-center justify-center">
-                            {ev.banner_url ? <img src={ev.banner_url} alt={ev.title} className="w-full h-full object-cover" /> : <Icons.Image />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-gray-800 truncate">{ev.title}</div>
-                            <div className="text-xs text-gray-500 truncate">{ev.date}{ev.location ? ` · ${ev.location}` : ''} {ev.is_featured ? '· ★ Featured' : ''}</div>
-                          </div>
-                          <div className="flex gap-1">
-                            <button onClick={() => setEditingChapterEvent(ev)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
-                            <button onClick={() => setDeleteConfirm({ id: String(ev.id), type: 'chapterEvent' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
-                          </div>
-                        </div>
-                      ))}
-                      {chapterEvents.length === 0 && <div className="text-gray-400 text-sm col-span-full">No events yet.</div>}
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* CHAPTER MGMT — Chapters CRUD + Join link + Roles */}
               {activeTab === 'chapter_management' && (

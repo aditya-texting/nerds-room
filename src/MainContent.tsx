@@ -4,6 +4,7 @@ import NotFound from './NotFound';
 import AdminPanel from './components/AdminPanel';
 import EventsPage from './components/EventsPage';
 import ChaptersPage from './components/ChaptersPage';
+import ChapterDetailPage from './components/ChapterDetailPage';
 import { useAppData } from './context/AppDataContext';
 import GlobalLoadingScreen from './components/GlobalLoadingScreen';
 import OfflineOverlay from './components/OfflineOverlay';
@@ -51,6 +52,7 @@ const MainContent = () => {
     if (currentPath === '/partner') return <NotFound />;
     if (currentPath === '/admin') return <AdminPanel />;
     if (currentPath === '/chapters') return <ChaptersPage />;
+    if (currentPath.startsWith('/chapters/')) return <ChapterDetailPage />;
     if (currentPath === '/hackathons' || currentPath === '/workshops' || currentPath === '/events' || currentPath.startsWith('/hackathons/') || currentPath.startsWith('/workshops/') || currentPath.startsWith('/other-events/')) return <EventsPage />;
 
     return (
