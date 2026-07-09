@@ -73,7 +73,7 @@ $$;
 -- 5. Backend-driven "Join Community" link (site_settings key/value store)
 -- ----------------------------------------------------------------------------
 INSERT INTO site_settings (key, value)
-SELECT 'join_community_link', 'https://discord.gg/nerdsroom'
+SELECT 'join_community_link', '"https://discord.gg/nerdsroom"'
 WHERE NOT EXISTS (SELECT 1 FROM site_settings WHERE key = 'join_community_link');
 
 -- ============================================================================

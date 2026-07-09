@@ -12,5 +12,5 @@ ALTER TABLE chapter_events ADD COLUMN IF NOT EXISTS subchapter_id integer REFERE
 
 -- 2. All-Chapters list header background banner (site setting)
 INSERT INTO site_settings (key, value)
-SELECT 'chapters_header_banner', ''
+SELECT 'chapters_header_banner', '""'
 WHERE NOT EXISTS (SELECT 1 FROM site_settings WHERE key = 'chapters_header_banner');
