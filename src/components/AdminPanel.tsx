@@ -88,8 +88,6 @@ const AdminPanel = () => {
     addCommunityLead,
     updateCommunityLead,
     deleteCommunityLead,
-    reorderCommunityLead,
-    chapterEvents,
     addChapterEvent,
     updateChapterEvent,
     deleteChapterEvent,
