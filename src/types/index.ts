@@ -65,6 +65,7 @@ export interface Chapter {
     banner_url?: string;
     description?: string;
     partner_link?: string;
+    join_link?: string; // per-chapter "Join Our Chapter" link
     display_order?: number;
     is_live?: boolean; // campus chapters: Private(false)/Live(true); city chapters always live
 }

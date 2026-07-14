@@ -120,7 +120,7 @@ const ChapterDetailPage = () => {
             </div>
             <div className="flex flex-wrap gap-3 mt-6">
               <a
-                href={joinCommunityLink || 'https://discord.gg/nerdsroom'}
+                href={chapter.join_link || joinCommunityLink || 'https://discord.gg/nerdsroom'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-nerdLime text-nerdBlue font-black px-6 py-3 rounded-xl shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all text-sm tracking-wide uppercase"

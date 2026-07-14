@@ -1,5 +1,6 @@
 import { useAppData } from '../context/AppDataContext';
 import { MissionLetterData } from '../types';
+import DOMPurify from 'dompurify';
 
 const MissionLetter = () => {
   const { missionLetter } = useAppData();
@@ -48,7 +49,7 @@ const MissionLetter = () => {
               <div
                 className="space-y-2 sm:space-y-3 text-sm sm:text-base md:text-lg text-black leading-relaxed"
                 style={{ fontFamily: 'Inter, sans-serif' }}
-                dangerouslySetInnerHTML={{ __html: data.content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data.content) }}
               />
             </div>
 

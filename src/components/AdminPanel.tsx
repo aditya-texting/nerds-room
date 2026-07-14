@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { supabase } from '../supabaseClient';
 import Skeleton from './Skeleton';
 import GrowthChart from './GrowthChart';
+import { Github, Linkedin } from 'lucide-react';
 import {
   Registration,
   FlagshipEvent,
@@ -51,8 +53,8 @@ const Icons = {
   Heart: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>,
   List: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>,
   Twitter: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.84 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" /></svg>,
-  Linkedin: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 financial 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451c.979 0 1.778-.773 1.778-1.729V1.729C24 .774 23.204 0 22.225 0z" /></svg>,
-  Github: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-.63A9.935 9.935 0 0024 4.59z" /></svg>,
+  Linkedin: ({ className }: { className?: string }) => <Linkedin className={className || "w-4 h-4"} />,
+  Github: ({ className }: { className?: string }) => <Github className={className || "w-4 h-4"} />,
   Instagram: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>,
   Globe: ({ className }: { className?: string }) => <svg className={className || "w-4 h-4"} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>,
   ArrowLeft: ({ className }: { className?: string }) => <svg className={className || "w-5 h-5"} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>,
@@ -108,6 +110,8 @@ const AdminPanel = () => {
     setJoinCommunityLink,
     chaptersHeaderBanner,
     setChaptersHeaderBanner,
+    chaptersHeaderBannerOpacity,
+    setChaptersHeaderBannerOpacity,
 
     pastEvents,
     addPastEvent,
@@ -146,9 +150,6 @@ const AdminPanel = () => {
     updateWhoWeAreContent,
   } = useAppData();
 
-
-  const ADMIN_ID = import.meta.env.VITE_ADMIN_ID;
-  const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD;
 
   const [activeTab, setActiveTabState] = useState<TabType>(() => {
     return (localStorage.getItem('admin_active_tab') as TabType) || 'analytics';
@@ -253,9 +254,6 @@ const AdminPanel = () => {
     const { error } = await signIn(email, password);
     if (error) {
       setAuthError(error.message);
-      if (email === ADMIN_ID && password === ADMIN_PASS) {
-        alert("Admin credentials match local config but Supabase Auth failed.");
-      }
     }
   };
 
@@ -263,16 +261,27 @@ const AdminPanel = () => {
     await signOut();
   };
 
-  const downloadCSV = () => {
+  const downloadCSV = async () => {
+    // Fetch ALL registrations from DB (not just the 50 in state)
+    const { data: allRegs, error } = await supabase
+      .from('registrations')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      showToast('Failed to fetch all registrations: ' + error.message, 'error');
+      return;
+    }
+
     const csvContent = [
       ['Dossier ID', 'Full Name', 'Professional Role', 'Email Address', 'Clearance Status', 'Timestamp'],
-      ...registrations.map((reg: Registration) => [
+      ...(allRegs || []).map((reg: any) => [
         reg.id,
         reg.name,
         reg.role,
         reg.email,
         reg.status,
-        new Date(reg.createdAt).toISOString(),
+        new Date(reg.created_at).toISOString(),
       ]),
     ].map((row: any[]) => row.map((cell) => `"${cell}"`).join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -541,7 +550,15 @@ const AdminPanel = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                          {registrations.slice(0, 10).map((reg: Registration) => (
+                          {registrations
+                            .filter(reg => {
+                              if (!searchQuery.trim()) return true;
+                              const q = searchQuery.toLowerCase();
+                              return reg.name.toLowerCase().includes(q) ||
+                                     reg.email.toLowerCase().includes(q) ||
+                                     (reg.role || '').toLowerCase().includes(q);
+                            })
+                            .slice(0, 10).map((reg: Registration) => (
 
                             <tr key={reg.id} className="hover:bg-gray-50/50">
                               <td className="px-6 py-4">
@@ -805,12 +822,28 @@ const AdminPanel = () => {
                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'chapters', 'chapters-banner')} />
                       {isUploading ? 'UPLOADING...' : 'UPLOAD FROM DEVICE'}
                     </label>
+                    {/* Banner opacity */}
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-xs font-bold text-gray-600">Banner Opacity</label>
+                        <span className="text-xs font-bold text-gray-500">{Math.round(chaptersHeaderBannerOpacity * 100)}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        value={chaptersHeaderBannerOpacity}
+                        onChange={(e) => setChaptersHeaderBannerOpacity(Number(e.target.value))}
+                        className="w-full accent-[#9BE600]"
+                      />
+                    </div>
                     {/* Live preview */}
                     <div className="mt-3">
                       <p className="text-xs text-gray-400 mb-2">Preview (how it looks on /chapters):</p>
                       <div className="relative h-28 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                         {chaptersHeaderBanner ? (
-                          <img src={convertGoogleDriveUrl(chaptersHeaderBanner)} alt="" className="w-full h-full object-cover opacity-60" />
+                          <img src={convertGoogleDriveUrl(chaptersHeaderBanner)} alt="" className="w-full h-full object-cover" style={{ opacity: chaptersHeaderBannerOpacity }} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No banner set</div>
                         )}
@@ -1738,6 +1771,7 @@ const AdminPanel = () => {
                   {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
                 </label>
                 <textarea id="new-chapter-desc" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-20" placeholder="Header tagline / description" />
+                <input id="new-chapter-join" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Join Our Chapter link (optional)" />
                 <input id="new-chapter-partner" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Partner With Us link (optional)" />
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input id="new-chapter-live" type="checkbox" defaultChecked className="w-4 h-4" />
@@ -1754,10 +1788,11 @@ const AdminPanel = () => {
                   const members = Number((document.getElementById('new-chapter-members') as HTMLInputElement).value || 0);
                   const banner = (document.getElementById('new-chapter-banner') as HTMLInputElement).value;
                   const description = (document.getElementById('new-chapter-desc') as HTMLTextAreaElement).value;
+                  const join_link = (document.getElementById('new-chapter-join') as HTMLInputElement).value;
                   const partner_link = (document.getElementById('new-chapter-partner') as HTMLInputElement).value;
                   const live = (document.getElementById('new-chapter-live') as HTMLInputElement).checked;
                   if (name) {
-                    addChapter({ name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, description, partner_link, is_live: type === 'campus' ? live : true });
+                    addChapter({ name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, description, join_link, partner_link, is_live: type === 'campus' ? live : true });
                     setShowAddChapter(false);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
@@ -1791,6 +1826,7 @@ const AdminPanel = () => {
                   {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
                 </label>
                 <textarea id="edit-chapter-desc" defaultValue={editingChapter.description} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-20" placeholder="Header tagline / description" />
+                <input id="edit-chapter-join" defaultValue={editingChapter.join_link} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Join Our Chapter link (optional)" />
                 <input id="edit-chapter-partner" defaultValue={editingChapter.partner_link} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Partner With Us link (optional)" />
                 <label className="flex items-center gap-2 text-sm text-gray-600">
                   <input id="edit-chapter-live" type="checkbox" defaultChecked={editingChapter.is_live !== false} className="w-4 h-4" />
@@ -1807,10 +1843,11 @@ const AdminPanel = () => {
                   const members = Number((document.getElementById('edit-chapter-members') as HTMLInputElement).value || 0);
                   const banner = (document.getElementById('edit-chapter-banner') as HTMLInputElement).value;
                   const description = (document.getElementById('edit-chapter-desc') as HTMLTextAreaElement).value;
+                  const join_link = (document.getElementById('edit-chapter-join') as HTMLInputElement).value;
                   const partner_link = (document.getElementById('edit-chapter-partner') as HTMLInputElement).value;
                   const live = (document.getElementById('edit-chapter-live') as HTMLInputElement).checked;
                   if (name) {
-                    updateChapter(editingChapter.id, { name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, description, partner_link, is_live: type === 'campus' ? live : true });
+                    updateChapter(editingChapter.id, { name, location: loc, chapter_type: type, lead, member_count: members, banner_url: banner, description, join_link, partner_link, is_live: type === 'campus' ? live : true });
                     setEditingChapter(null);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE CHANGES</button>

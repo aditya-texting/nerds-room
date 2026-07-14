@@ -176,6 +176,8 @@ interface AppDataContextType {
   setJoinCommunityLink: (link: string) => Promise<void>;
   chaptersHeaderBanner: string;
   setChaptersHeaderBanner: (url: string) => Promise<void>;
+  chaptersHeaderBannerOpacity: number;
+  setChaptersHeaderBannerOpacity: (opacity: number) => Promise<void>;
   registrationsOpen: boolean;
   setRegistrationsOpen: (open: boolean) => Promise<void>;
   emailNotifications: boolean;
@@ -278,6 +280,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const [maintenanceMode, setMaintenanceModeState] = useState(false);
   const [joinCommunityLink, setJoinCommunityLinkState] = useState('https://discord.gg/nerdsroom');
   const [chaptersHeaderBanner, setChaptersHeaderBannerState] = useState('');
+  const [chaptersHeaderBannerOpacity, setChaptersHeaderBannerOpacityState] = useState(0.6);
 
   // Cache timestamps to prevent excessive fetching
   const lastFetchTime = useRef<{ [key: string]: number }>({});
@@ -608,6 +611,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
           case 'maintenance_mode': setMaintenanceModeState(val); break;
           case 'join_community_link': if (val) setJoinCommunityLinkState(val); break;
           case 'chapters_header_banner': if (val) setChaptersHeaderBannerState(val); break;
+          case 'chapters_header_banner_opacity': if (typeof val === 'number') setChaptersHeaderBannerOpacityState(val); break;
           case 'who_we_are_content': if (val) setWhoWeAreContentState(val); break;
         }
       });
@@ -1099,13 +1103,21 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   // ... (existing helper functions for settings)
   // Partners/Settings (Simplified: update the single row)
   const setPartners = async (p: string[]) => {
+    const previousPartners = [...partners];
     setPartnersState(p);
-    // Ideally update 'partners' table. 
-    // Delete all and re-insert is easiest for this simple list.
-    await supabase.from('partners').delete().neq('id', 0); // Delete all
-    const inserts = p.map(name => ({ name }));
-    if (inserts.length > 0)
-      await supabase.from('partners').insert(inserts);
+    try {
+      // Delete all and re-insert
+      await supabase.from('partners').delete().neq('id', 0);
+      if (p.length > 0) {
+        const inserts = p.map(name => ({ name }));
+        const { error } = await supabase.from('partners').insert(inserts);
+        if (error) throw error;
+      }
+    } catch (err: any) {
+      // Revert to previous state on failure
+      setPartnersState(previousPartners);
+      showToast('Failed to update partners: ' + (err.message || 'Unknown error'), 'error');
+    }
   };
 
   const updateSetting = async (key: string, value: any) => {
@@ -1173,6 +1185,11 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     updateSetting('chapters_header_banner', url);
   };
 
+  const setChaptersHeaderBannerOpacity = async (opacity: number) => {
+    setChaptersHeaderBannerOpacityState(opacity);
+    updateSetting('chapters_header_banner_opacity', opacity);
+  };
+
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -1218,6 +1235,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       }
     } catch (err: any) {
       console.warn('Supabase upload failed (likely bucket missing), trying fallbacks...', err.message);
+      showToast('Supabase Storage upload failed — using fallback upload method', 'error');
     }
 
     // 2. Fallback: ImgBB
@@ -1232,6 +1250,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       }
     } catch (err) {
       console.warn('ImgBB upload failed', err);
+      showToast('Image upload falling back to base64 — check Supabase Storage bucket', 'error');
     }
 
     // 3. Last Resort: Base64
@@ -1430,6 +1449,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     setJoinCommunityLink,
     chaptersHeaderBanner,
     setChaptersHeaderBanner,
+    chaptersHeaderBannerOpacity,
+    setChaptersHeaderBannerOpacity,
     showToast,
     uploadFile,
     convertGoogleDriveUrl,
