@@ -282,7 +282,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   // Cache timestamps to prevent excessive fetching
   const lastFetchTime = useRef<{ [key: string]: number }>({});
   const CACHE_DURATION = 30000; // 30 seconds cache
-  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const shouldFetch = (key: string): boolean => {
     const now = Date.now();
