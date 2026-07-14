@@ -101,7 +101,7 @@ const EventCard = ({
 
       <div className="relative w-[clamp(230px,72vw,334px)] aspect-[250/240] shrink-0">
         <div className="relative w-full h-full rounded-2xl overflow-hidden">
-          <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={event.image} alt={event.title} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
         </div>
 
         <div className="absolute bottom-2 md:bottom-2.5 lg:bottom-3 left-[24%] sm:left-[28%] md:left-[32%] lg:left-[35%] space-y-1.5 md:space-y-2 lg:space-y-2.5 max-w-[74%]">

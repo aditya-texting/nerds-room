@@ -13,6 +13,9 @@ const GlobalLoadingScreen = () => {
                         <img
                             src="/logo.png"
                             alt="Nerds Room"
+                            width={112}
+                            height={112}
+                            decoding="async"
                             className="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain relative z-10 rounded-2xl shadow-2xl transition-transform hover:scale-110 duration-500"
                         />
                     </div>

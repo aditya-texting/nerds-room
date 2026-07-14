@@ -79,6 +79,10 @@ const CommunitySays = () => {
                         <img
                           src={testimonial.image}
                           alt={testimonial.name}
+                          width={48}
+                          height={48}
+                          loading="lazy"
+                          decoding="async"
                           className="object-cover w-full h-full"
                         />
                       </div>

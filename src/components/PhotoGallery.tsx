@@ -22,6 +22,8 @@ const MosaicImage = ({ src, alt, className, onClick }: { src: string, alt: strin
       <img
         src={currentSrc}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         onClick={onClick}
         className={`w-full h-full object-cover transition-opacity duration-500 ease-in-out ${isFading ? 'opacity-0' : 'opacity-100'}`}
       />

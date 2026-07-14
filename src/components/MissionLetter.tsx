@@ -60,14 +60,18 @@ const MissionLetter = () => {
                   <img
                     src={data.profile_image_url}
                     alt={data.signature_name}
+                    width={46}
+                    height={46}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 )}
               </div>
               <div className="flex flex-col gap-0">
-                <h6 className="text-base font-semibold" style={{ color: 'rgb(255, 102, 31)', fontFamily: 'Inter, sans-serif' }}>
+                <p className="text-base font-semibold" style={{ color: 'rgb(255, 102, 31)', fontFamily: 'Inter, sans-serif' }}>
                   {data.signature_name}
-                </h6>
+                </p>
                 <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
                   {data.signature_role}
                 </p>

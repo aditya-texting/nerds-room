@@ -73,16 +73,18 @@ function App() {
   return (
     <div className="font-sans relative scroll-smooth">
       <Navbar />
-      <Hero />
-      <PartnersMarquee />
-      <PastEvents />
-      <Chapters />
-      <FlagshipEvents />
-      <Workshops />
-      <CommunitySays />
-      <JoinCommunity />
-      <MissionLetter />
-      <PhotoGallery />
+      <main id="main-content">
+        <Hero />
+        <PartnersMarquee />
+        <PastEvents />
+        <Chapters />
+        <FlagshipEvents />
+        <Workshops />
+        <CommunitySays />
+        <JoinCommunity />
+        <MissionLetter />
+        <PhotoGallery />
+      </main>
       <Footer />
     </div>
   );

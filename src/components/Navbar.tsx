@@ -44,6 +44,10 @@ const Navbar = () => {
             <img
               src="/logo.png"
               alt="Nerds Room Logo"
+              width={36}
+              height={36}
+              loading="lazy"
+              decoding="async"
               className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl object-cover shadow-lg group-hover:scale-105 transition-transform duration-300"
             />
             <span className="font-black text-lg sm:text-2xl tracking-tight text-nerdBlue whitespace-nowrap">

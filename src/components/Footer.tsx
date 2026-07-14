@@ -35,6 +35,10 @@ const Footer = () => {
                   <img
                     src="/logo.png"
                     alt="Nerds Room Logo"
+                    width={40}
+                    height={40}
+                    loading="lazy"
+                    decoding="async"
                     className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shadow-lg"
                   />
                   <span className="font-black text-2xl tracking-tight text-white">

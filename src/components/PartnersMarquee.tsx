@@ -5,7 +5,7 @@ const PartnersMarquee = () => {
 
   return (
     <div className="bg-white py-6 sm:py-8 overflow-hidden">
-      <p className="text-center text-gray-400 font-mono text-[10px] sm:text-xs mb-3 sm:mb-4 tracking-[0.2em] sm:tracking-[0.3em] font-bold uppercase px-4">
+      <p className="text-center text-gray-500 font-mono text-[10px] sm:text-xs mb-3 sm:mb-4 tracking-[0.2em] sm:tracking-[0.3em] font-bold uppercase px-4">
         {supportedByText || 'Supported by leading tech'}
       </p>
       <div className="marquee-container relative w-full overflow-hidden">
