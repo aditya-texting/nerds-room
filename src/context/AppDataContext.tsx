@@ -98,6 +98,7 @@ interface AppDataContextType {
   addSubchapter: (sub: Omit<Subchapter, 'id'>) => Promise<void>;
   updateSubchapter: (id: number, updates: Partial<Subchapter>) => Promise<void>;
   deleteSubchapter: (id: number) => Promise<void>;
+  reorderSubchapter: (id: number, direction: 'up' | 'down') => Promise<void>;
 
   // Chapter Content
   chapterContents: ChapterContent[];
@@ -495,7 +496,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const fetchChapters = async () => {
-    const { data } = await supabase.from('chapters').select('*').order('created_at', { ascending: true });
+    const { data } = await supabase.from('chapters').select('*').order('display_order', { ascending: true });
     if (data) setChapters(data);
   };
 
@@ -515,7 +516,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const fetchChapterEvents = async () => {
-    const { data } = await supabase.from('chapter_events').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('chapter_events').select('*').order('display_order', { ascending: true });
     if (data) setChapterEvents(data);
   };
 
@@ -836,7 +837,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
 
   // Chapters
   const addChapter = async (chapter: Omit<Chapter, 'id'>) => {
-    const { error } = await supabase.from('chapters').insert([chapter]);
+    const order = (chapters || []).length;
+    const { error } = await supabase.from('chapters').insert([{ ...chapter, display_order: order }]);
     if (!error) fetchChapters();
   };
 
@@ -879,6 +881,21 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const deleteSubchapter = async (id: number) => {
     const { error } = await supabase.from('subchapters').delete().eq('id', id);
     if (!error) fetchSubchapters();
+  };
+
+  const reorderSubchapter = async (id: number, direction: 'up' | 'down') => {
+    const sorted = [...subchapters].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    const idx = sorted.findIndex(s => s.id === id);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const current = sorted[idx];
+    const target = sorted[swapIdx];
+    const curOrder = current.display_order ?? idx;
+    const tgtOrder = target.display_order ?? swapIdx;
+    await supabase.from('subchapters').update({ display_order: tgtOrder }).eq('id', current.id);
+    await supabase.from('subchapters').update({ display_order: curOrder }).eq('id', target.id);
+    fetchSubchapters();
   };
 
   // Chapter Content (upsert one row per chapter)
@@ -1349,6 +1366,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     addSubchapter,
     updateSubchapter,
     deleteSubchapter,
+    reorderSubchapter,
     chapterContents,
     upsertChapterContent,
     userRoles,

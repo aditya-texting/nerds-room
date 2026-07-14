@@ -98,6 +98,7 @@ const AdminPanel = () => {
     addSubchapter,
     updateSubchapter,
     deleteSubchapter,
+    reorderSubchapter,
     chapterContents,
     upsertChapterContent,
     userRoles,
@@ -232,6 +233,11 @@ const AdminPanel = () => {
   const [editingPastEvent, setEditingPastEvent] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; type: string } | null>(null);
   const [modalEventStats, setModalEventStats] = useState<any[]>([]);
+  const [joinLinkInput, setJoinLinkInput] = useState(joinCommunityLink);
+
+  useEffect(() => {
+    setJoinLinkInput(joinCommunityLink);
+  }, [joinCommunityLink]);
 
 
 
@@ -768,11 +774,17 @@ const AdminPanel = () => {
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="font-bold text-gray-800 text-lg">Join Community Link</h3>
                       <button
-                        onClick={() => handleAction(() => setJoinCommunityLink((document.getElementById('join-link') as HTMLInputElement).value), 'Join link updated')}
+                        onClick={() => handleAction(() => setJoinCommunityLink(joinLinkInput.trim()), 'Join link updated')}
                         className="bg-[#9BE600] text-[#00308F] px-6 py-2 rounded-lg text-xs font-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
                       >SAVE</button>
                     </div>
-                    <input id="join-link" defaultValue={joinCommunityLink} className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold" placeholder="https://..." />
+                    <input
+                      id="join-link"
+                      value={joinLinkInput}
+                      onChange={(e) => setJoinLinkInput(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-bold"
+                      placeholder="https://..."
+                    />
                     <p className="text-xs text-gray-400 mt-2">This link powers the "Join the Community" button on the Chapters page. No redeploy needed.</p>
                   </div>
 
@@ -862,6 +874,10 @@ const AdminPanel = () => {
                               </div>
                             </div>
                             <div className="flex gap-1">
+                              <div className="flex flex-col gap-0.5 mr-1">
+                                <button onClick={() => reorderSubchapter(sub.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 hover:bg-indigo-100 rounded leading-none" title="Move up">▲</button>
+                                <button onClick={() => reorderSubchapter(sub.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 hover:bg-indigo-100 rounded leading-none" title="Move down">▼</button>
+                              </div>
                               <button onClick={() => setEditingSubchapter(sub)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
                               <button onClick={() => setDeleteConfirm({ id: String(sub.id), type: 'subchapter' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
                             </div>
@@ -1923,6 +1939,10 @@ const AdminPanel = () => {
                 <input id="sub-lead" defaultValue={editingSubchapter?.lead || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Lead name" />
                 <input id="sub-members" type="number" defaultValue={editingSubchapter?.member_count ?? 0} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Member count" />
                 <input id="sub-banner" defaultValue={editingSubchapter?.banner_url || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Banner image URL" />
+                <label className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-200 text-xs font-bold cursor-pointer hover:border-indigo-400 hover:text-indigo-500 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'subchapters', 'sub-banner')} />
+                  {isUploading ? 'UPLOADING...' : 'UPLOAD BANNER FROM DEVICE'}
+                </label>
                 <input id="sub-join" defaultValue={editingSubchapter?.join_link || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Join link (optional, per-subchapter)" />
               </div>
               <div className="flex justify-end gap-3 mt-8">
