@@ -50,7 +50,7 @@ const MainContent = () => {
     }, []);
 
     if (currentPath === '/partner') return <NotFound />;
-    if (currentPath === '/admin') return <AdminPanel />;
+    if (currentPath === '/admin_aditya004') return <AdminPanel />;
     if (currentPath === '/chapters') return <ChaptersPage />;
     if (currentPath.startsWith('/chapters/')) return <ChapterDetailPage />;
     if (currentPath === '/hackathons' || currentPath === '/workshops' || currentPath === '/events' || currentPath.startsWith('/hackathons/') || currentPath.startsWith('/workshops/') || currentPath.startsWith('/other-events/')) return <EventsPage />;
