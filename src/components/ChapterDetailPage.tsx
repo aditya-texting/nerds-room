@@ -25,13 +25,13 @@ const ChapterDetailPage = () => {
     if (!chapter) return [];
     return (chapterEvents || [])
       .filter(e => e.chapter_id === chapter.id)
-      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0) || (a.date || '').localeCompare(b.date || ''));
   }, [chapterEvents, chapter]);
 
   const subEvents = (subId: number) => {
     return (chapterEvents || [])
       .filter(e => e.subchapter_id === subId)
-      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0) || (a.date || '').localeCompare(b.date || ''));
   };
 
   const content = useMemo(() => {

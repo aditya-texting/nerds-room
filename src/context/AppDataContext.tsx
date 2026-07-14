@@ -91,6 +91,7 @@ interface AppDataContextType {
   addChapterEvent: (event: Omit<ChapterEvent, 'id'>) => Promise<void>;
   updateChapterEvent: (id: number, updates: Partial<ChapterEvent>) => Promise<void>;
   deleteChapterEvent: (id: number) => Promise<void>;
+  reorderChapterEvent: (id: number, direction: 'up' | 'down') => Promise<void>;
 
   // Subchapters
   subchapters: Subchapter[];
@@ -927,6 +928,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
 
   // Chapter Events
   const addChapterEvent = async (event: Omit<ChapterEvent, 'id'>) => {
+    const order = (chapterEvents || []).length;
     const { error } = await supabase.from('chapter_events').insert([{
       title: event.title,
       date: event.date ?? null,
@@ -935,6 +937,8 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
       rsvp_link: event.rsvp_link ?? null,
       is_featured: event.is_featured ?? false,
       chapter_id: event.chapter_id ?? null,
+      subchapter_id: event.subchapter_id ?? null,
+      display_order: order,
     }]);
     if (!error) fetchChapterEvents();
   };
@@ -947,6 +951,21 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   const deleteChapterEvent = async (id: number) => {
     const { error } = await supabase.from('chapter_events').delete().eq('id', id);
     if (!error) fetchChapterEvents();
+  };
+
+  const reorderChapterEvent = async (id: number, direction: 'up' | 'down') => {
+    const sorted = [...chapterEvents].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+    const idx = sorted.findIndex(e => e.id === id);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const current = sorted[idx];
+    const target = sorted[swapIdx];
+    const curOrder = current.display_order ?? idx;
+    const tgtOrder = target.display_order ?? swapIdx;
+    await supabase.from('chapter_events').update({ display_order: tgtOrder }).eq('id', current.id);
+    await supabase.from('chapter_events').update({ display_order: curOrder }).eq('id', target.id);
+    fetchChapterEvents();
   };
 
   // Hackathons
@@ -1325,6 +1344,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     addChapterEvent,
     updateChapterEvent,
     deleteChapterEvent,
+    reorderChapterEvent,
     subchapters,
     addSubchapter,
     updateSubchapter,

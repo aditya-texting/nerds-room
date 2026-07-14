@@ -88,6 +88,7 @@ export interface ChapterEvent {
     is_featured?: boolean;
     chapter_id?: number | null;
     subchapter_id?: number | null;
+    display_order?: number;
     created_at?: string;
 }
 

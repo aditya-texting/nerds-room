@@ -92,6 +92,7 @@ const AdminPanel = () => {
     addChapterEvent,
     updateChapterEvent,
     deleteChapterEvent,
+    reorderChapterEvent,
     chapterEvents,
     subchapters,
     addSubchapter,
@@ -131,6 +132,7 @@ const AdminPanel = () => {
     setMaintenanceMode,
     showToast,
     uploadFile,
+    convertGoogleDriveUrl,
 
 
     missionLetter,
@@ -779,7 +781,10 @@ const AdminPanel = () => {
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="font-bold text-gray-800 text-lg">All Chapters Header Banner</h3>
                       <button
-                        onClick={() => handleAction(() => setChaptersHeaderBanner((document.getElementById('chapters-banner') as HTMLInputElement).value), 'Header banner updated')}
+                        onClick={() => {
+                          const raw = (document.getElementById('chapters-banner') as HTMLInputElement).value;
+                          handleAction(() => setChaptersHeaderBanner(convertGoogleDriveUrl(raw)), 'Header banner updated');
+                        }}
                         className="bg-[#9BE600] text-[#00308F] px-6 py-2 rounded-lg text-xs font-black shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
                       >SAVE</button>
                     </div>
@@ -788,7 +793,19 @@ const AdminPanel = () => {
                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'chapters', 'chapters-banner')} />
                       {isUploading ? 'UPLOADING...' : 'UPLOAD FROM DEVICE'}
                     </label>
-                    <p className="text-xs text-gray-400 mt-2">Shows as a faded background behind the search header on the /chapters page.</p>
+                    {/* Live preview */}
+                    <div className="mt-3">
+                      <p className="text-xs text-gray-400 mb-2">Preview (how it looks on /chapters):</p>
+                      <div className="relative h-28 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                        {chaptersHeaderBanner ? (
+                          <img src={convertGoogleDriveUrl(chaptersHeaderBanner)} alt="" className="w-full h-full object-cover opacity-60" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No banner set</div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-white/90" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">Shows as a faded background behind the search header on the /chapters page. Google Drive links are auto-converted.</p>
                   </div>
 
                   {/* Chapters CRUD */}
@@ -810,8 +827,10 @@ const AdminPanel = () => {
                             </div>
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => reorderChapter(chapter.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded" title="Move up">▲</button>
-                            <button onClick={() => reorderChapter(chapter.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded" title="Move down">▼</button>
+                            <div className="flex flex-col gap-0.5 mr-1">
+                              <button onClick={() => reorderChapter(chapter.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 hover:bg-indigo-100 rounded leading-none" title="Move up">▲</button>
+                              <button onClick={() => reorderChapter(chapter.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1.5 py-0.5 hover:bg-indigo-100 rounded leading-none" title="Move down">▼</button>
+                            </div>
                             <button onClick={() => setEditingChapterContent(chapter)} className="text-nerdBlue font-bold text-[10px] px-1.5 py-1 rounded hover:bg-nerdBlue/10" title="Edit page content">PAGE</button>
                             <button onClick={() => setEditingChapter(chapter)} className="text-indigo-600 font-bold text-xs p-1"><Icons.Edit /></button>
                             <button onClick={() => setDeleteConfirm({ id: String(chapter.id), type: 'chapter' })} className="text-red-500 font-bold text-xs p-1"><Icons.Trash /></button>
@@ -864,6 +883,10 @@ const AdminPanel = () => {
                         const parent = chapters.find((c: any) => c.id === ev.chapter_id);
                         return (
                           <div key={ev.id} className="p-4 border border-gray-100 rounded-xl flex items-center gap-3 bg-gray-50/50">
+                            <div className="flex flex-col gap-0.5 shrink-0">
+                              <button onClick={() => reorderChapterEvent(ev.id, 'up')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded leading-none" title="Move up">▲</button>
+                              <button onClick={() => reorderChapterEvent(ev.id, 'down')} className="text-indigo-600 text-[10px] font-bold px-1 hover:bg-indigo-100 rounded leading-none" title="Move down">▼</button>
+                            </div>
                             <div className="w-14 h-10 rounded-lg bg-nerdGray overflow-hidden shrink-0 flex items-center justify-center">
                               {ev.banner_url ? <img src={ev.banner_url} alt={ev.title} className="w-full h-full object-cover" /> : <Icons.Image />}
                             </div>
@@ -1732,9 +1755,12 @@ const AdminPanel = () => {
       {
         editingChapter && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
-              <h3 className="text-xl font-bold mb-6">Edit Chapter</h3>
-              <div className="space-y-4">
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
+              <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b border-gray-100">
+                <h3 className="text-xl font-bold">Edit Chapter</h3>
+                <button onClick={() => setEditingChapter(null)} className="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+              </div>
+              <div className="overflow-y-auto px-8 py-6 space-y-4 scrollbar-thin">
                 <input id="edit-chapter-name" defaultValue={editingChapter.name} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Chapter Name" />
                 <input id="edit-chapter-loc" defaultValue={editingChapter.location} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Location" />
                 <select id="edit-chapter-type" defaultValue={editingChapter.chapter_type || 'city'} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200">
@@ -1755,7 +1781,7 @@ const AdminPanel = () => {
                   Live (visible on public site) — uncheck for Private
                 </label>
               </div>
-              <div className="flex justify-end gap-3 mt-8">
+              <div className="flex justify-end gap-3 px-8 py-4 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
                 <button onClick={() => setEditingChapter(null)} className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-gray-100 rounded-lg">CANCEL</button>
                 <button onClick={() => {
                   const name = (document.getElementById('edit-chapter-name') as HTMLInputElement).value;
