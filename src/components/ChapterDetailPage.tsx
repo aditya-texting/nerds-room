@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Users, ArrowLeft, Calendar, ArrowUpRight } from 'lucide-react';
 
 const ChapterDetailPage = () => {
-  const { chapters, subchapters, chapterEvents, chapterContents, loading, navigate, joinCommunityLink } = useAppData();
+  const { chapters, subchapters, chapterEvents, chapterContents, loading, navigate, joinCommunityLink, normalizeUrl } = useAppData();
 
   const name = useMemo(() => decodeURIComponent(window.location.pathname.split('/').pop() || ''), []);
 
@@ -120,7 +120,7 @@ const ChapterDetailPage = () => {
             </div>
             <div className="flex flex-wrap gap-3 mt-6">
               <a
-                href={chapter.join_link || joinCommunityLink || 'https://discord.gg/nerdsroom'}
+                href={normalizeUrl(chapter.join_link || joinCommunityLink || 'https://discord.gg/nerdsroom')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-nerdLime text-nerdBlue font-black px-6 py-3 rounded-xl shadow-hard hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all text-sm tracking-wide uppercase"
@@ -130,7 +130,7 @@ const ChapterDetailPage = () => {
               </a>
               {chapter.partner_link && (
                 <a
-                  href={chapter.partner_link}
+                  href={normalizeUrl(chapter.partner_link)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-white/10 text-white border border-white/30 font-black px-6 py-3 rounded-xl hover:bg-white/20 transition-all text-sm tracking-wide uppercase"
@@ -262,7 +262,7 @@ const ChapterDetailPage = () => {
                       <Users className="w-4 h-4" />{sub.member_count ?? 0} members
                     </p>
                     <a
-                      href={sub.join_link || joinCommunityLink || 'https://discord.gg/nerdsroom'}
+                      href={normalizeUrl(sub.join_link || joinCommunityLink || 'https://discord.gg/nerdsroom')}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-4 inline-flex items-center justify-center gap-2 bg-nerdLime text-nerdBlue font-black px-5 py-2.5 rounded-xl hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-sm w-fit"

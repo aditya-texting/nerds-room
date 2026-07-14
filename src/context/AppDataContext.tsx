@@ -191,6 +191,7 @@ interface AppDataContextType {
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   uploadFile: (file: File, bucket: string) => Promise<string | null>;
   convertGoogleDriveUrl: (url: string) => string;
+  normalizeUrl: (url: string) => string;
   getGrowthData: () => { labels: string[], data: number[] };
   refreshData: () => Promise<void>;
   navigate: (to: string) => void;
@@ -1211,6 +1212,15 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     return url;
   };
 
+  // Ensure a URL has a protocol so it isn't treated as a relative path.
+  // e.g. "www.google.com" -> "https://www.google.com"
+  const normalizeUrl = (url: string): string => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url;
+    if (/^mailto:/i.test(url) || /^tel:/i.test(url)) return url;
+    return `https://${url}`;
+  };
+
   const uploadFile = async (originalFile: File, _bucket: string): Promise<string | null> => {
     const BUCKET = 'images'; // Create this in Supabase Dashboard -> Storage -> New Bucket (public)
 
@@ -1454,6 +1464,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
     showToast,
     uploadFile,
     convertGoogleDriveUrl,
+    normalizeUrl,
     getGrowthData,
     updateRegistration,
     refreshData,
