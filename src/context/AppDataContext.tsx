@@ -1109,7 +1109,10 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const updateSetting = async (key: string, value: any) => {
-    await supabase.from('site_settings').upsert({ key, value });
+    // onConflict: 'key' ensures we UPDATE the existing row instead of
+    // failing on a duplicate-key insert (site_settings uses `key` as the
+    // unique identifier, not the auto-increment id).
+    await supabase.from('site_settings').upsert({ key, value }, { onConflict: 'key' });
   };
 
   const setSupportedByText = async (text: string) => {
