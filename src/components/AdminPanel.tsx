@@ -3,7 +3,7 @@ import { useAppData } from '../context/AppDataContext';
 import { supabase } from '../supabaseClient';
 import Skeleton from './Skeleton';
 import GrowthChart from './GrowthChart';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, RefreshCw, Plus, ExternalLink, Trash2 } from 'lucide-react';
 import {
   Registration,
   FlagshipEvent,
@@ -208,6 +208,11 @@ const AdminPanel = () => {
   const [authError, setAuthError] = useState('');
 
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [joinLinkInput, setJoinLinkInput] = useState(joinCommunityLink || '');
+
+  useEffect(() => {
+    if (joinCommunityLink) setJoinLinkInput(joinCommunityLink);
+  }, [joinCommunityLink]);
 
   // CRUD Modal States
   const [showAddEvent, setShowAddEvent] = useState(false);
@@ -234,11 +239,162 @@ const AdminPanel = () => {
   const [editingPastEvent, setEditingPastEvent] = useState<any | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; type: string } | null>(null);
   const [modalEventStats, setModalEventStats] = useState<any[]>([]);
-  const [joinLinkInput, setJoinLinkInput] = useState(joinCommunityLink);
+  // Luma Calendar and External Events (Unstop, Devfolio, etc.)
+  const [showAddExternalEvent, setShowAddExternalEvent] = useState(false);
+  const [isSyncingLuma, setIsSyncingLuma] = useState(false);
+  const [lumaSyncMsg, setLumaSyncMsg] = useState<string | null>(null);
+  const [externalEventsList, setExternalEventsList] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('nerds_external_events');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
 
-  useEffect(() => {
-    setJoinLinkInput(joinCommunityLink);
-  }, [joinCommunityLink]);
+  // External event form fields
+  const [extTitle, setExtTitle] = useState('');
+  const [extLink, setExtLink] = useState('');
+  const [extCover, setExtCover] = useState('');
+  const [extDate, setExtDate] = useState('');
+  const [extLocation, setExtLocation] = useState('');
+  const [extBadge, setExtBadge] = useState<'Unstop' | 'Devfolio' | 'HackerEarth' | 'Nerds Room' | 'External'>('Unstop');
+  const [extChapterId, setExtChapterId] = useState<string>('');
+  const [extSection, setExtSection] = useState<'upcoming' | 'past'>('upcoming');
+
+  const handleLumaSync = async () => {
+    setIsSyncingLuma(true);
+    setLumaSyncMsg(null);
+    try {
+      const calId = 'cal-RnzTQXOxDIzD7SU';
+      const timestamp = Date.now();
+      const upRes = await fetch(`/api/luma/calendar/get-items?calendar_api_id=${calId}&t=${timestamp}`);
+      let upCount = 0;
+      if (upRes.ok) {
+        const upData = await upRes.json();
+        if (Array.isArray(upData?.entries)) {
+          upCount = upData.entries.length;
+          const mapped = upData.entries.map((entry: any) => {
+            const ev = entry.event || {};
+            const loc = ev.geo_address_info?.city || ev.location?.city || ev.geo_address_info?.short_address || 'India';
+            const lumaSlug = ev.url ? (ev.url.startsWith('http') ? ev.url : `https://lu.ma/${ev.url}`) : 'https://lu.ma/nerdsroom';
+            return {
+              id: ev.api_id || entry.api_id || String(Math.random()),
+              title: ev.name || 'Community Event',
+              coverUrl: ev.cover_url || 'https://images.lumacdn.com/uploads/06/f0fb4a76-6cd8-419c-9c8a-0b682d506b9b.png',
+              badge: 'Luma',
+              dateStr: ev.start_at ? new Date(ev.start_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'TBA',
+              timestamp: ev.start_at ? new Date(ev.start_at).getTime() : 0,
+              location: loc,
+              chapterName: loc.includes('Jalandhar') ? 'Jalandhar' : loc.includes('Noida') ? 'Noida' : undefined,
+              link: lumaSlug,
+              isPast: false,
+            };
+          });
+          localStorage.setItem('nerds_luma_upcoming', JSON.stringify(mapped));
+        }
+      }
+
+      const pastRes = await fetch(`/api/luma/calendar/get-items?calendar_api_id=${calId}&period=past&t=${timestamp}`);
+      let pastCount = 0;
+      if (pastRes.ok) {
+        const pastData = await pastRes.json();
+        if (Array.isArray(pastData?.entries)) {
+          pastCount = pastData.entries.length;
+          const mappedPast = pastData.entries.map((entry: any) => {
+            const ev = entry.event || {};
+            const loc = ev.geo_address_info?.city || ev.location?.city || ev.geo_address_info?.short_address || 'India';
+            const lumaSlug = ev.url ? (ev.url.startsWith('http') ? ev.url : `https://lu.ma/${ev.url}`) : 'https://lu.ma/nerdsroom';
+            return {
+              id: ev.api_id || entry.api_id || String(Math.random()),
+              title: ev.name || 'Past Event',
+              coverUrl: ev.cover_url || 'https://images.lumacdn.com/uploads/w7/8ba49e6d-260c-480f-bdaf-f14b9a6eca48.png',
+              badge: 'Nerds Room',
+              dateStr: ev.start_at ? new Date(ev.start_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'TBA',
+              timestamp: ev.start_at ? new Date(ev.start_at).getTime() : 0,
+              location: loc,
+              chapterName: loc.includes('Jalandhar') ? 'Jalandhar' : loc.includes('Noida') ? 'Noida' : undefined,
+              link: lumaSlug,
+              isPast: true,
+            };
+          });
+          localStorage.setItem('nerds_luma_past', JSON.stringify(mappedPast));
+        }
+      }
+
+      const msg = `Synced! ${upCount} upcoming & ${pastCount} past events fetched from Luma.`;
+      setLumaSyncMsg(msg);
+      showToast(msg, 'success');
+    } catch (err: any) {
+      showToast('Error syncing with Luma calendar', 'error');
+    } finally {
+      setIsSyncingLuma(false);
+    }
+  };
+
+  const handleCreateExternalEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!extTitle || !extLink) {
+      showToast('Title and Link are required', 'error');
+      return;
+    }
+
+    const matchedChapter = chapters.find(c => String(c.id) === String(extChapterId));
+    const loc = extLocation.trim() || (matchedChapter ? matchedChapter.name : 'India');
+
+    const resolvedCover = extCover.trim() || ((document.getElementById('ext-cover-input') as HTMLInputElement)?.value || '').trim() || 'https://images.lumacdn.com/uploads/06/f0fb4a76-6cd8-419c-9c8a-0b682d506b9b.png';
+
+    const newEvent = {
+      id: `ext-${Date.now()}`,
+      title: extTitle.trim(),
+      link: extLink.startsWith('http') ? extLink.trim() : `https://${extLink.trim()}`,
+      coverUrl: resolvedCover,
+      dateStr: extDate.trim() || 'Upcoming',
+      location: loc,
+      chapterName: matchedChapter ? matchedChapter.name : undefined,
+      chapterId: matchedChapter ? matchedChapter.id : null,
+      badge: extBadge,
+      isPast: extSection === 'past',
+      isExternal: true,
+    };
+
+    const updated = [newEvent, ...externalEventsList];
+    setExternalEventsList(updated);
+    localStorage.setItem('nerds_external_events', JSON.stringify(updated));
+
+    // If chapter was tagged, also add to Supabase chapter_events table!
+    if (matchedChapter) {
+      try {
+        await addChapterEvent({
+          title: newEvent.title,
+          date: newEvent.dateStr,
+          location: newEvent.location,
+          banner_url: newEvent.coverUrl,
+          rsvp_link: newEvent.link,
+          chapter_id: matchedChapter.id,
+          is_featured: true,
+        });
+      } catch (err) {
+        console.warn('Could not add to chapter_events table:', err);
+      }
+    }
+
+    showToast(`External event "${newEvent.title}" created & tagged!`, 'success');
+    setShowAddExternalEvent(false);
+    setExtTitle('');
+    setExtLink('');
+    setExtCover('');
+    setExtDate('');
+    setExtLocation('');
+    setExtChapterId('');
+  };
+
+  const handleDeleteExternalEvent = (id: string) => {
+    const updated = externalEventsList.filter(e => e.id !== id);
+    setExternalEventsList(updated);
+    localStorage.setItem('nerds_external_events', JSON.stringify(updated));
+    showToast('External event removed', 'success');
+  };
 
 
 
@@ -328,7 +484,9 @@ const AdminPanel = () => {
   }
 
 
-  if (!session) {
+  const isDevBypass = import.meta.env.DEV && (window.location.search.includes('bypass') || localStorage.getItem('nerds_dev_bypass') === 'true');
+
+  if (!session && !isDevBypass) {
     return (
       <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
@@ -597,7 +755,112 @@ const AdminPanel = () => {
 
               {/* STRATEGIC PROGRAMS (Events & cards) */}
               {activeTab === 'strategic_programs' && (
-                <div className="grid grid-cols-1 gap-16">
+                <div className="grid grid-cols-1 gap-12">
+                  {/* LUMA CALENDAR LIVE INTEGRATION */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                          <h3 className="font-bold text-gray-800 text-lg">Luma Calendar Live Integration</h3>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Connected Luma ID: <code className="bg-gray-100 px-2 py-0.5 rounded text-indigo-600 font-mono font-bold">cal-RnzTQXOxDIzD7SU</code> • Live dynamic streaming
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <a
+                          href="https://lu.ma/nerdsroom"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 border border-gray-200 text-gray-700 hover:text-indigo-600 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5"
+                        >
+                          <span>Open Luma Dashboard</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                        <button
+                          onClick={handleLumaSync}
+                          disabled={isSyncingLuma}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-60 cursor-pointer"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isSyncingLuma ? 'animate-spin' : ''}`} />
+                          <span>{isSyncingLuma ? 'Syncing...' : 'Sync Events from Luma'}</span>
+                        </button>
+                      </div>
+                    </div>
+                    {lumaSyncMsg && (
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 text-green-700 text-xs font-bold rounded-lg flex items-center gap-2">
+                        <span>✓</span>
+                        <span>{lumaSyncMsg}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* EXTERNAL PLATFORM EVENTS (Unstop, Devfolio, HackerEarth & Chapters) */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                      <div>
+                        <h3 className="font-bold text-gray-800 text-lg">External Platform Events & Chapter Tagging</h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Manage events hosted on Unstop, Devfolio, or external sites. Tag with a city chapter to also display on that Chapter's page.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowAddExternalEvent(true)}
+                        className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ ADD EXTERNAL EVENT</span>
+                      </button>
+                    </div>
+
+                    {externalEventsList.length === 0 ? (
+                      <div className="p-8 text-center bg-gray-50 border border-dashed border-gray-200 rounded-xl">
+                        <p className="text-xs text-gray-500 font-medium">No external events added yet. Click "+ ADD EXTERNAL EVENT" to add events from Unstop, Devfolio, etc.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {externalEventsList.map((ext: any) => (
+                          <div key={ext.id} className="p-4 border border-gray-100 rounded-xl hover:shadow-md transition-all flex flex-col justify-between bg-white">
+                            <div>
+                              <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-gray-100 mb-3 border border-gray-200">
+                                <img src={ext.coverUrl} alt={ext.title} className="w-full h-full object-cover" />
+                              </div>
+                              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                                <span className="bg-indigo-50 text-indigo-600 font-bold text-[10px] px-2 py-0.5 rounded uppercase">
+                                  {ext.badge}
+                                </span>
+                                {ext.chapterName && (
+                                  <span className="bg-green-50 text-green-700 font-bold text-[10px] px-2 py-0.5 rounded">
+                                    📍 {ext.chapterName} Chapter
+                                  </span>
+                                )}
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">
+                                  {ext.isPast ? 'Past' : 'Upcoming'}
+                                </span>
+                              </div>
+                              <h4 className="font-bold text-gray-800 text-sm line-clamp-2">{ext.title}</h4>
+                              <p className="text-xs text-gray-400 mt-1">{ext.dateStr} • {ext.location}</p>
+                            </div>
+                            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                              <a href={ext.link} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
+                                <span>View Link</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                              <button
+                                onClick={() => handleDeleteExternalEvent(ext.id)}
+                                className="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50 cursor-pointer"
+                                title="Delete event"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Flagship Events */}
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div className="flex justify-between items-center mb-6">
@@ -630,7 +893,6 @@ const AdminPanel = () => {
                     </div>
                     <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                       {whatWeDoCards.map((card: WhatWeDoCard) => (
-
                         <div key={card.id} className="p-4 border border-gray-100 rounded-xl hover:shadow-md transition-all">
                           <div className="flex justify-between items-start">
                             <span className="text-2xl">{card.icon}</span>
@@ -641,6 +903,10 @@ const AdminPanel = () => {
                           </div>
                           <h4 className="font-bold text-gray-800 text-sm mt-3">{card.title}</h4>
                           <p className="text-xs text-gray-500 mt-1 line-clamp-2">{card.description}</p>
+                          <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+                            <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{card.stat || '0+'}</span>
+                            <span className="text-gray-400 font-semibold uppercase text-[10px] tracking-wider">{card.statLabel || 'Stat'}</span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1598,8 +1864,12 @@ const AdminPanel = () => {
             <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
               <h3 className="text-xl font-bold mb-6">Add Card</h3>
               <div className="space-y-4">
-                <input id="new-card-title" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Title" />
+                <input id="new-card-title" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Title (e.g. BUILDATHONS)" />
                 <input id="new-card-icon" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Icon (Emoji)" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input id="new-card-stat" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Stat (e.g. 10+)" />
+                  <input id="new-card-stat-label" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Stat Label (e.g. Sessions)" />
+                </div>
                 <textarea id="new-card-desc" className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-24" placeholder="Description" />
               </div>
               <div className="flex justify-end gap-3 mt-8">
@@ -1608,8 +1878,10 @@ const AdminPanel = () => {
                   const title = (document.getElementById('new-card-title') as HTMLInputElement).value;
                   const icon = (document.getElementById('new-card-icon') as HTMLInputElement).value;
                   const desc = (document.getElementById('new-card-desc') as HTMLTextAreaElement).value;
+                  const stat = (document.getElementById('new-card-stat') as HTMLInputElement).value;
+                  const statLabel = (document.getElementById('new-card-stat-label') as HTMLInputElement).value;
                   if (title) {
-                    addWhatWeDoCard({ title, icon: icon || '🚀', description: desc, stat: '0', statLabel: '', iconBg: '', gradient: '' });
+                    addWhatWeDoCard({ title, icon: icon || '🚀', description: desc, stat: stat || '0+', statLabel: statLabel || '', iconBg: '', gradient: '' });
                     setShowAddCard(false);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
@@ -1628,6 +1900,10 @@ const AdminPanel = () => {
               <div className="space-y-4">
                 <input id="edit-card-title" defaultValue={editingCard.title} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Title" />
                 <input id="edit-card-icon" defaultValue={editingCard.icon} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Icon (Emoji)" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input id="edit-card-stat" defaultValue={editingCard.stat || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Stat (e.g. 10+)" />
+                  <input id="edit-card-stat-label" defaultValue={editingCard.statLabel || ''} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200" placeholder="Stat Label (e.g. Sessions)" />
+                </div>
                 <textarea id="edit-card-desc" defaultValue={editingCard.description} className="w-full bg-gray-50 p-3 rounded-lg text-sm border border-gray-200 h-24" placeholder="Description" />
               </div>
               <div className="flex justify-end gap-3 mt-8">
@@ -1636,8 +1912,10 @@ const AdminPanel = () => {
                   const title = (document.getElementById('edit-card-title') as HTMLInputElement).value;
                   const icon = (document.getElementById('edit-card-icon') as HTMLInputElement).value;
                   const desc = (document.getElementById('edit-card-desc') as HTMLTextAreaElement).value;
+                  const stat = (document.getElementById('edit-card-stat') as HTMLInputElement).value;
+                  const statLabel = (document.getElementById('edit-card-stat-label') as HTMLInputElement).value;
                   if (title) {
-                    updateWhatWeDoCard(editingCard.id, { title, icon, description: desc });
+                    updateWhatWeDoCard(editingCard.id, { title, icon, description: desc, stat, statLabel });
                     setEditingCard(null);
                   }
                 }} className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700">SAVE</button>
@@ -2183,6 +2461,217 @@ const AdminPanel = () => {
                   setEditingPastEvent(null);
                 }} className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700 shadow-lg shadow-indigo-200">{editingPastEvent ? 'Update' : 'Add'} Event</button>
               </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Add External Event Modal (Unstop, Devfolio, HackerEarth, etc.) */}
+      {
+        showAddExternalEvent && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#00308F]" />
+                    Add External Event
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Post events from Unstop, Devfolio, HackerEarth, etc. and tag with a City Chapter.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAddExternalEvent(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateExternalEvent} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Event Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={extTitle}
+                    onChange={(e) => setExtTitle(e.target.value)}
+                    placeholder="e.g. Nerds Room National Hackathon 2026"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Platform Badge
+                    </label>
+                    <select
+                      value={extBadge}
+                      onChange={(e) => setExtBadge(e.target.value as any)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                    >
+                      <option value="Unstop">Unstop</option>
+                      <option value="Devfolio">Devfolio</option>
+                      <option value="HackerEarth">HackerEarth</option>
+                      <option value="Nerds Room">Nerds Room</option>
+                      <option value="External">External / Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Target Section
+                    </label>
+                    <select
+                      value={extSection}
+                      onChange={(e) => setExtSection(e.target.value as any)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                    >
+                      <option value="upcoming">Upcoming Events</option>
+                      <option value="past">Past Events Archive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                    Registration / RSVP Link *
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    value={extLink}
+                    onChange={(e) => setExtLink(e.target.value)}
+                    placeholder="https://unstop.com/o/nerds-hackathon-2026"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                {/* City Chapter Tag Setting */}
+                <div className="bg-blue-50/70 border border-blue-200/60 rounded-xl p-3.5 space-y-2">
+                  <label className="block text-xs font-bold text-[#00308F] uppercase">
+                    📍 Tag with City Chapter (Optional)
+                  </label>
+                  <select
+                    value={extChapterId}
+                    onChange={(e) => {
+                      setExtChapterId(e.target.value);
+                      const ch = chapters.find(c => String(c.id) === String(e.target.value));
+                      if (ch && !extLocation) {
+                        setExtLocation(ch.name);
+                      }
+                    }}
+                    className="w-full bg-white border border-blue-200 rounded-lg p-2.5 text-sm focus:border-[#00308F] focus:outline-none"
+                  >
+                    <option value="">None (Global Event — Not Chapter Specific)</option>
+                    {chapters.map((ch) => (
+                      <option key={ch.id} value={ch.id}>
+                        {ch.name} Chapter {ch.location ? `(${ch.location})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-blue-700/80 leading-relaxed">
+                    Tagging a city chapter displays the <strong>&quot;📍 Chapter&quot;</strong> badge on the event card and automatically syncs it to the Chapter's page!
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Event Date / Time
+                    </label>
+                    <input
+                      type="text"
+                      value={extDate}
+                      onChange={(e) => setExtDate(e.target.value)}
+                      placeholder="e.g. 20 Nov 2026, 3:00 PM"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Location / Venue
+                    </label>
+                    <input
+                      type="text"
+                      value={extLocation}
+                      onChange={(e) => setExtLocation(e.target.value)}
+                      placeholder="e.g. Jalandhar / Virtual"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* 800x800 Banner Image */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-gray-700 uppercase">
+                      Event Banner Image (800 × 800 px)
+                    </label>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      1:1 Square Ratio
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      id="ext-cover-input"
+                      value={extCover}
+                      onChange={(e) => setExtCover(e.target.value)}
+                      placeholder="https://images.lumacdn.com/... or upload below"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:bg-white focus:border-[#00308F] focus:outline-none transition-colors"
+                    />
+                    <label
+                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-gray-300 text-xs font-bold text-gray-600 cursor-pointer hover:border-[#00308F] hover:text-[#00308F] transition-all bg-gray-50/50 ${
+                        isUploading ? 'opacity-50 pointer-events-none' : ''
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploading(true);
+                          const url = await uploadFile(file, 'events');
+                          setIsUploading(false);
+                          if (url) {
+                            setExtCover(url);
+                            showToast('800x800 banner uploaded successfully!', 'success');
+                          }
+                        }}
+                      />
+                      {isUploading ? 'UPLOADING BANNER...' : '📁 UPLOAD 800×800 BANNER FROM DEVICE'}
+                    </label>
+                    <p className="text-[11px] text-gray-400">
+                      Matches Luma's native 800×800 square cover dimension perfectly for maximum visibility.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddExternalEvent(false)}
+                    className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-xs font-bold uppercase hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#00308F] text-white py-3 rounded-xl text-xs font-bold uppercase hover:bg-[#002060] shadow-md transition-all flex items-center justify-center gap-2"
+                  >
+                    Publish External Event
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )

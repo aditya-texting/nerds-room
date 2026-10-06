@@ -1,6 +1,7 @@
 import Navbar from './components/Navbar';
 import PartnersMarquee from './components/PartnersMarquee';
 import PastEvents from './components/PastEvents';
+import WhatWeDo from './components/WhatWeDo';
 import FlagshipEvents from './components/FlagshipEvents';
 import Chapters from './components/Chapters';
 
@@ -77,6 +78,7 @@ function App() {
         <Hero />
         <PartnersMarquee />
         <PastEvents />
+        <WhatWeDo />
         <Chapters />
         <FlagshipEvents />
         <Workshops />

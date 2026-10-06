@@ -5,21 +5,6 @@ const Navbar = () => {
   const { navigate } = useAppData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    setMobileMenuOpen(false);
-    const hash = href.startsWith('#') ? href : href.substring(href.indexOf('#'));
-    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-      const target = document.querySelector(hash);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      // Navigate to home with hash — main.tsx pushstate handler will scroll to section
-      navigate('/' + hash);
-    }
-  };
-
   return (
     <>
       {/* Navbar pill */}
@@ -88,9 +73,16 @@ const Navbar = () => {
                 Chapters
               </a>
               <a
-                href="#who-we-are"
+                href="/who-we-are"
                 className="hover:text-nerdBlue transition-colors"
-                onClick={(e) => handleSmoothScroll(e, '#who-we-are')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/who-we-are');
+                  const target = document.getElementById('who-we-are');
+                  if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
               >
                 Who We Are
               </a>
@@ -163,9 +155,17 @@ const Navbar = () => {
               CHAPTERS <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
             </a>
             <a
-              href="#who-we-are"
+              href="/who-we-are"
               className="mobile-link p-3 rounded-lg hover:bg-gray-50 flex items-center justify-between group"
-              onClick={(e) => handleSmoothScroll(e, '#who-we-are')}
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                navigate('/who-we-are');
+                const target = document.getElementById('who-we-are');
+                if (target) {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
             >
               WHO WE ARE <span className="text-nerdLime opacity-0 group-hover:opacity-100 transition-opacity">-&gt;</span>
             </a>

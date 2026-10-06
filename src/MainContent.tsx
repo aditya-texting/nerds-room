@@ -23,21 +23,37 @@ const MainContent = () => {
             setBootTimeout(true);
         }, 10000);
 
-        const handleLocationChange = () => {
-            setCurrentPath(window.location.pathname);
+        const scrollToTarget = (id: string) => {
+            setTimeout(() => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 300);
+        };
 
-            if (window.location.hash) {
-                setTimeout(() => {
-                    const id = window.location.hash.substring(1);
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }, 400);
+        const handleLocationChange = () => {
+            const path = window.location.pathname;
+            setCurrentPath(path);
+
+            if (path === '/who-we-are') {
+                scrollToTarget('who-we-are');
+            } else if (path === '/what-we-do') {
+                scrollToTarget('what-we-do');
+            } else if (window.location.hash) {
+                const id = window.location.hash.substring(1);
+                scrollToTarget(id);
             } else {
                 window.scrollTo(0, 0);
             }
         };
+
+        // Initial scroll if opening directly with /who-we-are or /what-we-do
+        if (window.location.pathname === '/who-we-are') {
+            scrollToTarget('who-we-are');
+        } else if (window.location.pathname === '/what-we-do') {
+            scrollToTarget('what-we-do');
+        }
 
         window.addEventListener('popstate', handleLocationChange);
         window.addEventListener('pushstate', handleLocationChange);

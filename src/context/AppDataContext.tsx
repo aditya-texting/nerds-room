@@ -681,6 +681,9 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
 
   // What We Do
   const addWhatWeDoCard = async (card: Omit<WhatWeDoCard, 'id'>) => {
+    const tempId = Date.now();
+    const newCard: WhatWeDoCard = { ...card, id: tempId };
+    setWhatWeDoCards(prev => [...prev, newCard]);
     const { error } = await supabase.from('what_we_do_cards').insert([{
       title: card.title,
       description: card.description,
@@ -694,6 +697,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const updateWhatWeDoCard = async (id: number, updates: Partial<WhatWeDoCard>) => {
+    setWhatWeDoCards(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
     const { error } = await supabase.from('what_we_do_cards').update({
       title: updates.title,
       description: updates.description,
@@ -704,6 +708,7 @@ export const AppDataProvider: React.FC<AppDataProviderProps> = ({ children }) =>
   };
 
   const deleteWhatWeDoCard = async (id: number) => {
+    setWhatWeDoCards(prev => prev.filter(c => c.id !== id));
     const { error } = await supabase.from('what_we_do_cards').delete().eq('id', id);
     if (!error) fetchWhatWeDo();
   };

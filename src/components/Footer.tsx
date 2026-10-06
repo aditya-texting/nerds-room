@@ -8,6 +8,12 @@ const Footer = () => {
 
   const handleNav = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
+    if (path === '/who-we-are') {
+      navigate('/who-we-are');
+      const el = document.getElementById('who-we-are');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
       if (path.includes('#')) {
         const id = path.split('#')[1];
@@ -76,11 +82,18 @@ const Footer = () => {
                 <h3 className="text-white text-base font-semibold">Resources</h3>
                 <div className="flex flex-col gap-3">
                   <a
-                    href="/#who-we-are"
-                    onClick={(e) => handleNav(e, '/#who-we-are')}
+                    href="/who-we-are"
+                    onClick={(e) => handleNav(e, '/who-we-are')}
                     className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
                   >
                     Who We Are
+                  </a>
+                  <a
+                    href="/#what-we-do"
+                    onClick={(e) => handleNav(e, '/#what-we-do')}
+                    className="text-gray-300 text-base hover:text-white hover:translate-x-1 transition-all duration-200"
+                  >
+                    What We Do
                   </a>
                   <a
                     href="/#gallery"
