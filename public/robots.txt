@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.nerdsroom.xyz/sitemap.xml
+Sitemap: https://www.nerdsroom.org/sitemap.xml
