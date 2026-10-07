@@ -18,6 +18,11 @@
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="canonical" href="https://www.nerdsroom.org/" />
   <meta name="google-site-verification" content="ox5hXjykjhfmx8ic0rOuAgIYDQA_N2qljliB-3Qxpsw" />
+  <script>
+    if (window.location.hostname === 'nerds-room.vercel.app') {
+      window.location.replace('https://www.nerdsroom.org' + window.location.pathname + window.location.search);
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://ycrhhvsiflktxddrjypq.supabase.co" crossorigin>
